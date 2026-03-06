@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="14dp"
+    android:gravity="center_horizontal">
+
+    <!-- App name header -->
+    <TextView
+        android:id="@+id/text_app_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🕌 Waktu Shalat"
+        android:textColor="@color/widget_gold"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.08"
+        android:gravity="start" />
+
+    <!-- Divider -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="6dp"
+        android:background="@color/widget_divider"
+        android:contentDescription="@null" />
+
+    <!-- "Shalat Berikutnya" label -->
+    <TextView
+        android:id="@+id/text_next_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Shalat Berikutnya"
+        android:textColor="@color/widget_muted"
+        android:textSize="9sp"
+        android:gravity="start" />
+
+    <!-- Prayer name (big gold) -->
+    <TextView
+        android:id="@+id/text_prayer_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="—"
+        android:textColor="@color/widget_gold"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="start"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- Prayer time (white) -->
+    <TextView
+        android:id="@+id/text_prayer_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:text="—"
+        android:textColor="@color/widget_white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:gravity="start" />
+
+    <!-- Countdown (muted) -->
+    <TextView
+        android:id="@+id/text_countdown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:text="—"
+        android:textColor="@color/widget_muted"
+        android:textSize="10sp"
+        android:gravity="start" />
+
+</LinearLayout>

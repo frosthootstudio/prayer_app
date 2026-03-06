@@ -1,0 +1,81 @@
+name: prayer_app
+description: "Aplikasi waktu shalat dengan kalkulasi offline dan notifikasi adzan."
+publish_to: 'none'
+
+version: 1.0.1+2
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Prayer time calculation (offline, null-safe)
+  adhan: ^2.0.0
+
+  # Location
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+
+  # Notifications
+
+  # State management
+  provider: ^6.1.3
+
+  # Local storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Date formatting
+  intl: ^0.20.2
+  google_fonts: ^8.0.2
+  awesome_notifications: ^0.11.0
+  flutter_qiblah: ^3.2.0
+  smooth_page_indicator: ^2.0.1
+  flutter_native_splash: ^2.4.7
+
+  # Home screen widget
+  home_widget: ^0.7.0
+  workmanager: ^0.9.0
+
+  # Hijri calendar & calendar widget
+  hijri: ^3.0.0
+  table_calendar: ^3.1.3
+  quran: ^1.4.1
+  just_audio: ^0.10.5
+  just_audio_background: ^0.0.1-beta.17
+  audio_service: ^0.18.18
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#1A1C2E"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  min_sdk_android: 21
+  web:
+    generate: false
+
+flutter_native_splash:
+  color: "#1A1C2E"
+  color_dark: "#1A1C2E"
+  image: assets/icon/app_icon.png
+  image_dark: assets/icon/app_icon.png
+  android_12:
+    image: assets/icon/app_icon_foreground.png
+    icon_background_color: "#1A1C2E"
+    image_dark: assets/icon/app_icon_foreground.png
+    icon_background_color_dark: "#1A1C2E"
+  fullscreen: false
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,185 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:home_widget/home_widget.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
+import 'package:workmanager/workmanager.dart';
+
+import 'package:just_audio_background/just_audio_background.dart';
+
+import 'models/prayer_tracking_model.dart';
+import 'providers/dzikir_provider.dart';
+import 'providers/murottal_provider.dart';
+import 'providers/prayer_provider.dart';
+import 'providers/quran_provider.dart';
+import 'providers/settings_provider.dart';
+import 'providers/tracking_provider.dart';
+import 'screens/main_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'services/notification_service.dart';
+
+// ── WorkManager background task ───────────────────────────────────────────────
+//
+// Runs every 15 minutes (Android minimum) to refresh the home-screen widget
+// countdown. The Kotlin providers recompute the countdown from the stored
+// next_prayer_millis value, so no Dart-side prayer calculation is needed.
+
+const _kWidgetTaskName = 'prayer_widget_update';
+
+@pragma('vm:entry-point')
+void _workmanagerDispatcher() {
+  Workmanager().executeTask((task, _) async {
+    // Trigger a redraw on both widget sizes — Kotlin providers compute
+    // the fresh countdown from the already-saved next_prayer_millis.
+    await Future.wait([
+      HomeWidget.updateWidget(androidName: 'PrayerWidgetSmallProvider'),
+      HomeWidget.updateWidget(androidName: 'PrayerWidgetMediumProvider'),
+    ]);
+    return true;
+  });
+}
+
+Future<void> main() async {
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // Keep native splash visible while Dart-side init runs
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // Register WorkManager background task for widget countdown refresh
+  await Workmanager().initialize(_workmanagerDispatcher);
+  await Workmanager().registerPeriodicTask(
+    _kWidgetTaskName,
+    _kWidgetTaskName,
+    frequency: const Duration(minutes: 15),
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+    constraints: Constraints(networkType: NetworkType.notRequired),
+  );
+
+  // Lock to portrait
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Init Hive (local storage)
+  await Hive.initFlutter();
+  Hive.registerAdapter(IbadahTrackingAdapter());
+
+  // Init intl locale data for date formatting (Indonesian + English)
+  await initializeDateFormatting('id_ID');
+  await initializeDateFormatting('en_US');
+
+  // Init notification channel (required before onboarding permission request)
+  await NotificationService.initialize();
+
+  // Initialize settings before runApp so themeMode is ready on first frame
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.initialize();
+
+  // Read onboarding flag from the already-opened 'settings' box
+  final onboardingDone =
+      Hive.box('settings').get('onboarding_done', defaultValue: false) as bool;
+
+  final trackingProvider = TrackingProvider();
+  await trackingProvider.initialize();
+
+  final dzikirProvider = DzikirProvider();
+  await dzikirProvider.initialize();
+
+  final quranProvider = QuranProvider();
+  await quranProvider.initialize();
+
+  // Background audio (murottal player)
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'studio.frosthoot.prayer_app.murottal',
+    androidNotificationChannelName: 'Murottal Al-Quran',
+    androidNotificationOngoing: true,
+    androidStopForegroundOnPause: true,
+  );
+
+  final murottalProvider = MurottalProvider();
+  await murottalProvider.initialize();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: settingsProvider),
+        ChangeNotifierProvider.value(value: trackingProvider),
+        ChangeNotifierProvider.value(value: dzikirProvider),
+        ChangeNotifierProvider.value(value: quranProvider),
+        ChangeNotifierProvider.value(value: murottalProvider),
+        ChangeNotifierProvider(create: (_) => PrayerProvider(settingsProvider)),
+      ],
+      child: PrayerApp(onboardingDone: onboardingDone),
+    ),
+  );
+}
+
+class PrayerApp extends StatefulWidget {
+  final bool onboardingDone;
+  const PrayerApp({super.key, required this.onboardingDone});
+
+  @override
+  State<PrayerApp> createState() => _PrayerAppState();
+}
+
+class _PrayerAppState extends State<PrayerApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Remove native splash once the first Flutter frame is ready
+    FlutterNativeSplash.remove();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeMode = context.watch<SettingsProvider>().themeMode;
+
+    return MaterialApp(
+      title: 'Waktu Shalat',
+      debugShowCheckedModeBanner: false,
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
+      themeMode: themeMode,
+      home: widget.onboardingDone
+          ? const MainScreen()
+          : const OnboardingScreen(),
+    );
+  }
+
+  ThemeData _buildTheme(Brightness brightness) {
+    if (brightness == Brightness.dark) {
+      const darkScheme = ColorScheme.dark(
+        primary: Color(0xFFD4A057),
+        onPrimary: Color(0xFF1A1C2E),
+        primaryContainer: Color(0xFF2E3150),
+        secondary: Color(0xFFD4A057),
+        surface: Color(0xFF252840),
+        onSurface: Color(0xFFE8E8F0),
+        onSurfaceVariant: Color(0xFFB0B3C6),
+        outline: Color(0xFF2E3150),
+      );
+      final base = ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorScheme: darkScheme,
+        scaffoldBackgroundColor: const Color(0xFF1A1C2E),
+      );
+      return base.copyWith(
+        textTheme: GoogleFonts.poppinsTextTheme(base.textTheme),
+      );
+    }
+
+    final base = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      colorSchemeSeed: const Color(0xFFCE7E50),
+      scaffoldBackgroundColor: const Color(0xFFFBF6F0),
+    );
+    return base.copyWith(
+      textTheme: GoogleFonts.poppinsTextTheme(base.textTheme),
+    );
+  }
+}

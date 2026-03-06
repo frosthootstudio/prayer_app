@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Waktu Shalat</string>
+    <string name="widget_small_description">Widget waktu shalat kecil (2×2)</string>
+    <string name="widget_medium_description">Widget waktu shalat medium (4×2)</string>
+</resources>
