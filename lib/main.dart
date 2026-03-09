@@ -63,6 +63,15 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Edge-to-edge: Flutter draws behind the system nav bar; nav bar is
+  // transparent so the app controls all pixels. SafeArea / MediaQuery.padding
+  // in each widget provides the correct insets for both gesture and 3-button nav.
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor:        Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+  ));
+
   // Init Hive (local storage)
   await Hive.initFlutter();
   Hive.registerAdapter(IbadahTrackingAdapter());

@@ -80,7 +80,7 @@ class _SurahScreenState extends State<SurahScreen> {
           final isEn = ctx.read<SettingsProvider>().isEnglish;
           const gold = Color(0xFFD4A057);
           return Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+            padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.viewPaddingOf(ctx).bottom + 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -555,7 +555,7 @@ class _AyahTile extends StatelessWidget {
       builder: (ctx) {
         final isEnLocal = ctx.read<SettingsProvider>().isEnglish;
         return Padding(
-          padding: const EdgeInsets.fromLTRB(8, 12, 8, 24),
+          padding: EdgeInsets.fromLTRB(8, 12, 8, MediaQuery.viewPaddingOf(ctx).bottom + 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

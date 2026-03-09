@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import androidx.core.view.WindowCompat
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -16,6 +17,8 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Allow Flutter to draw behind the system navigation bar (edge-to-edge)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         // Start keepalive foreground service so MIUI/HyperOS won't kill
         // the notification scheduler when the app is in the background.

@@ -179,7 +179,7 @@ class SettingsScreen extends StatelessWidget {
                 // ── TENTANG / ABOUT ──────────────────────────────────────────
                 _SectionHeader(settings.getLabel('about')),
                 _SettingCard(children: [
-                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.3 (build 3)'),
+                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.4 (build 4)'),
                   const _CardDivider(),
                   _InfoRow(label: settings.getLabel('developedBy'), value: 'Frosthoot Studio'),
                 ]),
@@ -320,6 +320,10 @@ class _SheetWrapper extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         child,
+        // Prevent content from being hidden behind the system navigation bar
+        // (3-button nav). viewPadding is the raw window inset — always correct
+        // regardless of how SafeArea may have transformed MediaQuery.padding.
+        SizedBox(height: MediaQuery.viewPaddingOf(context).bottom),
       ],
     );
   }

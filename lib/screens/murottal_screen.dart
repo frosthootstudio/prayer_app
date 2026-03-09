@@ -245,6 +245,8 @@ class MurottalScreen extends StatelessWidget {
           Flexible(
             flex: 11,
             fit: FlexFit.tight,
+            child: SafeArea(
+            top: false,
             child: Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E2038) : const Color(0xFFF5EFE8),
@@ -304,6 +306,7 @@ class MurottalScreen extends StatelessWidget {
               ],
             ),
             ),
+            ),
           ),
         ],
       ),
@@ -324,8 +327,8 @@ class MurottalScreen extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(8, 16, 8, 32),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(8, 16, 8, MediaQuery.viewPaddingOf(ctx).bottom + 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

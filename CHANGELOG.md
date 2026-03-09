@@ -1,5 +1,18 @@
 # Changelog — Waktu Shalat
 
+## [1.0.4] — 2026-03-09
+
+### Perubahan / Changes
+
+**Navigasi Android (Edge-to-Edge)**
+- Perbaikan konten tertutup navigation bar 3-tombol di Android
+- Aktifkan mode edge-to-edge: Flutter menggambar hingga tepi layar, navigation bar transparan
+- Bottom sheet (Tema, Bahasa, Metode Kalkulasi, dll.) kini tidak lagi terpotong oleh navigation bar
+- Gunakan `MediaQuery.viewPaddingOf` (inset fisik jendela) sebagai padding bawah yang andal, menggantikan `SafeArea` yang bisa bernilai nol di konteks route modal
+- `WindowCompat.setDecorFitsSystemWindows(window, false)` di Kotlin agar sistem tidak memaksa layout di atas navigation bar
+
+---
+
 ## [1.0.3] — 2026-03-07
 
 ### Perubahan / Changes
