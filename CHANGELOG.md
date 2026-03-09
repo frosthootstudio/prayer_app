@@ -1,0 +1,52 @@
+# Changelog — Waktu Shalat
+
+## [1.0.3] — 2026-03-07
+
+### Perubahan / Changes
+
+**Tampilan Home**
+- Hapus tombol panah kiri/kanan dari header tanggal — tampilan lebih bersih
+- Loading spinner hanya muncul saat pertama kali buka (belum ada data); jika data tersimpan, waktu shalat langsung tampil tanpa spinner
+
+**Performa Startup**
+- Waktu shalat kini ditampilkan secara instan menggunakan koordinat GPS yang di-cache
+- GPS baru di-refresh di background; kalkulasi ulang hanya dilakukan jika posisi berubah >0.01°
+
+**Murottal Player**
+- Layout player dipadatkan: padding card dikurangi, jarak antar elemen lebih rapat
+- Daftar surah sekarang mendapat 55% tinggi layar (vs player 45%) — lebih banyak surah terlihat
+
+**Koreksi Waktu (Pengaturan)**
+- Ganti slider global "Koreksi Waktu" dengan koreksi per-waktu shalat
+- Setiap waktu (Subuh, Dzuhur, Ashar, Maghrib, Isya) bisa diatur sendiri: -10 s/d +10 menit (tombol [-] / [+])
+- Disimpan per-waktu di Hive; langsung berlaku tanpa restart
+
+---
+
+## [1.0.1] — 2026-02-xx
+
+### Perubahan / Changes
+
+- Perbaikan akurasi waktu shalat metode Kemenag: tambah ihtiyaat 2 menit + pembulatan ke atas (ceil)
+- Tambah izin `SCHEDULE_EXACT_ALARM` di runtime untuk Android 12+
+- Ganti `USE_EXACT_ALARM` (dibatasi Play Store) dengan `SCHEDULE_EXACT_ALARM`
+- Target SDK ditingkatkan ke 36
+
+---
+
+## [1.0.0] — 2026-02-xx
+
+### Rilis Pertama / Initial Release
+
+- Kalkulasi waktu shalat offline (Kemenag, MWL, Egyptian, ISNA, Umm Al-Qura)
+- Notifikasi adzan harian (awesome_notifications, repeating exact alarm)
+- Pengingat pra-adzan (-5 s/d -30 menit)
+- Arah kiblat (kompas live)
+- Kalender Hijriah + peristiwa Islam
+- Al-Qur'an (114 surah, terjemahan Indonesia, murottal streaming)
+- Dzikir & Doa (40 item, favorit)
+- Pelacak ibadah harian
+- Widget layar beranda (2x2 dan 4x2)
+- Dukungan tema terang/gelap/sistem
+- Bahasa Indonesia & Inggris
+- Foreground service keepalive untuk MIUI/HyperOS

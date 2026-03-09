@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final settings = context.watch<SettingsProvider>();
 
     // ── Loading ───────────────────────────────────────────────────────────────
-    if (provider.isLoading) {
+    if (provider.isLoading && provider.prayerTimes.isEmpty) {
       return Center(child: CircularProgressIndicator(color: context.appAccent));
     }
 
@@ -513,57 +513,31 @@ class _DateHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
-      child: Row(
+      child: Column(
         children: [
-          const _ChevronButton(icon: Icons.chevron_left_rounded),
-          Expanded(
-            child: Column(
-              children: [
-                if (hijriDate.isNotEmpty)
-                  Text(
-                    hijriDate,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      color: context.appTextPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      height: 1.25,
-                    ),
-                  ),
-                Text(
-                  gregorianDate,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    color: context.appTextSecondary,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w400,
-                    height: 1.3,
-                  ),
-                ),
-              ],
+          if (hijriDate.isNotEmpty)
+            Text(
+              hijriDate,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: context.appTextPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+              ),
+            ),
+          Text(
+            gregorianDate,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              color: context.appTextSecondary,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w400,
+              height: 1.3,
             ),
           ),
-          const _ChevronButton(icon: Icons.chevron_right_rounded),
         ],
       ),
-    );
-  }
-}
-
-class _ChevronButton extends StatelessWidget {
-  final IconData icon;
-  const _ChevronButton({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: context.appChevronBg,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Icon(icon, color: context.appAccent, size: 20),
     );
   }
 }

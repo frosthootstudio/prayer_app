@@ -20,6 +20,7 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _prevMasterNotif     = _settings.masterNotifEnabled;
     _prevPreAdzanEnabled = _settings.preAdzanEnabled;
     _prevPreAdzanMinutes = _settings.preAdzanMinutes;
+    _prevPrayerOffsets   = Map.from(_settings.prayerTimeOffsets);
     _settings.addListener(_onSettingsChanged);
   }
 
@@ -52,12 +53,23 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   double? _lastLng;
 
   // Settings change detection
-  CalcMethod?    _prevCalcMethod;
-  MadhabSetting? _prevMadhab;
-  AppLanguage?   _prevLanguage;
-  bool?          _prevMasterNotif;
-  bool?          _prevPreAdzanEnabled;
-  int?           _prevPreAdzanMinutes;
+  CalcMethod?      _prevCalcMethod;
+  MadhabSetting?   _prevMadhab;
+  AppLanguage?     _prevLanguage;
+  bool?            _prevMasterNotif;
+  bool?            _prevPreAdzanEnabled;
+  int?             _prevPreAdzanMinutes;
+  Map<String, int> _prevPrayerOffsets = {};
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  static bool _mapsEqual(Map<String, int> a, Map<String, int> b) {
+    if (a.length != b.length) return false;
+    for (final k in a.keys) {
+      if (a[k] != b[k]) return false;
+    }
+    return true;
+  }
 
   // ── Hijri month names ─────────────────────────────────────────────────────
   static const _hijriMonthsId = [
@@ -155,9 +167,11 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void _onSettingsChanged() {
     if (!_initialized) return;
 
+    final offsetsChanged = !_mapsEqual(_settings.prayerTimeOffsets, _prevPrayerOffsets);
     final calcChanged = _settings.calcMethod != _prevCalcMethod ||
         _settings.madhab != _prevMadhab ||
-        _settings.language != _prevLanguage;
+        _settings.language != _prevLanguage ||
+        offsetsChanged;
     final notifChanged = _settings.masterNotifEnabled != _prevMasterNotif;
     final preAdzanChanged = _settings.preAdzanEnabled != _prevPreAdzanEnabled ||
         _settings.preAdzanMinutes != _prevPreAdzanMinutes;
@@ -168,6 +182,7 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _prevMasterNotif     = _settings.masterNotifEnabled;
     _prevPreAdzanEnabled = _settings.preAdzanEnabled;
     _prevPreAdzanMinutes = _settings.preAdzanMinutes;
+    _prevPrayerOffsets   = Map.from(_settings.prayerTimeOffsets);
 
     if (calcChanged && _lastLat != null) {
       _recalculate();
@@ -215,68 +230,88 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   // ── Core refresh ─────────────────────────────────────────────────────────
 
   Future<void> _refreshAll() async {
+    error = null;
+
+    final hasCached = _lastLat != null && _lastLng != null;
+
+    if (hasCached) {
+      // Show prayer times immediately from cached GPS — no spinner
+      cityName    = _box.get('lastCity', defaultValue: '') as String;
+      final now   = DateTime.now();
+      _calcDate   = now;
+      prayerTimes = _calc.calculate(
+        _lastLat!, _lastLng!,
+        method:        _settings.calcMethod,
+        madhab:        _settings.madhab,
+        language:      _settings.language,
+        prayerOffsets: _settings.prayerTimeOffsets,
+      );
+      _updateDates(now);
+      _updateNextPrayer();
+      isLoading = false;
+      notifyListeners();
+      _scheduleNotifications();
+      unawaited(WidgetService.update(prayers: prayerTimes, language: _settings.language));
+      _startTicker();
+
+      // Background GPS refresh if autoLocation is enabled
+      if (_settings.autoLocation) {
+        unawaited(_bgRefreshLocation());
+      }
+      return;
+    }
+
+    // No cached GPS — must fetch (show spinner only for first-time launch)
+    if (!_settings.autoLocation) {
+      error = _settings.language == AppLanguage.en
+          ? 'No cached location. Enable Auto Location to detect your position.'
+          : 'Tidak ada lokasi tersimpan. Aktifkan Lokasi Otomatis untuk mendeteksi posisi.';
+      notifyListeners();
+      return;
+    }
+
     isLoading = true;
-    error     = null;
     notifyListeners();
 
     try {
-      // Decide whether to use GPS or cached coordinates
-      final needGps = _settings.autoLocation || _lastLat == null;
-
-      if (needGps) {
-        final position = await _location.getCurrentPosition();
-        if (position == null) {
-          error     = _settings.language == AppLanguage.en
-              ? 'Location permission required.\nOpen Settings and allow location access.'
-              : 'Izin lokasi diperlukan.\nBuka Pengaturan dan izinkan akses lokasi.';
-          isLoading = false;
-          notifyListeners();
-          return;
-        }
-        _lastLat = position.latitude;
-        _lastLng = position.longitude;
-        _box.put('lastLat', _lastLat);
-        _box.put('lastLng', _lastLng);
-
-        // Reverse-geocode city name (best-effort, non-blocking)
-        cityName = _box.get('lastCity', defaultValue: '') as String;
-        _location.getCityName(_lastLat!, _lastLng!).then((name) {
-          if (name != cityName) {
-            cityName = name;
-            _box.put('lastCity', name);
-            notifyListeners();
-          }
-        });
-      } else {
-        // Use cached position; keep the last known city name
-        cityName = _box.get('lastCity', defaultValue: '') as String;
+      final position = await _location.getCurrentPosition();
+      if (position == null) {
+        error     = _settings.language == AppLanguage.en
+            ? 'Location permission required.\nOpen Settings and allow location access.'
+            : 'Izin lokasi diperlukan.\nBuka Pengaturan dan izinkan akses lokasi.';
+        isLoading = false;
+        notifyListeners();
+        return;
       }
+      _lastLat = position.latitude;
+      _lastLng = position.longitude;
+      _box.put('lastLat', _lastLat);
+      _box.put('lastLng', _lastLng);
+
+      cityName = _box.get('lastCity', defaultValue: '') as String;
+      _location.getCityName(_lastLat!, _lastLng!).then((name) {
+        if (name != cityName) {
+          cityName = name;
+          _box.put('lastCity', name);
+          notifyListeners();
+        }
+      });
 
       final now = DateTime.now();
       _calcDate   = now;
       prayerTimes = _calc.calculate(
-        _lastLat!,
-        _lastLng!,
-        method:   _settings.calcMethod,
-        madhab:   _settings.madhab,
-        language: _settings.language,
+        _lastLat!, _lastLng!,
+        method:        _settings.calcMethod,
+        madhab:        _settings.madhab,
+        language:      _settings.language,
+        prayerOffsets: _settings.prayerTimeOffsets,
       );
-
       _updateDates(now);
       _updateNextPrayer();
-
       isLoading = false;
       notifyListeners();
-
-      // Schedule notifications (respects master switch + per-prayer prefs)
       _scheduleNotifications();
-
-      // Push fresh prayer data to home screen widgets
-      unawaited(WidgetService.update(
-        prayers:  prayerTimes,
-        language: _settings.language,
-      ));
-
+      unawaited(WidgetService.update(prayers: prayerTimes, language: _settings.language));
       _startTicker();
     } catch (e) {
       error     = _settings.language == AppLanguage.en
@@ -284,6 +319,34 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
           : 'Gagal memuat waktu shalat.\n$e';
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// Background GPS refresh — only recalculates if position moved >0.01°.
+  Future<void> _bgRefreshLocation() async {
+    try {
+      final position = await _location.getCurrentPosition();
+      if (position == null) return;
+      final newLat = position.latitude;
+      final newLng = position.longitude;
+
+      _location.getCityName(newLat, newLng).then((name) {
+        if (name != cityName) {
+          cityName = name;
+          _box.put('lastCity', name);
+          notifyListeners();
+        }
+      });
+
+      if ((_lastLat! - newLat).abs() > 0.01 || (_lastLng! - newLng).abs() > 0.01) {
+        _lastLat = newLat;
+        _lastLng = newLng;
+        _box.put('lastLat', _lastLat);
+        _box.put('lastLng', _lastLng);
+        await _recalculate();
+      }
+    } catch (_) {
+      // Silent — cached data is already displayed
     }
   }
 
@@ -297,9 +360,10 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     prayerTimes = _calc.calculate(
       _lastLat!,
       _lastLng!,
-      method:   _settings.calcMethod,
-      madhab:   _settings.madhab,
-      language: _settings.language,
+      method:        _settings.calcMethod,
+      madhab:        _settings.madhab,
+      language:      _settings.language,
+      prayerOffsets: _settings.prayerTimeOffsets,
     );
 
     _updateDates(now);

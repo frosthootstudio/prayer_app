@@ -60,7 +60,9 @@ class MurottalScreen extends StatelessWidget {
       body: Column(
         children: [
           // ── Now playing card ───────────────────────────────────────────
-          Expanded(
+          Flexible(
+            flex: 9,
+            fit: FlexFit.tight,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
               child: Column(
@@ -69,7 +71,7 @@ class MurottalScreen extends StatelessWidget {
                   // Surah display
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: isDark
@@ -109,7 +111,7 @@ class MurottalScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 10),
 
                   // ── Progress bar ─────────────────────────────────────────
                   SliderTheme(
@@ -143,7 +145,7 @@ class MurottalScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
 
                   // ── Main controls ─────────────────────────────────────────
                   Row(
@@ -221,7 +223,7 @@ class MurottalScreen extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
 
                   // ── Repeat + Speed ────────────────────────────────────────
                   Row(
@@ -240,8 +242,10 @@ class MurottalScreen extends StatelessWidget {
           ),
 
           // ── Surah selector ─────────────────────────────────────────────
-          Container(
-            height: 220,
+          Flexible(
+            flex: 11,
+            fit: FlexFit.tight,
+            child: Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E2038) : const Color(0xFFF5EFE8),
               border: Border(
@@ -298,6 +302,7 @@ class MurottalScreen extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
             ),
           ),
         ],

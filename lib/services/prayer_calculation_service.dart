@@ -55,8 +55,8 @@ class PrayerCalculationService {
     switch (method) {
       case CalcMethod.kemenag:
         params = CalculationMethod.other.getParameters();
-        params.fajrAngle  = 20.0;
-        params.ishaAngle  = 18.0;
+        params.fajrAngle = 20.0;
+        params.ishaAngle = 18.0;
       case CalcMethod.mwl:
         // ignore: deprecated_member_use
         params = CalculationMethod.muslim_world_league.getParameters();
@@ -74,14 +74,33 @@ class PrayerCalculationService {
     return params;
   }
 
+  /// Applies minute-level correction to a raw astronomical DateTime:
+  ///   1. Ceil to next whole minute (if seconds/ms > 0)
+  ///   2. Add Kemenag ihtiyaat (+2 min safety margin) — Kemenag only
+  ///   3. Add user-defined time offset (-3 to +3 min)
+  ///
+  /// Non-Kemenag methods only truncate seconds and apply user offset.
+  static DateTime _correct(DateTime t, {bool kemenag = false, int userOffset = 0}) {
+    // Ceil: if sub-minute time remains, bump up to next full minute
+    final ceiled = (t.second > 0 || t.millisecond > 0)
+        ? DateTime(t.year, t.month, t.day, t.hour, t.minute + 1)
+        : DateTime(t.year, t.month, t.day, t.hour, t.minute);
+    final ihtiyaat = kemenag ? 2 : 0;
+    return ceiled.add(Duration(minutes: ihtiyaat + userOffset));
+  }
+
   /// Calculates the 6 daily prayer times for [lat]/[lng].
+  ///
+  /// [timeOffset] is a global user correction (-3 to +3 min) applied on top
+  /// of the method's own adjustment (Kemenag: ceil + 2 min ihtiyaat).
   List<PrayerInfo> calculate(
     double lat,
     double lng, {
     DateTime? forDate,
-    CalcMethod method       = CalcMethod.kemenag,
-    MadhabSetting madhab    = MadhabSetting.shafi,
-    AppLanguage language    = AppLanguage.id,
+    CalcMethod method                = CalcMethod.kemenag,
+    MadhabSetting madhab             = MadhabSetting.shafi,
+    AppLanguage language             = AppLanguage.id,
+    Map<String, int> prayerOffsets   = const {},
   }) {
     final target      = forDate ?? DateTime.now();
     final coordinates = Coordinates(lat, lng);
@@ -89,11 +108,20 @@ class PrayerCalculationService {
     final date        = DateComponents.from(target);
     final pt          = PrayerTimes(coordinates, date, params);
     final now         = DateTime.now();
+    final isKemenag   = method == CalcMethod.kemenag;
 
     final names = language == AppLanguage.en ? _namesEn : _namesId;
-    final times = [
+    final rawTimes = [
       pt.fajr, pt.sunrise, pt.dhuhr, pt.asr, pt.maghrib, pt.isha,
     ];
+    final times = List.generate(
+      rawTimes.length,
+      (i) => _correct(
+        rawTimes[i],
+        kemenag:    isKemenag,
+        userOffset: prayerOffsets[_keys[i]] ?? 0,
+      ),
+    );
 
     final nextIdx = times.indexWhere((t) => t.isAfter(now));
 

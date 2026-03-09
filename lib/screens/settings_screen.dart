@@ -102,6 +102,12 @@ class SettingsScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
+                // ── KOREKSI WAKTU / TIME CORRECTION ─────────────────────────
+                _SectionHeader(settings.getLabel('timeCorrection')),
+                _PrayerOffsetCard(settings: settings),
+
+                const SizedBox(height: 20),
+
                 // ── NOTIFIKASI / NOTIFICATIONS ───────────────────────────────
                 _SectionHeader(settings.getLabel('notifications')),
                 _SettingCard(children: [
@@ -173,7 +179,7 @@ class SettingsScreen extends StatelessWidget {
                 // ── TENTANG / ABOUT ──────────────────────────────────────────
                 _SectionHeader(settings.getLabel('about')),
                 _SettingCard(children: [
-                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.0'),
+                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.3 (build 3)'),
                   const _CardDivider(),
                   _InfoRow(label: settings.getLabel('developedBy'), value: 'Frosthoot Studio'),
                 ]),
@@ -580,6 +586,117 @@ class _PickerRow extends StatelessWidget {
               color: context.appTextSecondary,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Per-prayer time correction card ──────────────────────────────────────────
+
+class _PrayerOffsetCard extends StatelessWidget {
+  final SettingsProvider settings;
+  const _PrayerOffsetCard({required this.settings});
+
+  static const _keys = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+
+  @override
+  Widget build(BuildContext context) {
+    return _SettingCard(
+      children: [
+        for (int i = 0; i < _keys.length; i++) ...[
+          if (i > 0) const _CardDivider(),
+          _PrayerOffsetRow(prayerKey: _keys[i], settings: settings),
+        ],
+      ],
+    );
+  }
+}
+
+class _PrayerOffsetRow extends StatelessWidget {
+  final String prayerKey;
+  final SettingsProvider settings;
+  const _PrayerOffsetRow({required this.prayerKey, required this.settings});
+
+  static String _fmt(int v, bool isEn) {
+    if (v == 0) return isEn ? '0 min' : '0 mnt';
+    final sign = v > 0 ? '+' : '';
+    return '$sign$v m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const gold   = Color(0xFFD4A057);
+    final offset = settings.prayerTimeOffsets[prayerKey] ?? 0;
+    final name   = settings.getPrayerName(prayerKey);
+    final isEn   = settings.isEnglish;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              name,
+              style: GoogleFonts.poppins(
+                color: context.appTextPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          _OffsetButton(
+            icon: Icons.remove,
+            onTap: offset > -10
+                ? () => context.read<SettingsProvider>().setPrayerOffset(prayerKey, offset - 1)
+                : null,
+          ),
+          SizedBox(
+            width: 54,
+            child: Text(
+              _fmt(offset, isEn),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: offset != 0 ? gold : context.appTextSecondary,
+                fontSize: 13,
+                fontWeight: offset != 0 ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ),
+          _OffsetButton(
+            icon: Icons.add,
+            onTap: offset < 10
+                ? () => context.read<SettingsProvider>().setPrayerOffset(prayerKey, offset + 1)
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OffsetButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+  const _OffsetButton({required this.icon, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: onTap != null
+              ? context.appAccent.withValues(alpha: 0.12)
+              : context.appDivider,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 16,
+          color: onTap != null ? context.appAccent : context.appTextFaded,
         ),
       ),
     );

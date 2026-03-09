@@ -26,6 +26,9 @@ class SettingsProvider extends ChangeNotifier {
   bool           masterNotifEnabled = true;
   bool           preAdzanEnabled    = false;
   int            preAdzanMinutes    = 10;
+  Map<String, int> prayerTimeOffsets = const {
+    'fajr': 0, 'dhuhr': 0, 'asr': 0, 'maghrib': 0, 'isha': 0,
+  };
   AdzanSound     adzanSound         = AdzanSound.makkah;
   double         adzanVolume        = 0.8;
 
@@ -46,9 +49,13 @@ class SettingsProvider extends ChangeNotifier {
     autoLocation       = _box.get('autoLocation',       defaultValue: true)  as bool;
     masterNotifEnabled = _box.get('masterNotifEnabled', defaultValue: true)  as bool;
     preAdzanEnabled    = _box.get('preAdzanEnabled',    defaultValue: false) as bool;
-    preAdzanMinutes    = (_box.get('preAdzanMinutes',   defaultValue: 10)    as int).clamp(5, 30);
-    adzanSound         = AdzanSound.values[(_box.get('adzanSound', defaultValue: 0) as int).clamp(0, AdzanSound.values.length - 1)];
-    adzanVolume        = (_box.get('adzanVolume', defaultValue: 0.8) as double).clamp(0.0, 1.0);
+    preAdzanMinutes   = (_box.get('preAdzanMinutes', defaultValue: 10) as int).clamp(5, 30);
+    prayerTimeOffsets = {
+      for (final k in const ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'])
+        k: (_box.get('prayerOffset_$k', defaultValue: 0) as int).clamp(-10, 10),
+    };
+    adzanSound        = AdzanSound.values[(_box.get('adzanSound', defaultValue: 0) as int).clamp(0, AdzanSound.values.length - 1)];
+    adzanVolume       = (_box.get('adzanVolume', defaultValue: 0.8) as double).clamp(0.0, 1.0);
   }
 
   // ── Human-readable labels ─────────────────────────────────────────────────
@@ -107,6 +114,7 @@ class SettingsProvider extends ChangeNotifier {
     'enableAllNotif':     'Aktifkan Semua Notifikasi',
     'preAdzan':           'Pengingat Sebelum Adzan',
     'preAdzanMinutes':    'Menit Sebelum Adzan',
+    'timeCorrection':     'Koreksi Waktu',
     'appearance':         'Tampilan',
     'theme':              'Tema',
     'language':           'Bahasa',
@@ -171,6 +179,7 @@ class SettingsProvider extends ChangeNotifier {
     'enableAllNotif':     'Enable All Notifications',
     'preAdzan':           'Pre-Adhan Reminder',
     'preAdzanMinutes':    'Minutes Before Adhan',
+    'timeCorrection':     'Time Correction',
     'appearance':         'Appearance',
     'theme':              'Theme',
     'language':           'Language',
@@ -269,6 +278,12 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setPreAdzanMinutes(int v) async {
     preAdzanMinutes = v.clamp(5, 30);
     await _box.put('preAdzanMinutes', preAdzanMinutes);
+    notifyListeners();
+  }
+
+  Future<void> setPrayerOffset(String key, int v) async {
+    prayerTimeOffsets = {...prayerTimeOffsets, key: v.clamp(-10, 10)};
+    await _box.put('prayerOffset_$key', prayerTimeOffsets[key]);
     notifyListeners();
   }
 
