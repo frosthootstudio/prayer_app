@@ -209,4 +209,37 @@ class NotificationService {
 
   /// Cancels all prayer and pre-adzan notifications.
   static Future<void> cancelAll() => AwesomeNotifications().cancelAll();
+
+  // ── Test notification ──────────────────────────────────────────────────────
+
+  /// Schedules a one-shot test notification 10 seconds from now.
+  /// Helps users verify that the notification channel is working correctly.
+  static Future<void> scheduleTest() async {
+    final fireAt = DateTime.now().add(const Duration(seconds: 10));
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id:                 99,
+        channelKey:         _channelKey,
+        title:              'Test Notifikasi Adzan',
+        body:               'Notifikasi adzan berfungsi dengan baik!',
+        notificationLayout: NotificationLayout.Default,
+        category:           NotificationCategory.Reminder,
+        wakeUpScreen:       true,
+        autoDismissible:    true,
+      ),
+      schedule: NotificationCalendar(
+        year:           fireAt.year,
+        month:          fireAt.month,
+        day:            fireAt.day,
+        hour:           fireAt.hour,
+        minute:         fireAt.minute,
+        second:         fireAt.second,
+        millisecond:    0,
+        timeZone:       _localTz,
+        repeats:        false,
+        preciseAlarm:   true,
+        allowWhileIdle: true,
+      ),
+    );
+  }
 }

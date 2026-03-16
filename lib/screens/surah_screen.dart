@@ -27,6 +27,7 @@ class SurahScreen extends StatefulWidget {
 class _SurahScreenState extends State<SurahScreen> {
   late ScrollController _scrollCtrl;
   late int _surah;
+  List<String>? _fetchedTranslit; // null = loading/not needed; set after API fetch
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _SurahScreenState extends State<SurahScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Save last read
       context.read<QuranProvider>().setLastRead(_surah, widget.startAyah);
+      _loadTransliteration(_surah);
       // Scroll to approximate position of startAyah
       if (widget.startAyah > 1 && _scrollCtrl.hasClients) {
         final offset = _estimateOffset(widget.startAyah);
@@ -58,14 +60,26 @@ class _SurahScreenState extends State<SurahScreen> {
     return 140.0 + (hasBismillah ? 60.0 : 0) + (ayah - 1) * 160.0;
   }
 
+  void _loadTransliteration(int surahNumber) {
+    if (TransliterationData.hasSurah(surahNumber)) return; // local data sufficient
+    context
+        .read<QuranProvider>()
+        .fetchTransliteration(surahNumber)
+        .then((list) {
+      if (mounted) setState(() => _fetchedTranslit = list);
+    });
+  }
+
   void _navigateSurah(int delta) {
     final next = _surah + delta;
     if (next < 1 || next > quran.totalSurahCount) return;
     setState(() {
       _surah = next;
+      _fetchedTranslit = null;
       _scrollCtrl.jumpTo(0);
     });
     context.read<QuranProvider>().setLastRead(next, 1);
+    _loadTransliteration(next);
   }
 
   void _showReadingPrefs(BuildContext context) {
@@ -295,6 +309,7 @@ class _SurahScreenState extends State<SurahScreen> {
             mp: mp,
             isEn: isEn,
             isHighlighted: ayah == widget.startAyah && widget.startAyah > 1,
+            fetchedTranslit: _fetchedTranslit,
           );
         },
       ),
@@ -394,14 +409,16 @@ class _AyahTile extends StatelessWidget {
     required this.mp,
     required this.isEn,
     this.isHighlighted = false,
+    this.fetchedTranslit,
   });
 
-  final int             surah;
-  final int             ayah;
-  final QuranProvider   qp;
+  final int              surah;
+  final int              ayah;
+  final QuranProvider    qp;
   final MurottalProvider mp;
-  final bool            isEn;
-  final bool            isHighlighted;
+  final bool             isEn;
+  final bool             isHighlighted;
+  final List<String>?    fetchedTranslit;
 
   @override
   Widget build(BuildContext context) {
@@ -410,7 +427,11 @@ class _AyahTile extends StatelessWidget {
     final translation  = quran.getVerseTranslation(
       surah, ayah, translation: quran.Translation.indonesian,
     );
-    final translit      = TransliterationData.get(surah, ayah);
+    final translit = TransliterationData.hasSurah(surah)
+        ? TransliterationData.get(surah, ayah)
+        : (fetchedTranslit != null && ayah <= fetchedTranslit!.length
+            ? fetchedTranslit![ayah - 1]
+            : null);
     final isBookmarked  = qp.isBookmarked(surah, ayah);
     final isPlayingThis = mp.isPlayingAyah(surah, ayah);
     final isDark        = Theme.of(context).brightness == Brightness.dark;

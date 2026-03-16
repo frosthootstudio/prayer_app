@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:quran/quran.dart' as quran;
 
 // ── Bookmark model ────────────────────────────────────────────────────────────
@@ -113,6 +116,31 @@ class QuranProvider extends ChangeNotifier {
       await _bookmarksBox.put(key, key);
     }
     notifyListeners();
+  }
+
+  // ── Transliteration ───────────────────────────────────────────────────────
+
+  final Map<int, List<String>> _transliterationCache = {};
+
+  Future<List<String>> fetchTransliteration(int surahNumber) async {
+    if (_transliterationCache.containsKey(surahNumber)) {
+      return _transliterationCache[surahNumber]!;
+    }
+    try {
+      final response = await http
+          .get(Uri.parse(
+            'https://api.alquran.cloud/v1/surah/$surahNumber/en.transliteration',
+          ))
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final ayahs = (data['data']['ayahs'] as List).cast<Map<String, dynamic>>();
+        final list = ayahs.map((a) => a['text'] as String).toList();
+        _transliterationCache[surahNumber] = list;
+        return list;
+      }
+    } catch (_) {}
+    return [];
   }
 
   // ── Search ────────────────────────────────────────────────────────────────

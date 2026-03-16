@@ -20,6 +20,7 @@ import 'providers/tracking_provider.dart';
 import 'screens/main_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/notification_service.dart';
+import 'services/permission_service.dart';
 
 // ── WorkManager background task ───────────────────────────────────────────────
 //
@@ -82,6 +83,10 @@ Future<void> main() async {
 
   // Init notification channel (required before onboarding permission request)
   await NotificationService.initialize();
+
+  // Cache device manufacturer so PermissionService.isXiaomiDevice is
+  // synchronously available throughout the app (settings, home banner, sheets).
+  await PermissionService.getManufacturer();
 
   // Initialize settings before runApp so themeMode is ready on first frame
   final settingsProvider = SettingsProvider();

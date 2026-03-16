@@ -7,8 +7,11 @@ import 'package:just_audio/just_audio.dart';
 
 import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/notification_service.dart';
+import '../services/permission_service.dart';
 import '../services/prayer_calculation_service.dart';
 import '../utils/app_theme.dart';
+import '../widgets/permission_fix_sheet.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -134,6 +137,22 @@ class SettingsScreen extends StatelessWidget {
                           _showPreAdzanPicker(context, settings),
                     ),
                   ],
+                  const _CardDivider(),
+                  _ActionRow(
+                    label: settings.getLabel('testNotif'),
+                    icon:  Icons.notifications_active_rounded,
+                    onTap: () async {
+                      await NotificationService.scheduleTest();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(settings.getLabel('testNotifSent')),
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ]),
 
                 const SizedBox(height: 20),
@@ -144,11 +163,15 @@ class SettingsScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // ── MIUI / HYPEROS ───────────────────────────────────────────
-                _SectionHeader(settings.getLabel('miuiSection')),
-                _MiuiCard(settings: settings),
-
-                const SizedBox(height: 20),
+                // ── MIUI / HYPEROS (Xiaomi devices only) ─────────────────────
+                if (PermissionService.isXiaomiDevice) ...[
+                  _SectionHeader(settings.getLabel('miuiSection')),
+                  _MiuiCard(
+                    settings:  settings,
+                    onFixTap: () => _showPermissionSheet(context),
+                  ),
+                  const SizedBox(height: 20),
+                ],
 
                 // ── TAMPILAN / APPEARANCE ────────────────────────────────────
                 _SectionHeader(settings.getLabel('appearance')),
@@ -179,7 +202,7 @@ class SettingsScreen extends StatelessWidget {
                 // ── TENTANG / ABOUT ──────────────────────────────────────────
                 _SectionHeader(settings.getLabel('about')),
                 _SettingCard(children: [
-                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.4 (build 4)'),
+                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.5 (build 5)'),
                   const _CardDivider(),
                   _InfoRow(label: settings.getLabel('developedBy'), value: 'Frosthoot Studio'),
                 ]),
@@ -188,6 +211,20 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showPermissionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => PermissionFixSheet(
+        isXiaomi: PermissionService.isXiaomiDevice,
+        onDone: () => Navigator.pop(ctx),
       ),
     );
   }
@@ -831,7 +868,8 @@ class _AdzanCardState extends State<_AdzanCard> {
 
 class _MiuiCard extends StatelessWidget {
   final SettingsProvider settings;
-  const _MiuiCard({required this.settings});
+  final VoidCallback?    onFixTap;
+  const _MiuiCard({required this.settings, this.onFixTap});
 
   static final _channel = const MethodChannel('studio.frosthoot.prayer_app/settings');
 
@@ -844,6 +882,14 @@ class _MiuiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SettingCard(children: [
+      if (onFixTap != null) ...[
+        _ActionRow(
+          label: settings.getLabel('fixAuto'),
+          icon:  Icons.auto_fix_high_rounded,
+          onTap: onFixTap!,
+        ),
+        const _CardDivider(),
+      ],
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
         child: Column(

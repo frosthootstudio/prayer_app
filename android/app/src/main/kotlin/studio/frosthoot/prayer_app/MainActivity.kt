@@ -44,6 +44,17 @@ class MainActivity : AudioServiceActivity() {
                         startActivity(intent)
                         result.success(null)
                     }
+                    "getManufacturer" -> result.success(Build.MANUFACTURER)
+                    "openAlarmSettings" -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                                data = Uri.fromParts("package", packageName, null)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                        }
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }

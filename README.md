@@ -1,5 +1,7 @@
 # prayer_app
 
+**Versi saat ini: 1.0.5**
+
 A new Flutter project.
 
 ## Getting Started

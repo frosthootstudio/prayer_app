@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../services/permission_service.dart';
 import '../utils/app_theme.dart';
 import 'main_screen.dart';
 
@@ -102,7 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // ── Navigation ────────────────────────────────────────────────────────────
 
   void _next() {
-    if (_page < 2) {
+    if (_page < 3) {
       _ctrl.nextPage(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
@@ -125,7 +126,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLast    = _page == 2;
+    final isLast    = _page == 3;
     final safeTop   = MediaQuery.of(context).padding.top;
     final safeBot   = MediaQuery.of(context).padding.bottom;
 
@@ -155,6 +156,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 requested: _notifRequested,
                 granted:   _notifGranted,
                 onRequest: _requestNotif,
+              ),
+              _PermissionsPage(
+                topPad: safeTop + 56,
+                botPad: safeBot + 140,
               ),
             ],
           ),
@@ -192,7 +197,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   SmoothPageIndicator(
                     controller:    _ctrl,
-                    count:         3,
+                    count:         4,
                     effect: ExpandingDotsEffect(
                       dotColor:       context.appDivider,
                       activeDotColor: context.appAccent,
@@ -609,6 +614,205 @@ class _LocationPage extends StatelessWidget {
         onPressed:    onRequest,
         color:        const Color(0xFF10B981),
       ),
+    );
+  }
+}
+
+// ── Page 4: Battery / Permission setup ────────────────────────────────────────
+
+class _PermissionsPage extends StatefulWidget {
+  final double topPad;
+  final double botPad;
+  const _PermissionsPage({required this.topPad, required this.botPad});
+
+  @override
+  State<_PermissionsPage> createState() => _PermissionsPageState();
+}
+
+class _PermissionsPageState extends State<_PermissionsPage> {
+  bool _notifGranted      = false;
+  bool _batteryGranted    = false;
+  bool _exactAlarmGranted = false;
+  bool _loading           = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAll();
+  }
+
+  Future<void> _checkAll() async {
+    final n = await PermissionService.hasNotification();
+    final b = await PermissionService.hasBatteryOptimization();
+    final e = await PermissionService.hasExactAlarm();
+    if (mounted) {
+      setState(() {
+        _notifGranted      = n;
+        _batteryGranted    = b;
+        _exactAlarmGranted = e;
+      });
+    }
+  }
+
+  Future<void> _requestAll() async {
+    if (_loading) return;
+    setState(() => _loading = true);
+    if (!_notifGranted)      await PermissionService.requestNotification();
+    if (!_batteryGranted)    await PermissionService.requestBatteryOptimization();
+    if (!_exactAlarmGranted) await PermissionService.openExactAlarmSettings();
+    await _checkAll();
+    if (mounted) setState(() => _loading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const gold    = Color(0xFFD4A057);
+    const green   = Color(0xFF10B981);
+    const indigo  = Color(0xFF6366F1);
+    final allDone = _notifGranted && _batteryGranted && _exactAlarmGranted;
+
+    return _PageScaffold(
+      topPad:       widget.topPad,
+      botPad:       widget.botPad,
+      illustration: const _IllustrationBubble(
+        icon:  Icons.notifications_active_rounded,
+        color: Color(0xFFD4A057),
+      ),
+      title:    'Aktifkan Notifikasi Adzan',
+      subtitle: 'Agar adzan tidak terlambat, izinkan Waktu Shalat berjalan '
+                'di latar belakang tanpa batasan baterai.',
+      extra: Column(
+        children: [
+          _OnboardingPermRow(
+            label:   'Notifikasi',
+            granted: _notifGranted,
+            color:   indigo,
+          ),
+          const SizedBox(height: 8),
+          _OnboardingPermRow(
+            label:   'Baterai Tidak Dibatasi',
+            granted: _batteryGranted,
+            color:   gold,
+          ),
+          const SizedBox(height: 8),
+          _OnboardingPermRow(
+            label:   'Alarm Tepat Waktu',
+            granted: _exactAlarmGranted,
+            color:   green,
+          ),
+          const SizedBox(height: 20),
+          if (allDone)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                color:        green.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
+                border:       Border.all(color: green.withValues(alpha: 0.30)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: green, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Semua izin aktif!',
+                    style: GoogleFonts.poppins(
+                      color:      green,
+                      fontSize:   13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            SizedBox(
+              width:  double.infinity,
+              height: 48,
+              child: _loading
+                  ? Center(
+                      child: SizedBox(
+                        width: 24, height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: gold,
+                        ),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: _requestAll,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: gold,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Izinkan Semua',
+                        style: GoogleFonts.poppins(
+                          fontSize:   14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OnboardingPermRow extends StatelessWidget {
+  final String label;
+  final bool   granted;
+  final Color  color;
+  const _OnboardingPermRow({
+    required this.label,
+    required this.granted,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 28, height: 28,
+          decoration: BoxDecoration(
+            color:  granted
+                ? color.withValues(alpha: 0.12)
+                : context.appDivider,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            granted ? Icons.check_rounded : Icons.hourglass_empty_rounded,
+            size:  14,
+            color: granted ? color : context.appTextFaded,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize:   13,
+              fontWeight: FontWeight.w500,
+              color:      context.appTextPrimary,
+            ),
+          ),
+        ),
+        Text(
+          granted ? 'Aktif' : 'Belum',
+          style: GoogleFonts.poppins(
+            fontSize:   12,
+            color:      granted ? color : context.appTextFaded,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

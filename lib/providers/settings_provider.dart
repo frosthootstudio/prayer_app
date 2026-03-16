@@ -154,6 +154,23 @@ class SettingsProvider extends ChangeNotifier {
     'miuiStep3':          '3. Notifikasi → Aktifkan semua',
     'miuiStep4':          '4. Kunci di recent apps: tahan ikon → Kunci',
     'openBatterySettings':'Buka Pengaturan Baterai',
+    // Permission fix UI
+    'testNotif':          'Test Notifikasi Sekarang',
+    'testNotifSent':      'Notifikasi test akan muncul dalam 10 detik',
+    'fixNotif':           'Perbaiki Notifikasi Adzan',
+    'notifWarning':       'Notifikasi adzan mungkin terlambat. Tap untuk perbaiki.',
+    'permNotif':          'Izin Notifikasi',
+    'permBattery':        'Baterai Tidak Dibatasi',
+    'permExactAlarm':     'Alarm Tepat Waktu',
+    'permMiuiLock':       'Kunci di Recent Apps',
+    'allowAll':           'Izinkan Semua',
+    'recheckAll':         'Cek Ulang',
+    'fixAuto':            'Perbaiki Otomatis',
+    'onboardPermTitle':   'Aktifkan Notifikasi Adzan',
+    'onboardPermSub':     'Agar adzan tidak terlambat, izinkan Waktu Shalat berjalan di latar belakang tanpa batasan baterai.',
+    'allPermsActive':     'Semua izin aktif!',
+    'permActive':         'Aktif',
+    'permPending':        'Belum',
   };
 
   static const _labelsEn = <String, String>{
@@ -219,6 +236,23 @@ class SettingsProvider extends ChangeNotifier {
     'miuiStep3':          '3. Notifications → Enable all',
     'miuiStep4':          '4. Pin in recent apps: hold icon → Lock',
     'openBatterySettings':'Open Battery Settings',
+    // Permission fix UI
+    'testNotif':          'Test Notification Now',
+    'testNotifSent':      'Test notification will appear in 10 seconds',
+    'fixNotif':           'Fix Prayer Notifications',
+    'notifWarning':       'Prayer notifications may be delayed. Tap to fix.',
+    'permNotif':          'Notification Permission',
+    'permBattery':        'Battery Unrestricted',
+    'permExactAlarm':     'Exact Alarm',
+    'permMiuiLock':       'Pin in Recent Apps',
+    'allowAll':           'Allow All',
+    'recheckAll':         'Recheck',
+    'fixAuto':            'Auto Fix',
+    'onboardPermTitle':   'Enable Prayer Notifications',
+    'onboardPermSub':     'To ensure timely adhan alerts, allow Waktu Shalat to run in the background without battery restrictions.',
+    'allPermsActive':     'All permissions active!',
+    'permActive':         'Active',
+    'permPending':        'Pending',
   };
 
   String getLabel(String key) =>

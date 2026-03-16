@@ -1,5 +1,18 @@
 # Changelog — Waktu Shalat
 
+## [1.0.5] — 2026-03-16
+
+### Perbaikan
+- Fix notifikasi otomatis: request izin baterai & alarm eksak saat onboarding (halaman 4 baru)
+- Tambah `PermissionService` — cek & request notifikasi, baterai tidak dibatasi, alarm tepat waktu
+- Deteksi MIUI/HyperOS (Build.MANUFACTURER) untuk tampilkan panduan kunci recent apps hanya di Xiaomi
+- Banner peringatan di beranda jika izin notifikasi belum lengkap; tap untuk perbaiki via bottom sheet
+- Tambah tombol "Test Notifikasi Sekarang" di Pengaturan → jadwalkan notifikasi 10 detik ke depan
+- Bagian MIUI/HyperOS di Pengaturan kini hanya muncul pada perangkat Xiaomi
+- Transliterasi latin Al-Quran kini tersedia untuk semua 114 surah (fetch dari API alquran.cloud, di-cache per surah)
+
+---
+
 ## [1.0.4] — 2026-03-09
 
 ### Perubahan / Changes

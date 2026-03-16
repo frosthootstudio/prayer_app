@@ -7,8 +7,10 @@ import '../models/prayer_model.dart';
 import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
+import '../services/permission_service.dart';
 import '../utils/app_theme.dart';
 import '../widgets/next_prayer_card.dart';
+import '../widgets/permission_fix_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.onNavigateToTracking});
@@ -20,12 +22,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _showPermBanner = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PrayerProvider>().initialize();
+      _checkPermissions();
     });
+  }
+
+  Future<void> _checkPermissions() async {
+    final allOk = await PermissionService.allGranted();
+    if (mounted) setState(() => _showPermBanner = !allOk);
+  }
+
+  void _showPermissionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => PermissionFixSheet(
+        isXiaomi: PermissionService.isXiaomiDevice,
+        onDone: () {
+          Navigator.pop(ctx);
+          _checkPermissions();
+        },
+      ),
+    );
   }
 
   @override
@@ -61,6 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
       bottom: false,
       child: Column(
         children: [
+          // ── Permission warning banner ───────────────────────────────────────
+          if (_showPermBanner)
+            NotifWarningBanner(
+              onTap: () => _showPermissionSheet(context),
+            ),
+
           // ── Date header ────────────────────────────────────────────────────
           _DateHeader(
             hijriDate:    provider.hijriDate,
