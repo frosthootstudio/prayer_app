@@ -8,7 +8,10 @@ class NotificationService {
   NotificationService._();
 
   // ── Channel config ─────────────────────────────────────────────────────────
-  static const _channelKey  = 'prayer_channel';
+  // v2: forced channel recreation so Android picks up the correct alarm sound.
+  // Android never updates sound/importance on an existing channel; changing the
+  // key creates a fresh channel with the right settings on next install / update.
+  static const _channelKey  = 'prayer_channel_v2';
   static const _channelName = 'Waktu Shalat';
   static const _channelDesc = 'Notifikasi pengingat waktu shalat';
 

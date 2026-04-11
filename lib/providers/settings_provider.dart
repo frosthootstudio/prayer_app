@@ -171,6 +171,7 @@ class SettingsProvider extends ChangeNotifier {
     'allPermsActive':     'Semua izin aktif!',
     'permActive':         'Aktif',
     'permPending':        'Belum',
+    'rateApp':            'Beri Rating Aplikasi',
   };
 
   static const _labelsEn = <String, String>{
@@ -253,6 +254,7 @@ class SettingsProvider extends ChangeNotifier {
     'allPermsActive':     'All permissions active!',
     'permActive':         'Active',
     'permPending':        'Pending',
+    'rateApp':            'Rate this App',
   };
 
   String getLabel(String key) =>

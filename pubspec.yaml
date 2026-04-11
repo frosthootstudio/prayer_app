@@ -2,7 +2,7 @@ name: prayer_app
 description: "Aplikasi waktu shalat dengan kalkulasi offline dan notifikasi adzan."
 publish_to: 'none'
 
-version: 1.0.5+5
+version: 1.0.7+7
 
 environment:
   sdk: ^3.11.0
@@ -50,6 +50,7 @@ dependencies:
   just_audio: ^0.10.5
   just_audio_background: ^0.0.1-beta.17
   audio_service: ^0.18.18
+  in_app_review: ^2.0.9
 
 dev_dependencies:
   flutter_test:

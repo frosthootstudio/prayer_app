@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/murottal_provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/rating_service.dart';
 import '../widgets/mini_player.dart';
 import 'calendar_screen.dart';
 import 'dzikir_screen.dart';
@@ -21,6 +22,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Trigger rating prompt after 2 s — app feels stable, not during onboarding.
+    Future.delayed(const Duration(seconds: 2), RatingService.trackLaunchAndPrompt);
+  }
 
   @override
   Widget build(BuildContext context) {

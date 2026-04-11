@@ -17,7 +17,10 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Allow Flutter to draw behind the system navigation bar (edge-to-edge)
+        // Allow Flutter to draw behind the status bar and navigation bar.
+        // WindowCompat.setDecorFitsSystemWindows is the correct call here:
+        // AudioServiceActivity's class hierarchy prevents using the
+        // ComponentActivity.enableEdgeToEdge() extension at compile time.
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         // Start keepalive foreground service so MIUI/HyperOS won't kill

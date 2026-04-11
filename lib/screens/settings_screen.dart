@@ -9,6 +9,7 @@ import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/notification_service.dart';
 import '../services/permission_service.dart';
+import '../services/rating_service.dart';
 import '../services/prayer_calculation_service.dart';
 import '../utils/app_theme.dart';
 import '../widgets/permission_fix_sheet.dart';
@@ -202,7 +203,13 @@ class SettingsScreen extends StatelessWidget {
                 // ── TENTANG / ABOUT ──────────────────────────────────────────
                 _SectionHeader(settings.getLabel('about')),
                 _SettingCard(children: [
-                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.5 (build 5)'),
+                  _ActionRow(
+                    label: settings.getLabel('rateApp'),
+                    icon:  Icons.star_outline_rounded,
+                    onTap: () => RatingService.requestRating(),
+                  ),
+                  const _CardDivider(),
+                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.7 (build 7)'),
                   const _CardDivider(),
                   _InfoRow(label: settings.getLabel('developedBy'), value: 'Frosthoot Studio'),
                 ]),
