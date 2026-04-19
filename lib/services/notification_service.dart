@@ -3,19 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../models/prayer_model.dart';
+import '../providers/settings_provider.dart';
 
 class NotificationService {
   NotificationService._();
 
-  // ── Channel config ─────────────────────────────────────────────────────────
-  // v2: forced channel recreation so Android picks up the correct alarm sound.
-  // Android never updates sound/importance on an existing channel; changing the
-  // key creates a fresh channel with the right settings on next install / update.
-  static const _channelKey  = 'prayer_channel_v2';
-  static const _channelName = 'Waktu Shalat';
-  static const _channelDesc = 'Notifikasi pengingat waktu shalat';
+  // ── Channel keys ───────────────────────────────────────────────────────────
+  //
+  // Android locks a channel's sound at creation time and never changes it.
+  // Solution: one channel per AdzanSound value so each carries its own
+  // soundSource.  Key suffix _v3 ensures fresh creation after earlier
+  // migrations (v1 = alarm-only, v2 = first sound attempt).
+  //
+  static String _adzanChannelKey(AdzanSound sound) =>
+      'prayer_${sound.name}_v3';
 
-  // ── Stable notification IDs per prayer key ─────────────────────────────────
+  // Pre-adzan reminder uses its own channel (no custom adzan sound needed).
+  static const _preChannelKey  = 'prayer_pre_v3';
+  static const _preChannelName = 'Pengingat Adzan';
+
+  // ── Stable notification IDs ────────────────────────────────────────────────
   static const _ids = <String, int>{
     'fajr'   : 0,
     'sunrise': 1,
@@ -25,7 +32,6 @@ class NotificationService {
     'isha'   : 5,
   };
 
-  // ── Pre-adzan IDs (prayer_id + 10) ─────────────────────────────────────────
   static const _preAdzanIds = <String, int>{
     'fajr'   : 10,
     'dhuhr'  : 12,
@@ -42,36 +48,56 @@ class NotificationService {
   static Future<void> initialize() async {
     if (_initialized) return;
 
-    await AwesomeNotifications().initialize(
-      'resource://drawable/ic_notification',
-      [
-        NotificationChannel(
-          channelKey:          _channelKey,
-          channelName:         _channelName,
-          channelDescription:  _channelDesc,
-          defaultColor:        const Color(0xFFD4A057),
-          // Max importance ensures heads-up delivery on MIUI/HyperOS
-          importance:          NotificationImportance.Max,
-          defaultRingtoneType: DefaultRingtoneType.Alarm,
-          enableVibration:     true,
-          playSound:           true,
-          // criticalAlerts bypasses Do-Not-Disturb / silent mode
-          criticalAlerts:      true,
-          locked:              false,
-        ),
-      ],
-      debug: false,
+    // Build one channel for every AdzanSound variant.
+    // soundSource == null → channel falls back to system alarm ringtone.
+    final adzanChannels = AdzanSound.values.map((sound) {
+      return NotificationChannel(
+        channelKey:          _adzanChannelKey(sound),
+        channelName:         'Waktu Shalat · ${sound.displayName}',
+        channelDescription:  'Notifikasi pengingat waktu shalat',
+        defaultColor:        const Color(0xFFD4A057),
+        importance:          NotificationImportance.Max,
+        defaultRingtoneType: sound.hasAudio
+            ? DefaultRingtoneType.Ringtone
+            : DefaultRingtoneType.Alarm,
+        soundSource:         sound.soundSource,
+        enableVibration:     true,
+        playSound:           true,
+        criticalAlerts:      true,
+        locked:              false,
+      );
+    }).toList();
+
+    // Pre-adzan soft reminder — no custom adzan sound
+    final preChannel = NotificationChannel(
+      channelKey:          _preChannelKey,
+      channelName:         _preChannelName,
+      channelDescription:  'Pengingat sebelum waktu shalat',
+      defaultColor:        const Color(0xFFD4A057),
+      importance:          NotificationImportance.High,
+      defaultRingtoneType: DefaultRingtoneType.Ringtone,
+      enableVibration:     true,
+      playSound:           true,
+      locked:              false,
     );
 
-    _localTz = await AwesomeNotifications().getLocalTimeZoneIdentifier();
+    try {
+      await AwesomeNotifications().initialize(
+        'resource://drawable/ic_notification',
+        [...adzanChannels, preChannel],
+        debug: false,
+      );
+      _localTz = await AwesomeNotifications().getLocalTimeZoneIdentifier();
+    } catch (e) {
+      // Initialization failed (e.g. missing drawable resource); fall back to
+      // UTC timezone so scheduling still works on next call.
+      _localTz = 'UTC';
+    }
     _initialized = true;
   }
 
   // ── Permissions ───────────────────────────────────────────────────────────
 
-  /// Requests notification permission and, on Android 12+, exact alarm permission
-  /// (SCHEDULE_EXACT_ALARM → NotificationPermission.PreciseAlarms).
-  /// The user is directed to the system "Alarms & Reminders" settings page if needed.
   static Future<void> requestPermission() async {
     await AwesomeNotifications().requestPermissionToSendNotifications(
       permissions: [
@@ -80,16 +106,19 @@ class NotificationService {
         NotificationPermission.Vibration,
         NotificationPermission.Badge,
         NotificationPermission.CriticalAlert,
-        NotificationPermission.PreciseAlarms,  // SCHEDULE_EXACT_ALARM on API 31+
+        NotificationPermission.PreciseAlarms,
       ],
     );
   }
 
   // ── Adzan scheduling ──────────────────────────────────────────────────────
 
-  /// Schedules a daily-repeating exact alarm for [prayer].
-  /// Sunrise is skipped (no adzan notification).
-  static Future<void> scheduleOne(PrayerInfo prayer) async {
+  /// Schedules a daily-repeating exact alarm for [prayer] using the channel
+  /// that matches [sound].  Sunrise is always skipped.
+  static Future<void> scheduleOne(
+    PrayerInfo prayer, {
+    AdzanSound sound = AdzanSound.adzan,
+  }) async {
     if (prayer.key == 'sunrise') return;
     final id = _ids[prayer.key];
     if (id == null) return;
@@ -99,7 +128,7 @@ class NotificationService {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id:                 id,
-        channelKey:         _channelKey,
+        channelKey:         _adzanChannelKey(sound),
         title:              'Waktu ${prayer.name}',
         body:               '${prayer.name} · $timeStr',
         notificationLayout: NotificationLayout.Default,
@@ -121,7 +150,7 @@ class NotificationService {
     );
   }
 
-  /// Cancels the adzan notification for a single [prayerKey].
+  /// Cancels the adzan notification for [prayerKey].
   static Future<void> cancelOne(String prayerKey) async {
     final id = _ids[prayerKey];
     if (id == null) return;
@@ -130,7 +159,6 @@ class NotificationService {
 
   // ── Pre-adzan scheduling ──────────────────────────────────────────────────
 
-  /// Schedules a daily reminder [minutesBefore] minutes before [prayer].
   static Future<void> schedulePreAdzan(
     PrayerInfo prayer,
     int minutesBefore, {
@@ -140,21 +168,19 @@ class NotificationService {
     final id = _preAdzanIds[prayer.key];
     if (id == null) return;
 
-    // Compute the reminder time
     final preTime = prayer.time.subtract(Duration(minutes: minutesBefore));
     final timeStr = DateFormat('HH:mm').format(prayer.time);
-
-    final title = isEnglish
+    final title   = isEnglish
         ? '⏰ ${prayer.name} in $minutesBefore min'
         : '⏰ ${prayer.name} dalam $minutesBefore menit';
-    final body = isEnglish
+    final body    = isEnglish
         ? 'Prepare for ${prayer.name} prayer · $timeStr'
         : 'Bersiaplah untuk shalat ${prayer.name} · $timeStr';
 
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id:                 id,
-        channelKey:         _channelKey,
+        channelKey:         _preChannelKey,
         title:              title,
         body:               body,
         notificationLayout: NotificationLayout.Default,
@@ -176,7 +202,6 @@ class NotificationService {
     );
   }
 
-  /// Cancels the pre-adzan reminder for a single [prayerKey].
   static Future<void> cancelPreAdzan(String prayerKey) async {
     final id = _preAdzanIds[prayerKey];
     if (id == null) return;
@@ -185,19 +210,21 @@ class NotificationService {
 
   // ── Batch scheduling ──────────────────────────────────────────────────────
 
-  /// Schedules enabled prayers and their pre-adzan reminders; cancels disabled ones.
   static Future<void> scheduleAll(
-    List<PrayerInfo> prayers,
+    List<PrayerInfo>  prayers,
     Map<String, bool> notifPrefs, {
-    bool preAdzanEnabled = false,
-    int  preAdzanMinutes = 10,
-    bool isEnglish       = false,
+    AdzanSound adzanSound       = AdzanSound.adzan,
+    AdzanSound adzanSoundFajr   = AdzanSound.adzanFajr,
+    bool       preAdzanEnabled  = false,
+    int        preAdzanMinutes  = 10,
+    bool       isEnglish        = false,
   }) async {
     for (final prayer in prayers) {
       if (prayer.key == 'sunrise') continue;
       final enabled = notifPrefs[prayer.key] ?? true;
+      final sound   = prayer.key == 'fajr' ? adzanSoundFajr : adzanSound;
       if (enabled) {
-        await scheduleOne(prayer);
+        await scheduleOne(prayer, sound: sound);
         if (preAdzanEnabled) {
           await schedulePreAdzan(prayer, preAdzanMinutes, isEnglish: isEnglish);
         } else {
@@ -210,19 +237,19 @@ class NotificationService {
     }
   }
 
-  /// Cancels all prayer and pre-adzan notifications.
   static Future<void> cancelAll() => AwesomeNotifications().cancelAll();
 
-  // ── Test notification ──────────────────────────────────────────────────────
+  // ── Test notification ─────────────────────────────────────────────────────
 
-  /// Schedules a one-shot test notification 10 seconds from now.
-  /// Helps users verify that the notification channel is working correctly.
-  static Future<void> scheduleTest() async {
+  /// Schedules a one-shot notification 10 seconds from now using [sound].
+  static Future<void> scheduleTest({
+    AdzanSound sound = AdzanSound.adzan,
+  }) async {
     final fireAt = DateTime.now().add(const Duration(seconds: 10));
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id:                 99,
-        channelKey:         _channelKey,
+        channelKey:         _adzanChannelKey(sound),
         title:              'Test Notifikasi Adzan',
         body:               'Notifikasi adzan berfungsi dengan baik!',
         notificationLayout: NotificationLayout.Default,

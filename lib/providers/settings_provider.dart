@@ -4,16 +4,28 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../services/prayer_calculation_service.dart';
 
 enum AdzanSound {
-  makkah('Adzan Makkah',  'https://audio.islamway.net/adhan/adhan_makka.mp3'),
-  madinah('Adzan Madinah', 'https://audio.islamway.net/adhan/adhan_madina.mp3'),
-  subuh('Adzan Subuh',    'https://audio.islamway.net/adhan/adhan_subuh.mp3'),
-  none('Tanpa Suara',     '');
+  // rawResource = filename (no extension) used for:
+  //   • android/app/src/main/res/raw/<rawResource>.mp3  → notification sound
+  //   • assets/audio/<rawResource>.mp3                  → in-app preview
+  // Indices are persisted to Hive — do NOT reorder.
+  adzan    ('Adzan',         'adzan'),      // index 0
+  adzanFajr('Adzan Subuh',  'adzan_fajr'), // index 1
+  none     ('Suara Bawaan HP', '');         // index 2
 
-  const AdzanSound(this.displayName, this.url);
+  const AdzanSound(this.displayName, this.rawResource);
   final String displayName;
-  final String url;
+  final String rawResource;
 
-  bool get hasAudio => url.isNotEmpty;
+  bool get hasAudio => rawResource.isNotEmpty;
+
+  /// URI for awesome_notifications NotificationChannel.soundSource.
+  /// Returns null for [none] (channel uses default system alarm).
+  String? get soundSource =>
+      hasAudio ? 'resource://raw/$rawResource' : null;
+
+  /// Flutter asset path for in-app preview.
+  String? get assetPath =>
+      hasAudio ? 'audio/$rawResource.mp3' : null;
 }
 
 class SettingsProvider extends ChangeNotifier {
@@ -29,7 +41,8 @@ class SettingsProvider extends ChangeNotifier {
   Map<String, int> prayerTimeOffsets = const {
     'fajr': 0, 'dhuhr': 0, 'asr': 0, 'maghrib': 0, 'isha': 0,
   };
-  AdzanSound     adzanSound         = AdzanSound.makkah;
+  AdzanSound     adzanSound         = AdzanSound.adzan;
+  AdzanSound     adzanSoundFajr    = AdzanSound.adzanFajr;
   double         adzanVolume        = 0.8;
 
   late Box _box;
@@ -54,7 +67,8 @@ class SettingsProvider extends ChangeNotifier {
       for (final k in const ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'])
         k: (_box.get('prayerOffset_$k', defaultValue: 0) as int).clamp(-10, 10),
     };
-    adzanSound        = AdzanSound.values[(_box.get('adzanSound', defaultValue: 0) as int).clamp(0, AdzanSound.values.length - 1)];
+    adzanSound        = AdzanSound.values[(_box.get('adzanSound',      defaultValue: 0) as int).clamp(0, AdzanSound.values.length - 1)];
+    adzanSoundFajr    = AdzanSound.values[(_box.get('adzanSoundFajr', defaultValue: 1) as int).clamp(0, AdzanSound.values.length - 1)];
     adzanVolume       = (_box.get('adzanVolume', defaultValue: 0.8) as double).clamp(0.0, 1.0);
   }
 
@@ -143,17 +157,48 @@ class SettingsProvider extends ChangeNotifier {
     'quran':              'Al-Qur\'an',
     // Adzan audio
     'adzanAudio':         'Suara Adzan',
-    'adzanSound':         'Pilih Suara Adzan',
+    'adzanSound':         'Adzan (Umum)',
+    'adzanSoundFajr':     'Adzan Subuh',
     'adzanVolume':        'Volume Adzan',
     'previewAdzan':       'Pratinjau',
-    // MIUI/HyperOS guidance
-    'miuiSection':        'Optimasi MIUI / HyperOS',
-    'miuiInfo':           'Pada Xiaomi/MIUI, matikan optimasi baterai agar notifikasi adzan tidak terlambat atau hilang.',
-    'miuiStep1':          '1. Pengaturan HP → Aplikasi → Waktu Shalat',
-    'miuiStep2':          '2. Baterai → pilih "Tidak ada batasan"',
-    'miuiStep3':          '3. Notifikasi → Aktifkan semua',
-    'miuiStep4':          '4. Kunci di recent apps: tahan ikon → Kunci',
+    // Device optimization guidance (generic section title)
+    'miuiSection':        'Optimasi Notifikasi',
     'openBatterySettings':'Buka Pengaturan Baterai',
+    // Xiaomi/MIUI
+    'miuiInfo':           'Pada Xiaomi/MIUI, matikan optimasi baterai agar notifikasi adzan tidak terlambat atau hilang.',
+    'miuiStep1':          '1. Pengaturan → Aplikasi → Waktu Shalat → Baterai → Tidak ada batasan',
+    'miuiStep2':          '2. Pengaturan → Aplikasi → Waktu Shalat → Notifikasi → Aktifkan semua',
+    'miuiStep3':          '3. Security → Izin → Autostart → Aktifkan Waktu Shalat',
+    'miuiStep4':          '4. Kunci di recent apps: tahan ikon app → Kunci 🔒',
+    // Samsung/OneUI
+    'samsungInfo':        'Pada Samsung OneUI, pastikan baterai tidak dibatasi dan app tidak masuk daftar tidur.',
+    'samsungStep1':       '1. Pengaturan → Aplikasi → Waktu Shalat → Baterai → Tidak Dibatasi',
+    'samsungStep2':       '2. Pengaturan → Perawatan perangkat → Baterai → Batas penggunaan latar belakang → Hapus Waktu Shalat',
+    'samsungStep3':       '3. Pengaturan → Notifikasi → Notifikasi lanjutan → Izinkan notifikasi saat layar mati',
+    // Oppo/ColorOS
+    'oppoInfo':           'Pada OPPO/ColorOS, aktifkan autostart dan nonaktifkan pembatas baterai.',
+    'oppoStep1':          '1. Pengaturan → Baterai → Manajemen baterai app → Waktu Shalat → Tidak dibatasi',
+    'oppoStep2':          '2. Pengaturan → Manajemen app → Autostart → Aktifkan Waktu Shalat',
+    'oppoStep3':          '3. Pengaturan → Notifikasi → Waktu Shalat → Aktifkan semua',
+    // Vivo/FuntouchOS
+    'vivoInfo':           'Pada Vivo/FuntouchOS, izinkan berjalan di latar belakang dan aktifkan autostart.',
+    'vivoStep1':          '1. Pengaturan → Baterai → Konsumsi daya latar belakang → Waktu Shalat → Izinkan',
+    'vivoStep2':          '2. i-Manager → Manajemen app → Autostart → Aktifkan Waktu Shalat',
+    'vivoStep3':          '3. Pengaturan → Notifikasi → Waktu Shalat → Izinkan notifikasi',
+    // Huawei/EMUI
+    'huaweiInfo':         'Pada Huawei/EMUI, atur peluncuran app ke manual dan aktifkan semua.',
+    'huaweiStep1':        '1. Pengaturan → Baterai → Peluncuran app → Waktu Shalat → Kelola manual → Aktifkan semua',
+    'huaweiStep2':        '2. Pengaturan → Notifikasi → Waktu Shalat → Izinkan notifikasi',
+    'huaweiStep3':        '3. Telepon Manager → App yang dilindungi → Tambahkan Waktu Shalat',
+    // Realme/RealmeUI
+    'realmeInfo':         'Pada Realme/RealmeUI, aktifkan autostart dan nonaktifkan optimasi baterai.',
+    'realmeStep1':        '1. Pengaturan → Manajemen app → Penggunaan daya → Waktu Shalat → Tidak dibatasi',
+    'realmeStep2':        '2. Pengaturan → Manajemen app → Autostart → Aktifkan Waktu Shalat',
+    'realmeStep3':        '3. Pengaturan → Notifikasi → Waktu Shalat → Aktifkan semua',
+    // Generic (other manufacturers)
+    'genericOptInfo':     'Untuk notifikasi adzan tepat waktu, nonaktifkan optimasi baterai untuk Waktu Shalat.',
+    'genericOptStep1':    '1. Pengaturan → Aplikasi → Waktu Shalat → Baterai → Tidak dibatasi',
+    'genericOptStep2':    '2. Pengaturan → Aplikasi → Waktu Shalat → Notifikasi → Aktifkan semua',
     // Permission fix UI
     'testNotif':          'Test Notifikasi Sekarang',
     'testNotifSent':      'Notifikasi test akan muncul dalam 10 detik',
@@ -226,17 +271,48 @@ class SettingsProvider extends ChangeNotifier {
     'quran':              'Al-Qur\'an',
     // Adzan audio
     'adzanAudio':         'Adzan Audio',
-    'adzanSound':         'Select Adzan Sound',
+    'adzanSound':         'Adzan (General)',
+    'adzanSoundFajr':     'Fajr Adzan',
     'adzanVolume':        'Adzan Volume',
     'previewAdzan':       'Preview',
-    // MIUI/HyperOS guidance
-    'miuiSection':        'MIUI / HyperOS Optimization',
-    'miuiInfo':           'On Xiaomi/MIUI devices, disable battery optimization to prevent delayed or missing prayer notifications.',
-    'miuiStep1':          '1. Phone Settings → Apps → Waktu Shalat',
-    'miuiStep2':          '2. Battery → select "No restrictions"',
-    'miuiStep3':          '3. Notifications → Enable all',
-    'miuiStep4':          '4. Pin in recent apps: hold icon → Lock',
+    // Device optimization guidance (generic section title)
+    'miuiSection':        'Notification Optimization',
     'openBatterySettings':'Open Battery Settings',
+    // Xiaomi/MIUI
+    'miuiInfo':           'On Xiaomi/MIUI, disable battery optimization so prayer notifications are not delayed.',
+    'miuiStep1':          '1. Settings → Apps → Waktu Shalat → Battery → No restrictions',
+    'miuiStep2':          '2. Settings → Apps → Waktu Shalat → Notifications → Enable all',
+    'miuiStep3':          '3. Security → Permissions → Autostart → Enable Waktu Shalat',
+    'miuiStep4':          '4. Pin in recent apps: hold app icon → Lock 🔒',
+    // Samsung/OneUI
+    'samsungInfo':        'On Samsung OneUI, ensure battery is unrestricted and the app is not sleeping.',
+    'samsungStep1':       '1. Settings → Apps → Waktu Shalat → Battery → Unrestricted',
+    'samsungStep2':       '2. Settings → Device Care → Battery → Background limits → Remove Waktu Shalat',
+    'samsungStep3':       '3. Settings → Notifications → Advanced → Allow when screen off',
+    // Oppo/ColorOS
+    'oppoInfo':           'On OPPO/ColorOS, enable autostart and disable battery restrictions.',
+    'oppoStep1':          '1. Settings → Battery → App battery management → Waktu Shalat → No restrictions',
+    'oppoStep2':          '2. Settings → App management → Autostart → Enable Waktu Shalat',
+    'oppoStep3':          '3. Settings → Notifications → Waktu Shalat → Enable all',
+    // Vivo/FuntouchOS
+    'vivoInfo':           'On Vivo/FuntouchOS, allow background activity and enable autostart.',
+    'vivoStep1':          '1. Settings → Battery → Background power consumption → Waktu Shalat → Allow',
+    'vivoStep2':          '2. i-Manager → App manager → Autostart → Enable Waktu Shalat',
+    'vivoStep3':          '3. Settings → Notifications → Waktu Shalat → Allow',
+    // Huawei/EMUI
+    'huaweiInfo':         'On Huawei/EMUI, set app launch to manual and enable all options.',
+    'huaweiStep1':        '1. Settings → Battery → App launch → Waktu Shalat → Manual → Enable all',
+    'huaweiStep2':        '2. Settings → Notifications → Waktu Shalat → Allow',
+    'huaweiStep3':        '3. Phone Manager → Protected apps → Add Waktu Shalat',
+    // Realme/RealmeUI
+    'realmeInfo':         'On Realme/RealmeUI, enable autostart and disable battery optimization.',
+    'realmeStep1':        '1. Settings → App management → Power usage → Waktu Shalat → No restrictions',
+    'realmeStep2':        '2. Settings → App management → Autostart → Enable Waktu Shalat',
+    'realmeStep3':        '3. Settings → Notifications → Waktu Shalat → Enable all',
+    // Generic (other manufacturers)
+    'genericOptInfo':     'For on-time prayer notifications, disable battery optimization for Waktu Shalat.',
+    'genericOptStep1':    '1. Settings → Apps → Waktu Shalat → Battery → Unrestricted',
+    'genericOptStep2':    '2. Settings → Apps → Waktu Shalat → Notifications → Enable all',
     // Permission fix UI
     'testNotif':          'Test Notification Now',
     'testNotifSent':      'Test notification will appear in 10 seconds',
@@ -326,6 +402,12 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setAdzanSound(AdzanSound s) async {
     adzanSound = s;
     await _box.put('adzanSound', s.index);
+    notifyListeners();
+  }
+
+  Future<void> setAdzanSoundFajr(AdzanSound s) async {
+    adzanSoundFajr = s;
+    await _box.put('adzanSoundFajr', s.index);
     notifyListeners();
   }
 

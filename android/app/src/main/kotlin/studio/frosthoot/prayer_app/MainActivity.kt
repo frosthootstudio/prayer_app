@@ -33,6 +33,10 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
+    private fun tryStart(intent: Intent): Boolean = try {
+        startActivity(intent); true
+    } catch (_: Exception) { false }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -40,11 +44,38 @@ class MainActivity : AudioServiceActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "openBatterySettings" -> {
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", packageName, null)
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        val manufacturer = Build.MANUFACTURER.lowercase()
+                        val launched = when {
+                            manufacturer == "xiaomi" -> tryStart(Intent("miui.intent.action.APP_PERM_EDITOR").apply {
+                                setClassName("com.miui.securitycenter",
+                                    "com.miui.permcenter.permissions.PermissionsEditorActivity")
+                                putExtra("extra_pkgname", packageName)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            })
+                            manufacturer == "oppo" -> tryStart(Intent().apply {
+                                setClassName("com.coloros.safecenter",
+                                    "com.coloros.privacypermissionsentry.PermissionTopActivity")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            })
+                            manufacturer == "vivo" -> tryStart(Intent().apply {
+                                setClassName("com.vivo.permissionmanager",
+                                    "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            })
+                            manufacturer == "huawei" || manufacturer == "honor" -> tryStart(Intent().apply {
+                                setClassName("com.huawei.systemmanager",
+                                    "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            })
+                            else -> false
                         }
-                        startActivity(intent)
+                        if (!launched) {
+                            // Fallback: standard app details page
+                            startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", packageName, null)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            })
+                        }
                         result.success(null)
                     }
                     "getManufacturer" -> result.success(Build.MANUFACTURER)

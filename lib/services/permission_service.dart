@@ -84,5 +84,30 @@ class PermissionService {
 
   /// Synchronous check — valid only after [getManufacturer] has been awaited.
   static bool get isXiaomiDevice =>
-      (_cachedManufacturer ?? '').toLowerCase() == 'xiaomi';
+      deviceManufacturer == DeviceManufacturer.xiaomi;
+
+  /// Parsed manufacturer — valid only after [getManufacturer] has been awaited.
+  static DeviceManufacturer get deviceManufacturer {
+    final m = (_cachedManufacturer ?? '').toLowerCase();
+    if (m == 'xiaomi' || m == 'poco' || m == 'redmi') return DeviceManufacturer.xiaomi;
+    if (m == 'samsung')                                return DeviceManufacturer.samsung;
+    if (m == 'oppo')                                   return DeviceManufacturer.oppo;
+    if (m == 'vivo')                                   return DeviceManufacturer.vivo;
+    if (m == 'realme')                                 return DeviceManufacturer.realme;
+    if (m == 'huawei' || m == 'honor')                 return DeviceManufacturer.huawei;
+    return DeviceManufacturer.stock;
+  }
+
+  /// True for any OEM that needs battery/autostart guidance.
+  static bool get needsOptimizationGuidance =>
+      deviceManufacturer != DeviceManufacturer.stock;
+
+  /// Opens the most relevant battery settings for the current manufacturer.
+  static Future<void> openBatterySettings() async {
+    try {
+      await _channel.invokeMethod<void>('openBatterySettings');
+    } catch (_) {}
+  }
 }
+
+enum DeviceManufacturer { xiaomi, samsung, oppo, vivo, realme, huawei, stock }

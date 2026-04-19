@@ -45,76 +45,80 @@ void _workmanagerDispatcher() {
 
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  // Keep native splash visible while Dart-side init runs
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Register WorkManager background task for widget countdown refresh
-  await Workmanager().initialize(_workmanagerDispatcher);
-  await Workmanager().registerPeriodicTask(
-    _kWidgetTaskName,
-    _kWidgetTaskName,
-    frequency: const Duration(minutes: 15),
-    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-    constraints: Constraints(networkType: NetworkType.notRequired),
-  );
+  late SettingsProvider settingsProvider;
+  late TrackingProvider trackingProvider;
+  late DzikirProvider   dzikirProvider;
+  late QuranProvider    quranProvider;
+  late MurottalProvider murottalProvider;
+  bool onboardingDone = false;
 
-  // Lock to portrait
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  try {
+    await Workmanager().initialize(_workmanagerDispatcher);
+    await Workmanager().registerPeriodicTask(
+      _kWidgetTaskName,
+      _kWidgetTaskName,
+      frequency: const Duration(minutes: 15),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+      constraints: Constraints(networkType: NetworkType.notRequired),
+    );
 
-  // Edge-to-edge: Flutter draws behind the system nav bar; nav bar is
-  // transparent so the app controls all pixels. SafeArea / MediaQuery.padding
-  // in each widget provides the correct insets for both gesture and 3-button nav.
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    systemNavigationBarColor:        Colors.transparent,
-    systemNavigationBarDividerColor: Colors.transparent,
-  ));
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
-  // Init Hive (local storage)
-  await Hive.initFlutter();
-  Hive.registerAdapter(IbadahTrackingAdapter());
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      systemNavigationBarColor:        Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ));
 
-  // Init intl locale data for date formatting (Indonesian + English)
-  await initializeDateFormatting('id_ID');
-  await initializeDateFormatting('en_US');
+    await Hive.initFlutter();
+    Hive.registerAdapter(IbadahTrackingAdapter());
 
-  // Init notification channel (required before onboarding permission request)
-  await NotificationService.initialize();
+    await initializeDateFormatting('id_ID');
+    await initializeDateFormatting('en_US');
 
-  // Cache device manufacturer so PermissionService.isXiaomiDevice is
-  // synchronously available throughout the app (settings, home banner, sheets).
-  await PermissionService.getManufacturer();
+    await NotificationService.initialize();
+    await PermissionService.getManufacturer();
 
-  // Initialize settings before runApp so themeMode is ready on first frame
-  final settingsProvider = SettingsProvider();
-  await settingsProvider.initialize();
+    settingsProvider = SettingsProvider();
+    await settingsProvider.initialize();
 
-  // Read onboarding flag from the already-opened 'settings' box
-  final onboardingDone =
-      Hive.box('settings').get('onboarding_done', defaultValue: false) as bool;
+    onboardingDone =
+        Hive.box('settings').get('onboarding_done', defaultValue: false) as bool;
 
-  final trackingProvider = TrackingProvider();
-  await trackingProvider.initialize();
+    trackingProvider = TrackingProvider();
+    await trackingProvider.initialize();
 
-  final dzikirProvider = DzikirProvider();
-  await dzikirProvider.initialize();
+    dzikirProvider = DzikirProvider();
+    await dzikirProvider.initialize();
 
-  final quranProvider = QuranProvider();
-  await quranProvider.initialize();
+    quranProvider = QuranProvider();
+    await quranProvider.initialize();
 
-  // Background audio (murottal player)
-  await JustAudioBackground.init(
-    androidNotificationChannelId: 'studio.frosthoot.prayer_app.murottal',
-    androidNotificationChannelName: 'Murottal Al-Quran',
-    androidNotificationOngoing: true,
-    androidStopForegroundOnPause: true,
-  );
+    await JustAudioBackground.init(
+      androidNotificationChannelId: 'studio.frosthoot.prayer_app.murottal',
+      androidNotificationChannelName: 'Murottal Al-Quran',
+      androidNotificationOngoing: true,
+      androidStopForegroundOnPause: true,
+    );
 
-  final murottalProvider = MurottalProvider();
-  await murottalProvider.initialize();
+    murottalProvider = MurottalProvider();
+    await murottalProvider.initialize();
+  } catch (e, stack) {
+    debugPrint('Init error: $e\n$stack');
+    // Fallback: create empty providers so the app can still launch
+    settingsProvider  = SettingsProvider();
+    trackingProvider  = TrackingProvider();
+    dzikirProvider    = DzikirProvider();
+    quranProvider     = QuranProvider();
+    murottalProvider  = MurottalProvider();
+  } finally {
+    FlutterNativeSplash.remove();
+  }
 
   runApp(
     MultiProvider(
@@ -143,8 +147,6 @@ class _PrayerAppState extends State<PrayerApp> {
   @override
   void initState() {
     super.initState();
-    // Remove native splash once the first Flutter frame is ready
-    FlutterNativeSplash.remove();
   }
 
   @override

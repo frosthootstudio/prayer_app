@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
@@ -143,7 +142,9 @@ class SettingsScreen extends StatelessWidget {
                     label: settings.getLabel('testNotif'),
                     icon:  Icons.notifications_active_rounded,
                     onTap: () async {
-                      await NotificationService.scheduleTest();
+                      await NotificationService.scheduleTest(
+                        sound: settings.adzanSound,
+                      );
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -164,12 +165,13 @@ class SettingsScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // ── MIUI / HYPEROS (Xiaomi devices only) ─────────────────────
-                if (PermissionService.isXiaomiDevice) ...[
+                // ── DEVICE OPTIMIZATION (non-stock Android) ──────────────────
+                if (PermissionService.needsOptimizationGuidance) ...[
                   _SectionHeader(settings.getLabel('miuiSection')),
-                  _MiuiCard(
-                    settings:  settings,
-                    onFixTap: () => _showPermissionSheet(context),
+                  _ManufacturerOptCard(
+                    settings:    settings,
+                    manufacturer: PermissionService.deviceManufacturer,
+                    onFixTap:    () => _showPermissionSheet(context),
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -209,7 +211,7 @@ class SettingsScreen extends StatelessWidget {
                     onTap: () => RatingService.requestRating(),
                   ),
                   const _CardDivider(),
-                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.7 (build 7)'),
+                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.8 (build 8)'),
                   const _CardDivider(),
                   _InfoRow(label: settings.getLabel('developedBy'), value: 'Frosthoot Studio'),
                 ]),
@@ -782,13 +784,9 @@ class _AdzanCardState extends State<_AdzanCard> {
     }
     setState(() => _previewing = true);
     try {
-      await _player.setUrl(s.adzanSound.url);
       await _player.setVolume(s.adzanVolume);
-      await _player.play();
-      _player.playerStateStream.firstWhere(
-        (st) => st.processingState == ProcessingState.completed ||
-                st.processingState == ProcessingState.idle,
-      ).then((_) {
+      await _player.play(AssetSource(s.adzanSound.assetPath!));
+      _player.onPlayerComplete.listen((_) {
         if (mounted) setState(() => _previewing = false);
       });
     } catch (_) {
@@ -815,6 +813,24 @@ class _AdzanCardState extends State<_AdzanCard> {
             selected: s.adzanSound,
             label:    (v) => v.displayName,
             onSelect: (v) => context.read<SettingsProvider>().setAdzanSound(v),
+          ),
+        ),
+      ),
+      const _CardDivider(),
+      _PickerRow(
+        label: s.getLabel('adzanSoundFajr'),
+        value: s.adzanSoundFajr.displayName,
+        onTap: () => showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => _PickerSheet<AdzanSound>(
+            title:    s.getLabel('adzanSoundFajr'),
+            options:  AdzanSound.values,
+            selected: s.adzanSoundFajr,
+            label:    (v) => v.displayName,
+            onSelect: (v) => context.read<SettingsProvider>().setAdzanSoundFajr(v),
           ),
         ),
       ),
@@ -871,23 +887,31 @@ class _AdzanCardState extends State<_AdzanCard> {
   }
 }
 
-// ── MIUI / HyperOS guidance card ──────────────────────────────────────────────
+// ── Manufacturer-specific optimization guidance card ──────────────────────────
 
-class _MiuiCard extends StatelessWidget {
-  final SettingsProvider settings;
-  final VoidCallback?    onFixTap;
-  const _MiuiCard({required this.settings, this.onFixTap});
+class _ManufacturerOptCard extends StatelessWidget {
+  final SettingsProvider  settings;
+  final DeviceManufacturer manufacturer;
+  final VoidCallback?     onFixTap;
+  const _ManufacturerOptCard({
+    required this.settings,
+    required this.manufacturer,
+    this.onFixTap,
+  });
 
-  static final _channel = const MethodChannel('studio.frosthoot.prayer_app/settings');
-
-  Future<void> _openBatterySettings() async {
-    try {
-      await _channel.invokeMethod<void>('openBatterySettings');
-    } catch (_) {}
-  }
+  List<String> _stepKeys() => switch (manufacturer) {
+    DeviceManufacturer.xiaomi   => ['miuiInfo',    'miuiStep1',    'miuiStep2',    'miuiStep3',    'miuiStep4'],
+    DeviceManufacturer.samsung  => ['samsungInfo', 'samsungStep1', 'samsungStep2', 'samsungStep3'],
+    DeviceManufacturer.oppo     => ['oppoInfo',    'oppoStep1',    'oppoStep2',    'oppoStep3'],
+    DeviceManufacturer.vivo     => ['vivoInfo',    'vivoStep1',    'vivoStep2',    'vivoStep3'],
+    DeviceManufacturer.huawei   => ['huaweiInfo',  'huaweiStep1',  'huaweiStep2',  'huaweiStep3'],
+    DeviceManufacturer.realme   => ['realmeInfo',  'realmeStep1',  'realmeStep2',  'realmeStep3'],
+    DeviceManufacturer.stock    => ['genericOptInfo', 'genericOptStep1', 'genericOptStep2'],
+  };
 
   @override
   Widget build(BuildContext context) {
+    final keys = _stepKeys();
     return _SettingCard(children: [
       if (onFixTap != null) ...[
         _ActionRow(
@@ -902,8 +926,9 @@ class _MiuiCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // First key is the info/description paragraph
             Text(
-              settings.getLabel('miuiInfo'),
+              settings.getLabel(keys.first),
               style: GoogleFonts.poppins(
                 color: context.appTextSecondary,
                 fontSize: 12.5,
@@ -911,9 +936,8 @@ class _MiuiCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            for (final key in const [
-              'miuiStep1', 'miuiStep2', 'miuiStep3', 'miuiStep4',
-            ])
+            // Remaining keys are numbered steps
+            for (final key in keys.skip(1))
               Padding(
                 padding: const EdgeInsets.only(bottom: 5),
                 child: Text(
@@ -932,7 +956,7 @@ class _MiuiCard extends StatelessWidget {
       _ActionRow(
         label: settings.getLabel('openBatterySettings'),
         icon:  Icons.battery_saver_rounded,
-        onTap: _openBatterySettings,
+        onTap: PermissionService.openBatterySettings,
       ),
     ]);
   }

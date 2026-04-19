@@ -21,6 +21,8 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _prevPreAdzanEnabled = _settings.preAdzanEnabled;
     _prevPreAdzanMinutes = _settings.preAdzanMinutes;
     _prevPrayerOffsets   = Map.from(_settings.prayerTimeOffsets);
+    _prevAdzanSound      = _settings.adzanSound;
+    _prevAdzanSoundFajr  = _settings.adzanSoundFajr;
     _settings.addListener(_onSettingsChanged);
   }
 
@@ -60,6 +62,8 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool?            _prevPreAdzanEnabled;
   int?             _prevPreAdzanMinutes;
   Map<String, int> _prevPrayerOffsets = {};
+  AdzanSound?      _prevAdzanSound;
+  AdzanSound?      _prevAdzanSoundFajr;
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -175,6 +179,8 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     final notifChanged = _settings.masterNotifEnabled != _prevMasterNotif;
     final preAdzanChanged = _settings.preAdzanEnabled != _prevPreAdzanEnabled ||
         _settings.preAdzanMinutes != _prevPreAdzanMinutes;
+    final soundChanged = _settings.adzanSound != _prevAdzanSound ||
+        _settings.adzanSoundFajr != _prevAdzanSoundFajr;
 
     _prevCalcMethod      = _settings.calcMethod;
     _prevMadhab          = _settings.madhab;
@@ -183,10 +189,12 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _prevPreAdzanEnabled = _settings.preAdzanEnabled;
     _prevPreAdzanMinutes = _settings.preAdzanMinutes;
     _prevPrayerOffsets   = Map.from(_settings.prayerTimeOffsets);
+    _prevAdzanSound      = _settings.adzanSound;
+    _prevAdzanSoundFajr  = _settings.adzanSoundFajr;
 
     if (calcChanged && _lastLat != null) {
       _recalculate();
-    } else if (notifChanged || preAdzanChanged) {
+    } else if (notifChanged || preAdzanChanged || soundChanged) {
       _applyMasterNotif();
     }
   }
@@ -210,7 +218,8 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (_settings.masterNotifEnabled) {
       final prayer = prayerTimes.where((p) => p.key == key).firstOrNull;
       if (next && prayer != null) {
-        await NotificationService.scheduleOne(prayer);
+        final sound = prayer.key == 'fajr' ? _settings.adzanSoundFajr : _settings.adzanSound;
+        await NotificationService.scheduleOne(prayer, sound: sound);
         if (_settings.preAdzanEnabled) {
           await NotificationService.schedulePreAdzan(
             prayer,
@@ -384,6 +393,8 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       NotificationService.scheduleAll(
         prayerTimes,
         notifPrefs,
+        adzanSound:      _settings.adzanSound,
+        adzanSoundFajr:  _settings.adzanSoundFajr,
         preAdzanEnabled: _settings.preAdzanEnabled,
         preAdzanMinutes: _settings.preAdzanMinutes,
         isEnglish:       _settings.isEnglish,
@@ -398,6 +409,8 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
       NotificationService.scheduleAll(
         prayerTimes,
         notifPrefs,
+        adzanSound:      _settings.adzanSound,
+        adzanSoundFajr:  _settings.adzanSoundFajr,
         preAdzanEnabled: _settings.preAdzanEnabled,
         preAdzanMinutes: _settings.preAdzanMinutes,
         isEnglish:       _settings.isEnglish,
