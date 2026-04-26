@@ -3,9 +3,18 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 
 import '../models/prayer_tracking_model.dart';
+import '../services/ramadan_service.dart';
 
 class TrackingProvider extends ChangeNotifier {
   // ── Master task list ────────────────────────────────────────────────────────
+
+  static const List<Map<String, String>> ramadanTasks = [
+    {'key': 'sahur',    'label': 'Sahur',                'category': 'ramadan'},
+    {'key': 'tarawih',  'label': 'Shalat Tarawih',       'category': 'ramadan'},
+    {'key': 'tadarus',  'label': "Tadarus Al-Qur'an",    'category': 'ramadan'},
+    {'key': 'itikaf',   'label': "I'tikaf",              'category': 'ramadan'},
+    {'key': 'sedekah',  'label': 'Sedekah',              'category': 'ramadan'},
+  ];
 
   static const List<Map<String, String>> ibadahTasks = [
     {'key': 'tahajud',               'label': 'Tahajud',                          'category': 'malam'},
@@ -35,6 +44,7 @@ class TrackingProvider extends ChangeNotifier {
   // ── State ──────────────────────────────────────────────────────────────────
 
   late Box<IbadahTracking> _box;
+  bool _ramadanModeEnabled = true;
 
   // In-memory cache for today (reactive)
   final Map<String, bool>      _statusToday     = {};
@@ -53,7 +63,7 @@ class TrackingProvider extends ChangeNotifier {
     _lastLoadedDate = today;
     _statusToday.clear();
     _timestampsToday.clear();
-    for (final task in ibadahTasks) {
+    for (final task in effectiveTasks) {
       final k     = task['key']!;
       final entry = _box.get('${today}_$k');
       _statusToday[k]     = entry?.isDone   ?? false;
@@ -61,11 +71,27 @@ class TrackingProvider extends ChangeNotifier {
     }
   }
 
+  void setRamadanMode(bool v) {
+    if (_ramadanModeEnabled == v) return;
+    _ramadanModeEnabled = v;
+    _loadToday();
+    notifyListeners();
+  }
+
   /// Reloads today's data silently if the calendar day has rolled over.
   /// Safe to call inside getters — does NOT call notifyListeners().
   void _ensureToday() {
     if (todayKey != _lastLoadedDate) _loadToday();
   }
+
+  // ── Ramadan accessors ─────────────────────────────────────────────────────
+
+  bool get isRamadanActive => _ramadanModeEnabled && RamadanService.isRamadan();
+
+  List<Map<String, String>> get effectiveTasks =>
+      isRamadanActive ? [...ibadahTasks, ...ramadanTasks] : ibadahTasks;
+
+  int get effectiveTotalTasks => effectiveTasks.length;
 
   // ── Public accessors ──────────────────────────────────────────────────────
 

@@ -5,8 +5,10 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
   awesome_notifications
+  gal
   geolocator_windows
   permission_handler_windows
+  share_plus
   url_launcher_windows
 )
 

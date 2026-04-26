@@ -8,9 +8,11 @@ import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
 import '../services/permission_service.dart';
+import '../services/ramadan_service.dart';
 import '../utils/app_theme.dart';
 import '../widgets/next_prayer_card.dart';
 import '../widgets/permission_fix_sheet.dart';
+import '../widgets/share_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.onNavigateToTracking});
@@ -96,9 +98,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // ── Date header ────────────────────────────────────────────────────
           _DateHeader(
-            hijriDate:    provider.hijriDate,
+            hijriDate:     provider.hijriDate,
             gregorianDate: provider.gregorianDate,
+            showCrescent:  settings.ramadanMode && RamadanService.isRamadan(),
           ),
+
+          // ── Ramadan banner ─────────────────────────────────────────────────
+          if (settings.ramadanMode) ...[
+            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _RamadanBanner(isEnglish: settings.isEnglish),
+            ),
+          ],
 
           const SizedBox(height: 10),
 
@@ -129,20 +141,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     cityName:           provider.cityName,
                     notifPrefs:         provider.notifPrefs,
                     masterNotifEnabled: settings.masterNotifEnabled,
+                    imsakTime:          provider.isRamadanActive ? provider.imsakTime : null,
                     onRefresh: () =>
                         context.read<PrayerProvider>().retryLocation(),
+                    onShare: () => _showShareSheet(context, provider, settings),
                     onToggleNotif: (key) =>
                         context.read<PrayerProvider>().toggleNotification(key),
                   ),
 
                   const SizedBox(height: 8),
 
-                  if (syuruq != null && dhuhr != null && maghrib != null)
+                  if (provider.isRamadanActive)
+                    _RamadanCountdownCard(
+                      prayers:   prayers,
+                      imsakTime: provider.imsakTime,
+                      isEnglish: settings.isEnglish,
+                    ),
+
+                  if (syuruq != null && dhuhr != null && maghrib != null) ...[
+                    const SizedBox(height: 8),
                     _SunInfoCard(
                       syuruqTime:  syuruq.time,
                       dhuhrTime:   dhuhr.time,
                       maghribTime: maghrib.time,
                     ),
+                  ],
 
                   const SizedBox(height: 64),
                 ],
@@ -150,6 +173,26 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showShareSheet(
+    BuildContext context,
+    PrayerProvider provider,
+    SettingsProvider settings,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ShareBottomSheet(
+        prayers:       provider.prayerTimes,
+        cityName:      provider.cityName,
+        gregorianDate: provider.gregorianDate,
+        hijriDate:     provider.hijriDate,
+        imsakTime:     provider.isRamadanActive ? provider.imsakTime : null,
+        language:      settings.language,
       ),
     );
   }
@@ -171,7 +214,9 @@ class _PrayerGroupCard extends StatelessWidget {
   final String cityName;
   final Map<String, bool> notifPrefs;
   final bool masterNotifEnabled;
+  final DateTime? imsakTime;
   final VoidCallback onRefresh;
+  final VoidCallback onShare;
   final void Function(String key) onToggleNotif;
 
   const _PrayerGroupCard({
@@ -180,7 +225,9 @@ class _PrayerGroupCard extends StatelessWidget {
     required this.cityName,
     required this.notifPrefs,
     required this.masterNotifEnabled,
+    this.imsakTime,
     required this.onRefresh,
+    required this.onShare,
     required this.onToggleNotif,
   });
 
@@ -229,6 +276,22 @@ class _PrayerGroupCard extends StatelessWidget {
                     ),
                   ),
                   GestureDetector(
+                    onTap: onShare,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: context.appRefreshBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.share_rounded,
+                        size: 14,
+                        color: context.appAccent,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  GestureDetector(
                     onTap: onRefresh,
                     child: Container(
                       padding: const EdgeInsets.all(6),
@@ -257,6 +320,14 @@ class _PrayerGroupCard extends StatelessWidget {
 
             // ── Prayer rows ──────────────────────────────────────────────────
             for (int i = 0; i < prayers.length; i++) ...[
+              // Imsak row injected before Fajr during Ramadan
+              if (prayers[i].key == 'fajr' && imsakTime != null) ...[
+                _ImsakRow(time: imsakTime!),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Divider(height: 1, thickness: 0.5, color: context.appDivider),
+                ),
+              ],
               _PrayerRow(
                 prayer:         prayers[i],
                 prayerName:     settings.getPrayerName(prayers[i].key),
@@ -536,10 +607,12 @@ class _SunSection extends StatelessWidget {
 class _DateHeader extends StatelessWidget {
   final String hijriDate;
   final String gregorianDate;
+  final bool showCrescent;
 
   const _DateHeader({
     required this.hijriDate,
     required this.gregorianDate,
+    this.showCrescent = false,
   });
 
   @override
@@ -549,15 +622,36 @@ class _DateHeader extends StatelessWidget {
       child: Column(
         children: [
           if (hijriDate.isNotEmpty)
-            Text(
-              hijriDate,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                color: context.appTextPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                height: 1.25,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (showCrescent) ...[
+                  const Icon(
+                    Icons.nightlight_round,
+                    size: 14,
+                    color: Color(0xFFD4A057),
+                  ),
+                  const SizedBox(width: 5),
+                ],
+                Text(
+                  hijriDate,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    color: context.appTextPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    height: 1.25,
+                  ),
+                ),
+                if (showCrescent) ...[
+                  const SizedBox(width: 5),
+                  const Icon(
+                    Icons.nightlight_round,
+                    size: 14,
+                    color: Color(0xFFD4A057),
+                  ),
+                ],
+              ],
             ),
           Text(
             gregorianDate,
@@ -586,7 +680,8 @@ class _IbadahProgressRow extends StatelessWidget {
     final tracking = context.watch<TrackingProvider>();
     final settings = context.watch<SettingsProvider>();
     final count    = tracking.todayCount;
-    final pct      = count / TrackingProvider.totalTasks;
+    final total    = tracking.effectiveTotalTasks;
+    final pct      = count / total;
 
     return GestureDetector(
       onTap: onTap,
@@ -617,9 +712,9 @@ class _IbadahProgressRow extends StatelessWidget {
                       ),
                       const Spacer(),
                       Text(
-                        '$count/${TrackingProvider.totalTasks}',
+                        '$count/$total',
                         style: GoogleFonts.poppins(
-                          color: count == TrackingProvider.totalTasks
+                          color: count == total
                               ? const Color(0xFF22C55E)
                               : context.appAccent,
                           fontSize: 11,
@@ -649,6 +744,216 @@ class _IbadahProgressRow extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ── Imsak row ─────────────────────────────────────────────────────────────────
+
+class _ImsakRow extends StatelessWidget {
+  final DateTime time;
+  const _ImsakRow({required this.time});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEF2FF),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.nightlight_round, size: 16, color: Color(0xFFD4A057)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Imsak',
+              style: GoogleFonts.poppins(
+                color: context.appTextPrimary,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(
+            DateFormat('HH:mm').format(time),
+            style: GoogleFonts.poppins(
+              color: context.appTextPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+          const SizedBox(width: 28), // align with rows that have bell icon
+        ],
+      ),
+    );
+  }
+}
+
+// ── Ramadan banner ────────────────────────────────────────────────────────────
+
+class _RamadanBanner extends StatelessWidget {
+  final bool isEnglish;
+  const _RamadanBanner({required this.isEnglish});
+
+  @override
+  Widget build(BuildContext context) {
+    final inRamadan   = RamadanService.isRamadan();
+    final day         = RamadanService.currentRamadanDay();
+    final daysUntil   = RamadanService.daysUntilRamadan();
+    final isQadar     = RamadanService.isLailatulQadarNight();
+
+    // Only show if within 30 days of Ramadan or during Ramadan
+    if (!inRamadan && daysUntil > 30) return const SizedBox.shrink();
+
+    String mainText;
+    String? subText;
+
+    if (inRamadan && day != null) {
+      mainText = isEnglish
+          ? '🌙 Ramadan · Day $day of 30'
+          : '🌙 Ramadhan · Hari ke-$day dari 30';
+      if (isQadar) {
+        subText = isEnglish
+            ? '✨ Tonight may be Lailatul Qadar — increase your worship!'
+            : '✨ Malam ini bisa jadi Lailatul Qadar — perbanyak ibadah!';
+      }
+    } else {
+      mainText = isEnglish
+          ? '🌙 $daysUntil days until Ramadan'
+          : '🌙 $daysUntil hari lagi menuju Ramadhan';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C3A00), Color(0xFFD4A057)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            mainText,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          if (subText != null) ...[
+            const SizedBox(height: 3),
+            Text(
+              subText,
+              style: GoogleFonts.poppins(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Ramadan countdown card ─────────────────────────────────────────────────────
+
+class _RamadanCountdownCard extends StatelessWidget {
+  final List<PrayerInfo> prayers;
+  final DateTime? imsakTime;
+  final bool isEnglish;
+
+  const _RamadanCountdownCard({
+    required this.prayers,
+    required this.imsakTime,
+    required this.isEnglish,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final fajr    = _find(prayers, 'fajr');
+    final maghrib = _find(prayers, 'maghrib');
+
+    String label;
+    Duration? diff;
+
+    if (fajr != null && imsakTime != null && now.isBefore(fajr.time)) {
+      // Before Fajr — count down to Imsak or Fajr
+      if (now.isBefore(imsakTime!)) {
+        diff  = imsakTime!.difference(now);
+        label = isEnglish ? 'Time to Imsak' : 'Menuju Imsak';
+      } else {
+        diff  = fajr.time.difference(now);
+        label = isEnglish ? 'Time to Fajr (Sahur ends)' : 'Menuju Subuh (Sahur berakhir)';
+      }
+    } else if (maghrib != null && now.isBefore(maghrib.time)) {
+      // After Fajr, before Maghrib — countdown to iftar
+      diff  = maghrib.time.difference(now);
+      label = isEnglish ? 'Time to Iftar (Maghrib)' : 'Menuju Buka Puasa (Maghrib)';
+    } else {
+      return const SizedBox.shrink();
+    }
+
+    final h = diff.inHours.toString().padLeft(2, '0');
+    final m = (diff.inMinutes % 60).toString().padLeft(2, '0');
+    final s = (diff.inSeconds % 60).toString().padLeft(2, '0');
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: context.appCardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFD4A057).withValues(alpha: 0.4)),
+        boxShadow: [
+          BoxShadow(color: context.appCardShadow, blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.timer_outlined, size: 18, color: Color(0xFFD4A057)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.poppins(
+                color: context.appTextSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(
+            '$h:$m:$s',
+            style: GoogleFonts.poppins(
+              color: const Color(0xFFD4A057),
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static PrayerInfo? _find(List<PrayerInfo> list, String key) {
+    try { return list.firstWhere((p) => p.key == key); } catch (_) { return null; }
   }
 }
 

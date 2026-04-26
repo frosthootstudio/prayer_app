@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
 
 import '../providers/murottal_provider.dart';
 import '../providers/settings_provider.dart';
+import '../utils/arabic_font_helper.dart';
 import '../utils/quran_utils.dart';
 
 class MurottalScreen extends StatelessWidget {
@@ -13,7 +13,8 @@ class MurottalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mp     = context.watch<MurottalProvider>();
-    final isEn   = context.watch<SettingsProvider>().isEnglish;
+    final sp     = context.watch<SettingsProvider>();
+    final isEn   = sp.isEnglish;
     const gold   = Color(0xFFD4A057);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
@@ -88,7 +89,7 @@ class MurottalScreen extends StatelessWidget {
                         if (surahArabic.isNotEmpty)
                           Text(
                             surahArabic,
-                            style: GoogleFonts.amiri(fontSize: 36, color: gold),
+                            style: ArabicFontHelper.getStyle(sp.arabicFont, fontSize: 36, color: gold),
                           ),
                         const SizedBox(height: 8),
                         Text(

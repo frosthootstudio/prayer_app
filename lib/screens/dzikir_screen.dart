@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../data/dzikir_data.dart';
@@ -7,6 +6,7 @@ import '../models/dzikir_model.dart';
 import '../providers/dzikir_provider.dart';
 import '../providers/settings_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/arabic_font_helper.dart';
 
 class DzikirScreen extends StatelessWidget {
   const DzikirScreen({super.key});
@@ -154,6 +154,7 @@ class _DzikirItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
     final current = provider.getCount(item.id);
     final isFav = provider.isFavorite(item.id);
     final done = current >= item.count;
@@ -222,8 +223,9 @@ class _DzikirItemCard extends StatelessWidget {
               item.arabic,
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.center,
-              style: GoogleFonts.amiri(
-                fontSize: 22,
+              style: ArabicFontHelper.getStyle(
+                settings.arabicFont,
+                fontSize: settings.arabicFontSize,
                 height: 2.0,
                 color: context.appTextPrimary,
               ),
@@ -256,7 +258,61 @@ class _DzikirItemCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
+
+            // ── Reference badge
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: context.appAccent.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.menu_book_outlined, size: 11, color: context.appAccent),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        item.reference,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: context.appAccent,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Optional note
+            if (item.note != null) ...[
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.info_outline_rounded, size: 11, color: context.appTextFaded),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      item.note!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: context.appTextFaded,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            const SizedBox(height: 10),
             Divider(color: context.appDivider, height: 1),
             const SizedBox(height: 12),
 

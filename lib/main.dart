@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,6 +13,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 
 import 'models/prayer_tracking_model.dart';
 import 'providers/dzikir_provider.dart';
+import 'services/prayer_calculation_service.dart';
 import 'providers/murottal_provider.dart';
 import 'providers/prayer_provider.dart';
 import 'providers/quran_provider.dart';
@@ -80,6 +82,7 @@ Future<void> main() async {
 
     await initializeDateFormatting('id_ID');
     await initializeDateFormatting('en_US');
+    await initializeDateFormatting('ar');
 
     await NotificationService.initialize();
     await PermissionService.getManufacturer();
@@ -92,6 +95,10 @@ Future<void> main() async {
 
     trackingProvider = TrackingProvider();
     await trackingProvider.initialize();
+    trackingProvider.setRamadanMode(settingsProvider.ramadanMode);
+    settingsProvider.addListener(() {
+      trackingProvider.setRamadanMode(settingsProvider.ramadanMode);
+    });
 
     dzikirProvider = DzikirProvider();
     await dzikirProvider.initialize();
@@ -151,7 +158,10 @@ class _PrayerAppState extends State<PrayerApp> {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<SettingsProvider>().themeMode;
+    final settings  = context.watch<SettingsProvider>();
+    final themeMode = settings.themeMode;
+    final lang      = settings.language;
+    final isRtl     = lang == AppLanguage.ar;
 
     return MaterialApp(
       title: 'Waktu Shalat',
@@ -159,6 +169,21 @@ class _PrayerAppState extends State<PrayerApp> {
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
       themeMode: themeMode,
+      locale: Locale(lang.name),
+      supportedLocales: const [
+        Locale('id'),
+        Locale('en'),
+        Locale('ar'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      builder: (context, child) => Directionality(
+        textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+        child: child!,
+      ),
       home: widget.onboardingDone
           ? const MainScreen()
           : const OnboardingScreen(),

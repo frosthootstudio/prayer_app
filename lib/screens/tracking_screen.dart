@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
+import '../services/prayer_calculation_service.dart';
 import '../utils/app_theme.dart';
 
 class TrackingScreen extends StatelessWidget {
@@ -16,12 +17,12 @@ class TrackingScreen extends StatelessWidget {
     final settings = context.watch<SettingsProvider>();
     final today    = tracking.todayKey;
     final count    = tracking.todayCount;
-    final isEn     = settings.isEnglish;
+    final lang     = settings.language;
 
     // Pre-compute flat list: String = category header, Map = task
     final List<Object> items = [];
     String? lastCat;
-    for (final task in TrackingProvider.ibadahTasks) {
+    for (final task in tracking.effectiveTasks) {
       final cat = task['category']!;
       if (cat != lastCat) {
         items.add(cat);
@@ -50,7 +51,7 @@ class TrackingScreen extends StatelessWidget {
 
           // ── Summary card ─────────────────────────────────────────────────
           SliverToBoxAdapter(
-            child: _SummaryCard(count: count, isEn: isEn),
+            child: _SummaryCard(count: count, total: tracking.effectiveTotalTasks, language: lang),
           ),
 
           // ── Task list ─────────────────────────────────────────────────────
@@ -61,7 +62,7 @@ class TrackingScreen extends StatelessWidget {
               itemBuilder: (ctx, i) {
                 final item = items[i];
                 if (item is String) {
-                  return _CategoryHeader(cat: item, isEn: isEn);
+                  return _CategoryHeader(cat: item, language: lang);
                 }
                 final task    = item as Map<String, String>;
                 final taskKey = task['key']!;
@@ -83,7 +84,7 @@ class TrackingScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: _WeeklyStatsCard(
               stats: tracking.getWeeklyStats(),
-              isEn: isEn,
+              language: lang,
             ),
           ),
 
@@ -97,14 +98,18 @@ class TrackingScreen extends StatelessWidget {
 // ── Summary card ──────────────────────────────────────────────────────────────
 
 class _SummaryCard extends StatelessWidget {
-  final int  count;
-  final bool isEn;
+  final int         count;
+  final int         total;
+  final AppLanguage language;
 
-  const _SummaryCard({required this.count, required this.isEn});
+  const _SummaryCard({required this.count, required this.total, required this.language});
+
+  static String _t(AppLanguage l, {required String ar, required String en, required String id}) =>
+      l == AppLanguage.ar ? ar : l == AppLanguage.en ? en : id;
 
   @override
   Widget build(BuildContext context) {
-    final pct = count / TrackingProvider.totalTasks;
+    final pct = count / total;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Container(
@@ -127,7 +132,7 @@ class _SummaryCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  isEn ? "Today's Ibadah" : 'Ibadah hari ini',
+                  _t(language, ar: 'عبادات اليوم', en: "Today's Ibadah", id: 'Ibadah hari ini'),
                   style: GoogleFonts.poppins(
                     color: context.appTextSecondary,
                     fontSize: 12,
@@ -136,9 +141,9 @@ class _SummaryCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  '$count/${TrackingProvider.totalTasks}',
+                  '$count/$total',
                   style: GoogleFonts.poppins(
-                    color: count == TrackingProvider.totalTasks
+                    color: count == total
                         ? const Color(0xFF22C55E)
                         : context.appAccent,
                     fontSize: 20,
@@ -149,7 +154,7 @@ class _SummaryCard extends StatelessWidget {
                 Icon(
                   Icons.check_circle_rounded,
                   size: 16,
-                  color: count == TrackingProvider.totalTasks
+                  color: count == total
                       ? const Color(0xFF22C55E)
                       : context.appTextFaded,
                 ),
@@ -169,7 +174,7 @@ class _SummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              _motivationText(count, isEn),
+              _motivationText(count, total, language),
               style: GoogleFonts.poppins(
                 color: context.appTextPrimary,
                 fontSize: 13,
@@ -182,25 +187,38 @@ class _SummaryCard extends StatelessWidget {
     );
   }
 
-  static String _motivationText(int count, bool isEn) {
-    if (count == TrackingProvider.totalTasks) {
-      return isEn ? 'MashaAllah, a perfect day! 🎉' : 'MasyaAllah, sempurna hari ini! 🎉';
-    }
-    final pct = count * 100 ~/ TrackingProvider.totalTasks;
-    if (pct >= 76) return isEn ? 'Almost there, keep going! 🌟' : 'Hampir sempurna, sedikit lagi! 🌟';
-    if (pct >= 51) return isEn ? 'Great progress, stay consistent! ⭐' : 'Luar biasa, terus istiqomah! ⭐';
-    if (pct >= 26) return isEn ? 'Halfway there, keep it up! 💪' : 'Sudah setengah jalan, semangat! 💪';
-    return isEn ? 'Start the day with Bismillah 🌅' : 'Yuk mulai hari dengan bismillah 🌅';
+  static String _motivationText(int count, int total, AppLanguage lang) {
+    if (count == total) { return _t(lang,
+      ar: 'ما شاء الله، يوم مثالي! 🎉',
+      en: 'MashaAllah, a perfect day! 🎉',
+      id: 'MasyaAllah, sempurna hari ini! 🎉'); }
+    final pct = total > 0 ? count * 100 ~/ total : 0;
+    if (pct >= 76) { return _t(lang,
+      ar: 'تقريبًا، أكمل! 🌟',
+      en: 'Almost there, keep going! 🌟',
+      id: 'Hampir sempurna, sedikit lagi! 🌟'); }
+    if (pct >= 51) { return _t(lang,
+      ar: 'رائع، استمر! ⭐',
+      en: 'Great progress, stay consistent! ⭐',
+      id: 'Luar biasa, terus istiqomah! ⭐'); }
+    if (pct >= 26) { return _t(lang,
+      ar: 'منتصف الطريق، تشجع! 💪',
+      en: 'Halfway there, keep it up! 💪',
+      id: 'Sudah setengah jalan, semangat! 💪'); }
+    return _t(lang,
+      ar: 'ابدأ يومك بالبسملة 🌅',
+      en: 'Start the day with Bismillah 🌅',
+      id: 'Yuk mulai hari dengan bismillah 🌅');
   }
 }
 
 // ── Category header ───────────────────────────────────────────────────────────
 
 class _CategoryHeader extends StatelessWidget {
-  final String cat;
-  final bool   isEn;
+  final String      cat;
+  final AppLanguage language;
 
-  const _CategoryHeader({required this.cat, required this.isEn});
+  const _CategoryHeader({required this.cat, required this.language});
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +237,7 @@ class _CategoryHeader extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            _categoryLabel(cat, isEn),
+            _categoryLabel(cat, language),
             style: GoogleFonts.poppins(
               color: color,
               fontSize: 11,
@@ -241,20 +259,25 @@ class _CategoryHeader extends StatelessWidget {
         'petang'  => const Color(0xFFF43F5E),
         'maghrib' => const Color(0xFFEF4444),
         'isya'    => const Color(0xFF7C3AED),
+        'ramadan' => const Color(0xFFD4A057),
         _         => const Color(0xFF6B7280),
       };
 
-  static String _categoryLabel(String cat, bool isEn) => switch (cat) {
-        'malam'   => isEn ? 'NIGHT'   : 'MALAM',
-        'subuh'   => isEn ? 'FAJR'    : 'SUBUH',
-        'pagi'    => isEn ? 'MORNING' : 'PAGI',
-        'zuhur'   => isEn ? 'DHUHR'   : 'ZUHUR',
-        'ashar'   => isEn ? 'ASR'     : 'ASHAR',
-        'petang'  => isEn ? 'EVENING' : 'PETANG',
-        'maghrib' => isEn ? 'MAGHRIB' : 'MAGHRIB',
-        'isya'    => isEn ? 'ISHA'    : 'ISYA',
+  static String _categoryLabel(String cat, AppLanguage lang) => switch (cat) {
+        'malam'   => _t(lang, ar: 'ليل',    en: 'NIGHT',   id: 'MALAM'),
+        'subuh'   => _t(lang, ar: 'فجر',    en: 'FAJR',    id: 'SUBUH'),
+        'pagi'    => _t(lang, ar: 'صباح',   en: 'MORNING', id: 'PAGI'),
+        'zuhur'   => _t(lang, ar: 'ظهر',    en: 'DHUHR',   id: 'ZUHUR'),
+        'ashar'   => _t(lang, ar: 'عصر',    en: 'ASR',     id: 'ASHAR'),
+        'petang'  => _t(lang, ar: 'مساء',   en: 'EVENING', id: 'PETANG'),
+        'maghrib' => _t(lang, ar: 'مغرب',   en: 'MAGHRIB', id: 'MAGHRIB'),
+        'isya'    => _t(lang, ar: 'عشاء',   en: 'ISHA',    id: 'ISYA'),
+        'ramadan' => _t(lang, ar: 'رمضان',  en: 'RAMADAN', id: 'RAMADAN'),
         _         => cat.toUpperCase(),
       };
+
+  static String _t(AppLanguage l, {required String ar, required String en, required String id}) =>
+      l == AppLanguage.ar ? ar : l == AppLanguage.en ? en : id;
 }
 
 // ── Task row ──────────────────────────────────────────────────────────────────
@@ -355,10 +378,10 @@ class _TaskRow extends StatelessWidget {
 // ── Weekly stats card ─────────────────────────────────────────────────────────
 
 class _WeeklyStatsCard extends StatelessWidget {
-  final List<int> stats; // 7 values, index 6 = today
-  final bool isEn;
+  final List<int>   stats; // 7 values, index 6 = today
+  final AppLanguage language;
 
-  const _WeeklyStatsCard({required this.stats, required this.isEn});
+  const _WeeklyStatsCard({required this.stats, required this.language});
 
   @override
   Widget build(BuildContext context) {
@@ -385,7 +408,7 @@ class _WeeklyStatsCard extends StatelessWidget {
             final day     = now.subtract(Duration(days: 6 - i));
             final isToday = i == 6;
             return _DayCircle(
-              letter:  _dayLetter(day.weekday, isEn),
+              letter:  _dayLetter(day.weekday, language),
               count:   stats[i],
               isToday: isToday,
               accentColor: context.appAccent,
@@ -397,10 +420,14 @@ class _WeeklyStatsCard extends StatelessWidget {
   }
 
   // Weekday abbreviations (1=Mon … 7=Sun)
-  static String _dayLetter(int weekday, bool isEn) {
-    const lettersId = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
+  static String _dayLetter(int weekday, AppLanguage lang) {
+    const lettersAr = ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح'];
     const lettersEn = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    return (isEn ? lettersEn : lettersId)[weekday - 1];
+    const lettersId = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
+    final letters   = lang == AppLanguage.ar ? lettersAr
+                    : lang == AppLanguage.en ? lettersEn
+                    : lettersId;
+    return letters[weekday - 1];
   }
 }
 

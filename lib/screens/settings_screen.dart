@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../utils/arabic_font_helper.dart';
+
 import 'package:audioplayers/audioplayers.dart';
 
 import '../providers/prayer_provider.dart';
@@ -176,6 +178,37 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                 ],
 
+                // ── TAMPILAN ARAB / ARABIC DISPLAY ───────────────────────────
+                _SectionHeader(settings.getLabel('arabicDisplay')),
+                _ArabicDisplayCard(settings: settings),
+
+                const SizedBox(height: 20),
+
+                // ── RAMADAN ───────────────────────────────────────────────────
+                _SectionHeader(settings.getLabel('ramadanMode')),
+                _SettingCard(children: [
+                  _ToggleRow(
+                    label: settings.getLabel('ramadanMode'),
+                    value: settings.ramadanMode,
+                    onChanged: (v) =>
+                        context.read<SettingsProvider>().setRamadanMode(v),
+                  ),
+                  const _CardDivider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Text(
+                      settings.getLabel('ramadanModeDesc'),
+                      style: GoogleFonts.poppins(
+                        color: context.appTextSecondary,
+                        fontSize: 12,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ]),
+
+                const SizedBox(height: 20),
+
                 // ── TAMPILAN / APPEARANCE ────────────────────────────────────
                 _SectionHeader(settings.getLabel('appearance')),
                 _SettingCard(children: [
@@ -211,9 +244,11 @@ class SettingsScreen extends StatelessWidget {
                     onTap: () => RatingService.requestRating(),
                   ),
                   const _CardDivider(),
-                  _InfoRow(label: settings.getLabel('version'),     value: '1.0.8 (build 8)'),
+                  _InfoRow(label: settings.getLabel('version'),     value: '1.1.1 (build 11)'),
                   const _CardDivider(),
                   _InfoRow(label: settings.getLabel('developedBy'), value: 'Frosthoot Studio'),
+                  const _CardDivider(),
+                  _DzikirDisclaimerRow(settings: settings),
                 ]),
 
               ],
@@ -642,6 +677,51 @@ class _PickerRow extends StatelessWidget {
   }
 }
 
+// ── Dzikir reference disclaimer row ──────────────────────────────────────────
+
+class _DzikirDisclaimerRow extends StatelessWidget {
+  final SettingsProvider settings;
+  const _DzikirDisclaimerRow({required this.settings});
+
+  @override
+  Widget build(BuildContext context) {
+    final isEn = settings.isEnglish;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.menu_book_outlined, size: 14, color: context.appAccent),
+              const SizedBox(width: 6),
+              Text(
+                isEn ? 'Dzikir References' : 'Sumber Referensi',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: context.appTextPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isEn
+                ? 'All dzikir and doa in this app are sourced from authentic hadith in the Kutub as-Sittah (Bukhari, Muslim, Abu Dawud, Tirmidzi, Nasai, Ibn Majah) and Hisnul Muslim. If you find an error, please report it to frosthoot.studio@gmail.com'
+                : 'Seluruh dzikir dan doa dalam aplikasi ini bersumber dari hadits-hadits shahih yang termaktub dalam Kutub as-Sittah (Bukhari, Muslim, Abu Dawud, Tirmidzi, Nasa\'i, Ibnu Majah) serta kitab Hisnul Muslim. Jika menemukan kesalahan, mohon laporkan ke frosthoot.studio@gmail.com',
+            style: GoogleFonts.poppins(
+              fontSize: 11.5,
+              color: context.appTextSecondary,
+              height: 1.6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ── Per-prayer time correction card ──────────────────────────────────────────
 
 class _PrayerOffsetCard extends StatelessWidget {
@@ -959,5 +1039,214 @@ class _ManufacturerOptCard extends StatelessWidget {
         onTap: PermissionService.openBatterySettings,
       ),
     ]);
+  }
+}
+
+// ── Arabic display card ───────────────────────────────────────────────────────
+
+class _ArabicDisplayCard extends StatelessWidget {
+  final SettingsProvider settings;
+  const _ArabicDisplayCard({required this.settings});
+
+  static const _gold = Color(0xFFD4A057);
+
+  @override
+  Widget build(BuildContext context) {
+    final fontName = ArabicFontHelper.displayName(settings.arabicFont);
+    return _SettingCard(children: [
+      _PickerRow(
+        label: settings.getLabel('arabicFont'),
+        value: fontName,
+        onTap: () => _showFontPicker(context),
+      ),
+      const _CardDivider(),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    settings.getLabel('arabicFontSize'),
+                    style: GoogleFonts.poppins(
+                      color: context.appTextPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${settings.arabicFontSize.toInt()}',
+                  style: GoogleFonts.poppins(
+                    color: _gold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: _gold,
+                thumbColor: _gold,
+                overlayColor: _gold.withValues(alpha: 0.15),
+                inactiveTrackColor: _gold.withValues(alpha: 0.2),
+                trackHeight: 2,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+              ),
+              child: Slider(
+                value: settings.arabicFontSize,
+                min: 16, max: 40, divisions: 12,
+                onChanged: (v) =>
+                    context.read<SettingsProvider>().setArabicFontSize(v),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ]);
+  }
+
+  void _showFontPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.appSheetBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _ArabicFontPickerSheet(settings: settings),
+    );
+  }
+}
+
+class _ArabicFontPickerSheet extends StatelessWidget {
+  final SettingsProvider settings;
+  const _ArabicFontPickerSheet({required this.settings});
+
+  @override
+  Widget build(BuildContext context) {
+    return _SheetWrapper(
+      title: settings.getLabel('arabicFont'),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final font in ArabicFontHelper.availableFonts)
+              _FontOptionCard(
+                font: font,
+                isSelected: settings.arabicFont == font['key'],
+                isEn: settings.isEnglish,
+                onTap: () {
+                  context.read<SettingsProvider>().setArabicFont(font['key']!);
+                  Navigator.pop(context);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FontOptionCard extends StatelessWidget {
+  final Map<String, String> font;
+  final bool isSelected;
+  final bool isEn;
+  final VoidCallback onTap;
+  const _FontOptionCard({
+    required this.font,
+    required this.isSelected,
+    required this.isEn,
+    required this.onTap,
+  });
+
+  static const _gold = Color(0xFFD4A057);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: context.appCardBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? _gold : context.appDivider,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Name + style badge + check
+              Row(
+                children: [
+                  Text(
+                    font['name']!,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: context.appTextPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: _gold.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      font['style']!,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: _gold,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  if (isSelected)
+                    const Icon(Icons.check_circle_rounded,
+                        color: _gold, size: 20),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                isEn ? font['descEn']! : font['descId']!,
+                style: GoogleFonts.poppins(
+                  fontSize: 11.5,
+                  color: context.appTextSecondary,
+                ),
+              ),
+              const SizedBox(height: 10),
+              // Arabic preview
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ',
+                  textDirection: TextDirection.rtl,
+                  style: ArabicFontHelper.getStyle(
+                    font['key']!,
+                    fontSize: 22,
+                    color: context.appTextPrimary,
+                    height: 1.8,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -32,11 +32,13 @@ enum MadhabSetting {
 
 enum AppLanguage {
   id,
-  en;
+  en,
+  ar;
 
   String get label => switch (this) {
-        AppLanguage.id => 'Indonesia',
-        AppLanguage.en => 'English',
+        AppLanguage.id => '🇮🇩 Indonesia',
+        AppLanguage.en => '🇬🇧 English',
+        AppLanguage.ar => '🇸🇦 العربية',
       };
 }
 
@@ -45,6 +47,7 @@ enum AppLanguage {
 class PrayerCalculationService {
   static const _namesId = ['Subuh', 'Syuruq', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
   static const _namesEn = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  static const _namesAr = ['الفجر', 'الشروق', 'الظهر', 'العصر', 'المغرب', 'العشاء'];
   static const _keys    = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
   static CalculationParameters _getParams(
@@ -110,7 +113,11 @@ class PrayerCalculationService {
     final now         = DateTime.now();
     final isKemenag   = method == CalcMethod.kemenag;
 
-    final names = language == AppLanguage.en ? _namesEn : _namesId;
+    final names = switch (language) {
+      AppLanguage.ar => _namesAr,
+      AppLanguage.en => _namesEn,
+      AppLanguage.id => _namesId,
+    };
     final rawTimes = [
       pt.fajr, pt.sunrise, pt.dhuhr, pt.asr, pt.maghrib, pt.isha,
     ];

@@ -8,6 +8,7 @@ import '../models/prayer_model.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/prayer_calculation_service.dart';
+import '../services/ramadan_service.dart';
 import '../services/widget_service.dart';
 import 'settings_provider.dart';
 
@@ -41,6 +42,19 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool               isLoading    = true;
   String?            error;
   Map<String, bool>  notifPrefs   = {};
+
+  /// Imsak = Fajr − 10 minutes (Kemenag standard). Null if prayer times not loaded.
+  DateTime? get imsakTime {
+    try {
+      final fajr = prayerTimes.firstWhere((p) => p.key == 'fajr');
+      return fajr.time.subtract(const Duration(minutes: 10));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool get isRamadanActive =>
+      _settings.ramadanMode && RamadanService.isRamadan();
 
   // ── Internal ──────────────────────────────────────────────────────────────
   Timer?    _ticker;
@@ -415,6 +429,11 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
         preAdzanMinutes: _settings.preAdzanMinutes,
         isEnglish:       _settings.isEnglish,
       );
+      if (isRamadanActive) {
+        NotificationService.scheduleLailatulQadar(isEnglish: _settings.isEnglish);
+      } else {
+        NotificationService.cancelLailatulQadar();
+      }
     } else {
       NotificationService.cancelAll();
     }
@@ -432,13 +451,16 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
   // ── Date helpers ──────────────────────────────────────────────────────────
 
   void _updateDates(DateTime now) {
-    final isEn    = _settings.language == AppLanguage.en;
-    final locale  = isEn ? 'en_US' : 'id_ID';
+    final locale  = switch (_settings.language) {
+      AppLanguage.ar => 'ar',
+      AppLanguage.en => 'en_US',
+      AppLanguage.id => 'id_ID',
+    };
     gregorianDate = DateFormat('EEEE, d MMMM yyyy', locale).format(now);
 
     try {
       final h      = _gregorianToHijri(now.year, now.month, now.day);
-      final months = isEn ? _hijriMonthsEn : _hijriMonthsId;
+      final months = _settings.language == AppLanguage.en ? _hijriMonthsEn : _hijriMonthsId;
       final month  = months[(h.$2 - 1).clamp(0, 11)];
       hijriDate    = '${h.$3} $month ${h.$1} H';
     } catch (_) {

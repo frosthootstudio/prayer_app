@@ -44,6 +44,9 @@ class SettingsProvider extends ChangeNotifier {
   AdzanSound     adzanSound         = AdzanSound.adzan;
   AdzanSound     adzanSoundFajr    = AdzanSound.adzanFajr;
   double         adzanVolume        = 0.8;
+  String         arabicFont         = 'scheherazade';
+  double         arabicFontSize     = 24.0;
+  bool           ramadanMode        = true;
 
   late Box _box;
 
@@ -69,10 +72,15 @@ class SettingsProvider extends ChangeNotifier {
     };
     adzanSound        = AdzanSound.values[(_box.get('adzanSound',      defaultValue: 0) as int).clamp(0, AdzanSound.values.length - 1)];
     adzanSoundFajr    = AdzanSound.values[(_box.get('adzanSoundFajr', defaultValue: 1) as int).clamp(0, AdzanSound.values.length - 1)];
-    adzanVolume       = (_box.get('adzanVolume', defaultValue: 0.8) as double).clamp(0.0, 1.0);
+    adzanVolume       = (_box.get('adzanVolume',     defaultValue: 0.8)    as double).clamp(0.0, 1.0);
+    arabicFont        = _box.get('arabicFont',        defaultValue: 'scheherazade') as String;
+    arabicFontSize    = (_box.get('arabicFontSize',  defaultValue: 24.0)   as double).clamp(16.0, 40.0);
+    ramadanMode       = _box.get('ramadanMode',       defaultValue: true)  as bool;
   }
 
   // ── Human-readable labels ─────────────────────────────────────────────────
+
+  bool get isArabic  => language == AppLanguage.ar;
 
   String get themeModeLabel => switch (themeMode) {
         ThemeMode.light => getLabel('light'),
@@ -100,8 +108,20 @@ class SettingsProvider extends ChangeNotifier {
     'isha'    : 'Isha',
   };
 
-  String getPrayerName(String key) =>
-      (language == AppLanguage.en ? _namesEn : _namesId)[key] ?? key;
+  static const _namesAr = <String, String>{
+    'fajr'    : 'الفجر',
+    'sunrise' : 'الشروق',
+    'dhuhr'   : 'الظهر',
+    'asr'     : 'العصر',
+    'maghrib' : 'المغرب',
+    'isha'    : 'العشاء',
+  };
+
+  String getPrayerName(String key) => switch (language) {
+        AppLanguage.ar => _namesAr[key] ?? key,
+        AppLanguage.en => _namesEn[key] ?? key,
+        AppLanguage.id => _namesId[key] ?? key,
+      };
 
   // ── UI string localisation ─────────────────────────────────────────────────
 
@@ -217,6 +237,13 @@ class SettingsProvider extends ChangeNotifier {
     'permActive':         'Aktif',
     'permPending':        'Belum',
     'rateApp':            'Beri Rating Aplikasi',
+    // Arabic display
+    'arabicDisplay':      'Tampilan Arab',
+    'arabicFont':         'Font Arab',
+    'arabicFontSize':     'Ukuran Font Arab',
+    // Ramadan
+    'ramadanMode':        'Mode Ramadan',
+    'ramadanModeDesc':    'Banner & fitur Ramadan otomatis aktif',
   };
 
   static const _labelsEn = <String, String>{
@@ -331,16 +358,118 @@ class SettingsProvider extends ChangeNotifier {
     'permActive':         'Active',
     'permPending':        'Pending',
     'rateApp':            'Rate this App',
+    // Arabic display
+    'arabicDisplay':      'Arabic Display',
+    'arabicFont':         'Arabic Font',
+    'arabicFontSize':     'Arabic Font Size',
+    // Ramadan
+    'ramadanMode':        'Ramadan Mode',
+    'ramadanModeDesc':    'Auto-enable Ramadan banner & features',
   };
 
-  String getLabel(String key) =>
-      (language == AppLanguage.en ? _labelsEn : _labelsId)[key] ?? key;
+  static const _labelsAr = <String, String>{
+    'currentPrayer':      'الصلاة الحالية',
+    'nextPrayer':         'الصلاة القادمة',
+    'today':              'اليوم',
+    'allPrayersPassed':   'انتهت صلوات اليوم',
+    'ends':               'تنتهي',
+    'adhan':              'أذان',
+    'sunRise':            'شروق الشمس',
+    'solarNoon':          'منتصف النهار',
+    'sunSet':             'غروب الشمس',
+    'tryAgain':           'حاول مجددًا',
+    'settings':           'الإعدادات',
+    'location':           'الموقع',
+    'city':               'المدينة',
+    'refreshLocation':    'تحديث الموقع',
+    'autoLocation':       'الموقع التلقائي',
+    'calcMethod':         'طريقة الحساب',
+    'method':             'الطريقة',
+    'madhab':             'المذهب',
+    'notifications':      'الإشعارات',
+    'enableAllNotif':     'تفعيل جميع الإشعارات',
+    'preAdzan':           'تنبيه قبل الأذان',
+    'preAdzanMinutes':    'دقائق قبل الأذان',
+    'timeCorrection':     'ضبط الوقت',
+    'appearance':         'المظهر',
+    'theme':              'السمة',
+    'language':           'اللغة',
+    'about':              'عن التطبيق',
+    'version':            'الإصدار',
+    'developedBy':        'تطوير',
+    'followSystem':       'تبعًا للنظام',
+    'light':              'فاتح',
+    'dark':               'داكن',
+    'home':               'الرئيسية',
+    'qibla':              'القبلة',
+    'metalWarning':       'ابتعد عن المعادن والأجهزة الإلكترونية للحصول على أفضل دقة',
+    'sensorUnavailable':  'مستشعر البوصلة غير متاح في هذا الجهاز',
+    'noLocationQibla':    'مطلوب إذن الموقع لحساب اتجاه القبلة',
+    'ibadah':             'العبادات',
+    'ibadahToday':        'عبادات اليوم',
+    'dzikir':             'الأذكار والأدعية',
+    'kalender':           'التقويم',
+    'hijriCalendar':      'التقويم الهجري',
+    'islamicEvents':      'المناسبات الإسلامية',
+    'upcomingEvents':     'المناسبات القادمة',
+    'sunnahFasting':      'صيام السنة',
+    'noEvents':           'لا توجد مناسبات',
+    'quran':              'القرآن الكريم',
+    'adzanAudio':         'صوت الأذان',
+    'adzanSound':         'الأذان (عام)',
+    'adzanSoundFajr':     'أذان الفجر',
+    'adzanVolume':        'مستوى الصوت',
+    'previewAdzan':       'معاينة',
+    'miuiSection':        'تحسين الإشعارات',
+    'openBatterySettings':'فتح إعدادات البطارية',
+    'testNotif':          'اختبار الإشعار الآن',
+    'testNotifSent':      'ستظهر إشعارات الاختبار خلال 10 ثوانٍ',
+    'fixNotif':           'إصلاح إشعارات الأذان',
+    'notifWarning':       'قد تتأخر إشعارات الأذان. اضغط للإصلاح.',
+    'permNotif':          'إذن الإشعارات',
+    'permBattery':        'بطارية غير مقيدة',
+    'permExactAlarm':     'إنذار دقيق',
+    'permMiuiLock':       'تثبيت في التطبيقات الأخيرة',
+    'allowAll':           'السماح للكل',
+    'recheckAll':         'إعادة الفحص',
+    'fixAuto':            'إصلاح تلقائي',
+    'onboardPermTitle':   'تفعيل إشعارات الأذان',
+    'onboardPermSub':     'للحصول على تنبيهات الأذان في وقتها، اسمح للتطبيق بالعمل في الخلفية دون قيود على البطارية.',
+    'allPermsActive':     'جميع الأذونات مفعلة!',
+    'permActive':         'مفعّل',
+    'permPending':        'معلق',
+    'rateApp':            'قيّم التطبيق',
+    'arabicDisplay':      'عرض العربية',
+    'arabicFont':         'الخط العربي',
+    'arabicFontSize':     'حجم الخط العربي',
+    'ramadanMode':        'وضع رمضان',
+    'ramadanModeDesc':    'تفعيل تلقائي لبانر ومميزات رمضان',
+    'sunRiseShort':       'الشروق',
+    'ibadahPerfect':      'ما شاء الله، يوم مثالي! 🎉',
+    'ibadahAlmost':       'تقريبًا، أكمل! 🌟',
+    'ibadahGreat':        'رائع، استمر! ⭐',
+    'ibadahHalf':         'منتصف الطريق، تشجع! 💪',
+    'ibadahStart':        'ابدأ يومك بالبسملة 🌅',
+  };
+
+  String getLabel(String key) {
+    final map = switch (language) {
+      AppLanguage.ar => _labelsAr,
+      AppLanguage.en => _labelsEn,
+      AppLanguage.id => _labelsId,
+    };
+    return map[key] ?? _labelsEn[key] ?? key;
+  }
 
   bool get isEnglish => language == AppLanguage.en;
 
   String getMadhabLabel(MadhabSetting m) => switch (m) {
-        MadhabSetting.shafi  => language == AppLanguage.en ? "Shafi'i" : "Syafi'i",
-        MadhabSetting.hanafi => 'Hanafi',
+        MadhabSetting.shafi  => switch (language) {
+          AppLanguage.ar => 'شافعي',
+          AppLanguage.en => "Shafi'i",
+          AppLanguage.id => "Syafi'i",
+        },
+        MadhabSetting.hanafi => language == AppLanguage.ar ? 'حنفي' : 'Hanafi',
       };
 
   // ── Setters ───────────────────────────────────────────────────────────────
@@ -414,6 +543,24 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setAdzanVolume(double v) async {
     adzanVolume = v.clamp(0.0, 1.0);
     await _box.put('adzanVolume', adzanVolume);
+    notifyListeners();
+  }
+
+  Future<void> setArabicFont(String font) async {
+    arabicFont = font;
+    await _box.put('arabicFont', font);
+    notifyListeners();
+  }
+
+  Future<void> setArabicFontSize(double size) async {
+    arabicFontSize = size.clamp(16.0, 40.0);
+    await _box.put('arabicFontSize', arabicFontSize);
+    notifyListeners();
+  }
+
+  Future<void> setRamadanMode(bool v) async {
+    ramadanMode = v;
+    await _box.put('ramadanMode', v);
     notifyListeners();
   }
 

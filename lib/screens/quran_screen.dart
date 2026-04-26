@@ -6,6 +6,7 @@ import 'package:quran/quran.dart' as quran;
 import '../providers/murottal_provider.dart';
 import '../providers/quran_provider.dart';
 import '../providers/settings_provider.dart';
+import '../utils/arabic_font_helper.dart';
 import '../utils/quran_utils.dart';
 import 'murottal_screen.dart';
 import 'surah_screen.dart';
@@ -286,7 +287,8 @@ class _SurahTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const gold    = Color(0xFFD4A057);
+    const gold       = Color(0xFFD4A057);
+    final arabicFont = context.watch<SettingsProvider>().arabicFont;
     final name    = QuranUtils.getSurahDisplayName(surahNum);
     final meaning = QuranUtils.getSurahMeaning(surahNum, isEn: isEn);
     final arabic  = quran.getSurahNameArabic(surahNum);
@@ -344,7 +346,7 @@ class _SurahTile extends StatelessWidget {
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
-      trailing: Text(arabic, style: GoogleFonts.amiri(fontSize: 18, color: gold)),
+      trailing: Text(arabic, style: ArabicFontHelper.getStyle(arabicFont, fontSize: 18, color: gold, height: 1.5)),
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => SurahScreen(surahNumber: surahNum)),
@@ -481,7 +483,7 @@ class _BookmarkTab extends StatelessWidget {
             ),
             subtitle: Text(
               arabic,
-              style: GoogleFonts.amiri(fontSize: 13),
+              style: ArabicFontHelper.getStyle(context.watch<SettingsProvider>().arabicFont, fontSize: 13, height: 1.5),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textDirection: TextDirection.rtl,

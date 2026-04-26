@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../models/prayer_model.dart';
 import '../providers/settings_provider.dart';
+import 'ramadan_service.dart';
 
 class NotificationService {
   NotificationService._();
@@ -21,6 +22,9 @@ class NotificationService {
   // Pre-adzan reminder uses its own channel (no custom adzan sound needed).
   static const _preChannelKey  = 'prayer_pre_v3';
   static const _preChannelName = 'Pengingat Adzan';
+
+  static const _qadarChannelKey  = 'lailatul_qadar_v1';
+  static const _qadarChannelName = 'Lailatul Qadar';
 
   // ── Stable notification IDs ────────────────────────────────────────────────
   static const _ids = <String, int>{
@@ -81,10 +85,23 @@ class NotificationService {
       locked:              false,
     );
 
+    // Lailatul Qadar special night reminder
+    final qadarChannel = NotificationChannel(
+      channelKey:          _qadarChannelKey,
+      channelName:         _qadarChannelName,
+      channelDescription:  'Pengingat malam Lailatul Qadar',
+      defaultColor:        const Color(0xFFD4A057),
+      importance:          NotificationImportance.Max,
+      defaultRingtoneType: DefaultRingtoneType.Ringtone,
+      enableVibration:     true,
+      playSound:           true,
+      locked:              false,
+    );
+
     try {
       await AwesomeNotifications().initialize(
         'resource://drawable/ic_notification',
-        [...adzanChannels, preChannel],
+        [...adzanChannels, preChannel, qadarChannel],
         debug: false,
       );
       _localTz = await AwesomeNotifications().getLocalTimeZoneIdentifier();
@@ -238,6 +255,55 @@ class NotificationService {
   }
 
   static Future<void> cancelAll() => AwesomeNotifications().cancelAll();
+
+  // ── Lailatul Qadar notifications ──────────────────────────────────────────
+
+  /// Schedules one-shot notifications at 23:00 on Ramadan nights 21,23,25,27,29.
+  static Future<void> scheduleLailatulQadar({bool isEnglish = false}) async {
+    final dates = RamadanService.lailatulQadarDates();
+    final now   = DateTime.now();
+    for (final (day, date) in dates) {
+      final fireAt = DateTime(date.year, date.month, date.day, 23, 0, 0);
+      if (fireAt.isBefore(now)) continue; // skip past nights
+      final title = isEnglish
+          ? '✨ Lailatul Qadar Night (Night $day)'
+          : '✨ Malam Lailatul Qadar (Malam ke-$day)';
+      final body = isEnglish
+          ? 'This may be the Night of Power. Increase your worship!'
+          : 'Ini bisa jadi malam penuh kemuliaan. Perbanyak ibadah!';
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id:                 day, // 21, 23, 25, 27, or 29
+          channelKey:         _qadarChannelKey,
+          title:              title,
+          body:               body,
+          notificationLayout: NotificationLayout.Default,
+          category:           NotificationCategory.Reminder,
+          wakeUpScreen:       true,
+          autoDismissible:    false,
+        ),
+        schedule: NotificationCalendar(
+          year:           fireAt.year,
+          month:          fireAt.month,
+          day:            fireAt.day,
+          hour:           23,
+          minute:         0,
+          second:         0,
+          millisecond:    0,
+          timeZone:       _localTz,
+          repeats:        false,
+          preciseAlarm:   true,
+          allowWhileIdle: true,
+        ),
+      );
+    }
+  }
+
+  static Future<void> cancelLailatulQadar() async {
+    for (final day in const [21, 23, 25, 27, 29]) {
+      await AwesomeNotifications().cancel(day);
+    }
+  }
 
   // ── Test notification ─────────────────────────────────────────────────────
 

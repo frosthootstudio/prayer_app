@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../providers/calendar_provider.dart';
 import '../providers/settings_provider.dart';
+import '../utils/arabic_font_helper.dart';
 
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
@@ -104,10 +104,10 @@ class _HijriHeader extends StatelessWidget {
           ),
           Text(
             arName,
-            style: GoogleFonts.amiri(
+            style: ArabicFontHelper.getStyle(
+              settings.arabicFont,
               fontSize: 22,
               color: const Color(0xFFD4A057),
-              fontWeight: FontWeight.w700,
             ),
           ),
         ],
