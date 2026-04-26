@@ -27,7 +27,6 @@ class QuranBookmark {
 // ── Provider ──────────────────────────────────────────────────────────────────
 
 class QuranProvider extends ChangeNotifier {
-  static const _kFontSize        = 'q_fontSize';
   static const _kShowTranslation = 'q_showTranslation';
   static const _kShowTranslit    = 'q_showTranslit';
   static const _kLastSurah       = 'q_lastSurah';
@@ -35,8 +34,9 @@ class QuranProvider extends ChangeNotifier {
 
   late Box _prefsBox;
   late Box _bookmarksBox;
+  late Box _translitCacheBox;
+  late Box _uthmaniCacheBox;
 
-  double _fontSize        = 24.0;
   bool   _showTranslation = true;
   bool   _showTranslit    = true;
   int?   _lastReadSurah;
@@ -45,7 +45,6 @@ class QuranProvider extends ChangeNotifier {
 
   // ── Getters ───────────────────────────────────────────────────────────────
 
-  double              get fontSize        => _fontSize;
   bool                get showTranslation => _showTranslation;
   bool                get showTranslit    => _showTranslit;
   int?                get lastReadSurah   => _lastReadSurah;
@@ -55,12 +54,13 @@ class QuranProvider extends ChangeNotifier {
   // ── Init ──────────────────────────────────────────────────────────────────
 
   Future<void> initialize() async {
-    _prefsBox     = await Hive.openBox('quran_prefs');
-    _bookmarksBox = await Hive.openBox('quran_bookmarks');
+    _prefsBox          = await Hive.openBox('quran_prefs');
+    _bookmarksBox      = await Hive.openBox('quran_bookmarks');
+    _translitCacheBox  = await Hive.openBox('quran_translit_cache');
+    _uthmaniCacheBox   = await Hive.openBox('quran_uthmani_cache');
 
-    _fontSize        = (_prefsBox.get(_kFontSize, defaultValue: 24.0) as double).clamp(18.0, 32.0);
-    _showTranslation = _prefsBox.get(_kShowTranslation, defaultValue: true)  as bool;
-    _showTranslit    = _prefsBox.get(_kShowTranslit,    defaultValue: true)   as bool;
+    _showTranslation = _prefsBox.get(_kShowTranslation, defaultValue: true) as bool;
+    _showTranslit    = _prefsBox.get(_kShowTranslit,    defaultValue: true) as bool;
     _lastReadSurah   = _prefsBox.get(_kLastSurah) as int?;
     _lastReadAyah    = _prefsBox.get(_kLastAyah)  as int?;
 
@@ -72,12 +72,6 @@ class QuranProvider extends ChangeNotifier {
   }
 
   // ── Reading preferences ───────────────────────────────────────────────────
-
-  Future<void> setFontSize(double size) async {
-    _fontSize = size.clamp(18.0, 32.0);
-    await _prefsBox.put(_kFontSize, _fontSize);
-    notifyListeners();
-  }
 
   Future<void> toggleTranslation() async {
     _showTranslation = !_showTranslation;
@@ -120,27 +114,165 @@ class QuranProvider extends ChangeNotifier {
 
   // ── Transliteration ───────────────────────────────────────────────────────
 
+  static const _kTranslitTtlMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+
   final Map<int, List<String>> _transliterationCache = {};
 
-  Future<List<String>> fetchTransliteration(int surahNumber) async {
+  // TODO: Migrate to official Kemenag API when approval obtained.
+  // Register at: https://quran-api.kemenag.go.id — email: lajnah@kemenag.go.id
+
+  /// Returns verse-level Latin transliteration for [surahNumber].
+  ///
+  /// Load order:
+  ///   1. In-memory cache (instant)
+  ///   2. Hive disk cache (30-day TTL, works offline)
+  ///   3. Primary API  — equran.id  (Kemenag-based, correct teksLatin)
+  ///   4. Fallback API — api.quran.com word-by-word
+  ///   5. null → caller shows "Latin tidak tersedia"
+  Future<List<String>?> fetchTransliteration(int surahNumber) async {
+    // 1. Memory
     if (_transliterationCache.containsKey(surahNumber)) {
       return _transliterationCache[surahNumber]!;
     }
+
+    // 2. Disk cache
+    final cacheKey  = 'surah_$surahNumber';
+    final rawCached = _translitCacheBox.get(cacheKey) as String?;
+    if (rawCached != null) {
+      try {
+        final map   = json.decode(rawCached) as Map<String, dynamic>;
+        final ageMs = DateTime.now().millisecondsSinceEpoch - (map['ts'] as int);
+        if (ageMs < _kTranslitTtlMs) {
+          final list = (map['list'] as List).cast<String>();
+          _transliterationCache[surahNumber] = list;
+          return list;
+        }
+      } catch (_) {}
+    }
+
+    // 3. Primary — equran.id (Indonesian Kemenag transliteration)
+    final primary = await _fetchEquranId(surahNumber);
+    if (primary != null) {
+      _transliterationCache[surahNumber] = primary;
+      await _persistCacheTo(_translitCacheBox, cacheKey, primary);
+      return primary;
+    }
+
+    // 4. Fallback — api.quran.com word-by-word
+    final fallback = await _fetchQuranCom(surahNumber);
+    if (fallback != null) {
+      _transliterationCache[surahNumber] = fallback;
+      await _persistCacheTo(_translitCacheBox, cacheKey, fallback);
+      return fallback;
+    }
+
+    return null;
+  }
+
+  Future<List<String>?> _fetchEquranId(int surahNumber) async {
     try {
       final response = await http
-          .get(Uri.parse(
-            'https://api.alquran.cloud/v1/surah/$surahNumber/en.transliteration',
-          ))
-          .timeout(const Duration(seconds: 10));
+          .get(Uri.parse('https://equran.id/api/v2/surat/$surahNumber'))
+          .timeout(const Duration(seconds: 15));
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
-        final ayahs = (data['data']['ayahs'] as List).cast<Map<String, dynamic>>();
-        final list = ayahs.map((a) => a['text'] as String).toList();
-        _transliterationCache[surahNumber] = list;
+        final ayat = (data['data']['ayat'] as List).cast<Map<String, dynamic>>();
+        return ayat.map((a) => a['teksLatin'] as String).toList();
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<List<String>?> _fetchQuranCom(int surahNumber) async {
+    try {
+      final uri = Uri.parse(
+        'https://api.quran.com/api/v4/verses/by_chapter/$surahNumber'
+        '?words=true&word_fields=transliteration&per_page=300&fields=verse_number',
+      );
+      final response = await http.get(uri).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final data   = json.decode(response.body) as Map<String, dynamic>;
+        final verses = (data['verses'] as List).cast<Map<String, dynamic>>();
+        return verses.map((v) {
+          final words = (v['words'] as List).cast<Map<String, dynamic>>();
+          return words
+              .where((w) => (w['char_type_name'] as String?) != 'end')
+              .map((w) {
+                final t = w['transliteration'] as Map<String, dynamic>?;
+                return (t?['text'] as String? ?? '').trim();
+              })
+              .where((s) => s.isNotEmpty)
+              .join(' ');
+        }).toList();
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  // ── Uthmani text ──────────────────────────────────────────────────────────
+
+  static const _kUthmaniTtlMs = 365 * 24 * 60 * 60 * 1000; // 1 year — text is immutable
+
+  final Map<int, List<String>> _uthmaniCache = {};
+
+  /// Returns full Uthmani-script verse list for [surahNumber] (0-indexed).
+  ///
+  /// Load order:
+  ///   1. In-memory cache (instant)
+  ///   2. Hive disk cache (1-year TTL, works offline)
+  ///   3. api.quran.com /api/v4/quran/verses/uthmani
+  ///   4. null → caller falls back to quran.getVerse()
+  Future<List<String>?> fetchUthmaniText(int surahNumber) async {
+    // 1. Memory
+    if (_uthmaniCache.containsKey(surahNumber)) {
+      return _uthmaniCache[surahNumber]!;
+    }
+
+    // 2. Disk cache
+    final cacheKey  = 'surah_$surahNumber';
+    final rawCached = _uthmaniCacheBox.get(cacheKey) as String?;
+    if (rawCached != null) {
+      try {
+        final map   = json.decode(rawCached) as Map<String, dynamic>;
+        final ageMs = DateTime.now().millisecondsSinceEpoch - (map['ts'] as int);
+        if (ageMs < _kUthmaniTtlMs) {
+          final list = (map['list'] as List).cast<String>();
+          _uthmaniCache[surahNumber] = list;
+          return list;
+        }
+      } catch (_) {}
+    }
+
+    // 3. Network — api.quran.com Uthmani script
+    try {
+      final uri = Uri.parse(
+        'https://api.quran.com/api/v4/quran/verses/uthmani'
+        '?chapter_number=$surahNumber',
+      );
+      final response = await http.get(uri).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final data   = json.decode(response.body) as Map<String, dynamic>;
+        final verses = (data['verses'] as List).cast<Map<String, dynamic>>();
+        final list   = verses.map((v) => v['text_uthmani'] as String).toList();
+        _uthmaniCache[surahNumber] = list;
+        await _persistCacheTo(_uthmaniCacheBox, cacheKey, list);
         return list;
       }
     } catch (_) {}
-    return [];
+
+    // 4. Failure — caller uses quran.getVerse() fallback
+    return null;
+  }
+
+  // ── Cache helpers ─────────────────────────────────────────────────────────
+
+  Future<void> _persistCacheTo(Box box, String key, List<String> list) async {
+    try {
+      await box.put(key, json.encode({
+        'ts':   DateTime.now().millisecondsSinceEpoch,
+        'list': list,
+      }));
+    } catch (_) {}
   }
 
   // ── Search ────────────────────────────────────────────────────────────────

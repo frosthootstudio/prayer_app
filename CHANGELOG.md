@@ -1,5 +1,21 @@
 # Changelog — Waktu Shalat
 
+## [1.1.1] — 2026-04-26
+
+### Perbaikan
+- Al-Qur'an: teks ayat sekarang menggunakan encoding Uthmani lengkap (Mushaf Madinah) — sama persis dengan corpus dzikir
+  - Ditambahkan: alef wasla (ٱ), small waw (ـۥ), small ya (ـۦ), Uthmani sukun (ۡ), superscript alef (ٰ), tanda madd, bentuk tanwin khusus, tanda waqaf
+  - Sumber: `api.quran.com/api/v4/quran/verses/uthmani` per surat, di-cache di Hive (`quran_uthmani_cache`, TTL 1 tahun)
+  - Fallback ke teks `quran` package jika fetch pertama gagal saat offline
+- Pemilih font Arab di Pengaturan kini benar-benar berfungsi di layar Al-Qur'an (sebelumnya picker terabaikan karena style inheritance dari `Theme.textTheme`)
+  - Perbaikan di `ArabicFontHelper.getStyle`: `inherit: false`, eksplisit `package: null`, `fontFamilyFallback: const []`
+  - Wrap `Text` ayat dengan `Selector<SettingsProvider>` agar rebuild langsung saat font/size diganti
+
+### Catatan
+- Versi 1.0.6 — 1.1.0 belum ter-dokumentasi di changelog ini; akan di-backfill di rilis terpisah jika diperlukan.
+
+---
+
 ## [1.0.5] — 2026-03-16
 
 ### Perbaikan

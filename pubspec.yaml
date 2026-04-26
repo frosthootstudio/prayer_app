@@ -2,13 +2,15 @@ name: prayer_app
 description: "Aplikasi waktu shalat dengan kalkulasi offline dan notifikasi adzan."
 publish_to: 'none'
 
-version: 1.0.8+8
+version: 1.1.1+11
 
 environment:
   sdk: ^3.11.0
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
@@ -53,6 +55,12 @@ dependencies:
   audioplayers: ^6.1.0
   in_app_review: ^2.0.9
 
+  # Share prayer schedule
+  screenshot: ^3.0.0
+  share_plus: ^10.1.4
+  path_provider: ^2.1.5
+  gal: ^2.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -85,3 +93,17 @@ flutter:
   uses-material-design: true
   assets:
     - assets/audio/
+
+  fonts:
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/arabic/Amiri-Regular.ttf
+    - family: ScheherazadeNew
+      fonts:
+        - asset: assets/fonts/arabic/ScheherazadeNew-Regular.ttf
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/arabic/NotoNaskhArabic-Regular.ttf
+    - family: Lateef
+      fonts:
+        - asset: assets/fonts/arabic/Lateef-Regular.ttf

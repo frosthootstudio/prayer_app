@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
 
@@ -8,6 +7,7 @@ import '../data/transliteration_data.dart';
 import '../providers/murottal_provider.dart';
 import '../providers/quran_provider.dart';
 import '../providers/settings_provider.dart';
+import '../utils/arabic_font_helper.dart';
 import '../utils/quran_utils.dart';
 
 class SurahScreen extends StatefulWidget {
@@ -27,7 +27,9 @@ class SurahScreen extends StatefulWidget {
 class _SurahScreenState extends State<SurahScreen> {
   late ScrollController _scrollCtrl;
   late int _surah;
-  List<String>? _fetchedTranslit; // null = loading/not needed; set after API fetch
+  List<String>? _fetchedTranslit; // null = loading; non-null = done (may be empty on error)
+  bool _translitFailed = false;
+  List<String>? _uthmaniText;
 
   @override
   void initState() {
@@ -39,6 +41,7 @@ class _SurahScreenState extends State<SurahScreen> {
       // Save last read
       context.read<QuranProvider>().setLastRead(_surah, widget.startAyah);
       _loadTransliteration(_surah);
+      _loadUthmaniText(_surah);
       // Scroll to approximate position of startAyah
       if (widget.startAyah > 1 && _scrollCtrl.hasClients) {
         final offset = _estimateOffset(widget.startAyah);
@@ -62,11 +65,28 @@ class _SurahScreenState extends State<SurahScreen> {
 
   void _loadTransliteration(int surahNumber) {
     if (TransliterationData.hasSurah(surahNumber)) return; // local data sufficient
+    setState(() => _translitFailed = false);
     context
         .read<QuranProvider>()
         .fetchTransliteration(surahNumber)
         .then((list) {
-      if (mounted) setState(() => _fetchedTranslit = list);
+      if (mounted) {
+        setState(() {
+          _fetchedTranslit = list ?? [];
+          _translitFailed  = list == null;
+        });
+      }
+    });
+  }
+
+  void _loadUthmaniText(int surahNumber) {
+    context
+        .read<QuranProvider>()
+        .fetchUthmaniText(surahNumber)
+        .then((list) {
+      if (mounted && list != null) {
+        setState(() => _uthmaniText = list);
+      }
     });
   }
 
@@ -74,12 +94,15 @@ class _SurahScreenState extends State<SurahScreen> {
     final next = _surah + delta;
     if (next < 1 || next > quran.totalSurahCount) return;
     setState(() {
-      _surah = next;
+      _surah           = next;
       _fetchedTranslit = null;
+      _translitFailed  = false;
+      _uthmaniText     = null;
       _scrollCtrl.jumpTo(0);
     });
     context.read<QuranProvider>().setLastRead(next, 1);
     _loadTransliteration(next);
+    _loadUthmaniText(next);
   }
 
   void _showReadingPrefs(BuildContext context) {
@@ -91,7 +114,8 @@ class _SurahScreenState extends State<SurahScreen> {
       ),
       builder: (_) => Consumer<QuranProvider>(
         builder: (ctx, qp, _) {
-          final isEn = ctx.read<SettingsProvider>().isEnglish;
+          final sp   = ctx.watch<SettingsProvider>();
+          final isEn = sp.isEnglish;
           const gold = Color(0xFFD4A057);
           return Padding(
             padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.viewPaddingOf(ctx).bottom + 16),
@@ -129,7 +153,7 @@ class _SurahScreenState extends State<SurahScreen> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        '${qp.fontSize.round()}',
+                        '${sp.arabicFontSize.round()}',
                         style: const TextStyle(
                           color: gold, fontWeight: FontWeight.bold,
                         ),
@@ -138,11 +162,62 @@ class _SurahScreenState extends State<SurahScreen> {
                   ],
                 ),
                 Slider(
-                  value: qp.fontSize,
-                  min: 18, max: 32, divisions: 14,
+                  value: sp.arabicFontSize,
+                  min: 18, max: 36, divisions: 18,
                   activeColor: gold,
-                  onChanged: qp.setFontSize,
+                  onChanged: (v) => ctx.read<SettingsProvider>().setArabicFontSize(v),
                 ),
+                // Font family
+                const SizedBox(height: 4),
+                Text(
+                  isEn ? 'Arabic Font' : 'Font Arab',
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: ArabicFontHelper.availableFonts.map((f) {
+                    final key      = f['key']!;
+                    final selected = sp.arabicFont == key;
+                    return GestureDetector(
+                      onTap: () => ctx.read<SettingsProvider>().setArabicFont(key),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: selected ? gold.withValues(alpha: 0.15) : Colors.transparent,
+                          border: Border.all(
+                            color: selected ? gold : Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.4),
+                            width: selected ? 1.5 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              f['name']!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                                color: selected ? gold : null,
+                              ),
+                            ),
+                            Text(
+                              isEn ? f['descEn']! : f['descId']!,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 12),
                 // Show transliteration
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
@@ -172,7 +247,8 @@ class _SurahScreenState extends State<SurahScreen> {
   Widget build(BuildContext context) {
     final qp     = context.watch<QuranProvider>();
     final mp     = context.watch<MurottalProvider>();
-    final isEn   = context.watch<SettingsProvider>().isEnglish;
+    final sp     = context.watch<SettingsProvider>();
+    final isEn   = sp.isEnglish;
     const gold   = Color(0xFFD4A057);
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
 
@@ -208,7 +284,7 @@ class _SurahScreenState extends State<SurahScreen> {
           ],
         ),
         actions: [
-          Text(surahArabic, style: GoogleFonts.amiri(fontSize: 18, color: gold)),
+          Text(surahArabic, style: ArabicFontHelper.getStyle(sp.arabicFont, fontSize: 18, color: gold, height: 1.5)),
           const SizedBox(width: 4),
           IconButton(
             icon: const Icon(Icons.tune_rounded, size: 22),
@@ -303,13 +379,15 @@ class _SurahScreenState extends State<SurahScreen> {
           }
           final ayah = index - headerCount + 1;
           return _AyahTile(
-            surah: _surah,
-            ayah: ayah,
-            qp: qp,
-            mp: mp,
-            isEn: isEn,
-            isHighlighted: ayah == widget.startAyah && widget.startAyah > 1,
+            surah:          _surah,
+            ayah:           ayah,
+            qp:             qp,
+            mp:             mp,
+            isEn:           isEn,
+            isHighlighted:  ayah == widget.startAyah && widget.startAyah > 1,
             fetchedTranslit: _fetchedTranslit,
+            translitFailed: _translitFailed,
+            uthmaniText:    _uthmaniText,
           );
         },
       ),
@@ -336,8 +414,9 @@ class _SurahHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const gold   = Color(0xFFD4A057);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const gold      = Color(0xFFD4A057);
+    final isDark    = Theme.of(context).brightness == Brightness.dark;
+    final arabicFont = context.watch<SettingsProvider>().arabicFont;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -357,7 +436,7 @@ class _SurahHeader extends StatelessWidget {
         children: [
           Text(
             surahArabic,
-            style: GoogleFonts.amiri(fontSize: 32, color: gold),
+            style: ArabicFontHelper.getStyle(arabicFont, fontSize: 32, color: gold),
           ),
           const SizedBox(height: 4),
           Text(
@@ -384,15 +463,16 @@ class _Bismillah extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const gold = Color(0xFFD4A057);
+    final sp   = context.watch<SettingsProvider>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Text(
         quran.basmala,
         textAlign: TextAlign.center,
-        style: GoogleFonts.amiri(
-          fontSize: 22,
+        style: ArabicFontHelper.getStyle(
+          sp.arabicFont,
+          fontSize: sp.arabicFontSize,
           color: gold,
-          height: 2.0,
         ),
       ),
     );
@@ -410,6 +490,8 @@ class _AyahTile extends StatelessWidget {
     required this.isEn,
     this.isHighlighted = false,
     this.fetchedTranslit,
+    this.translitFailed = false,
+    this.uthmaniText,
   });
 
   final int              surah;
@@ -419,11 +501,15 @@ class _AyahTile extends StatelessWidget {
   final bool             isEn;
   final bool             isHighlighted;
   final List<String>?    fetchedTranslit;
+  final bool             translitFailed;
+  final List<String>?    uthmaniText;
 
   @override
   Widget build(BuildContext context) {
     const gold         = Color(0xFFD4A057);
-    final arabicText   = quran.getVerse(surah, ayah);
+    final arabicText   = (uthmaniText != null && ayah - 1 < uthmaniText!.length)
+        ? uthmaniText![ayah - 1]
+        : quran.getVerse(surah, ayah);
     final translation  = quran.getVerseTranslation(
       surah, ayah, translation: quran.Translation.indonesian,
     );
@@ -516,29 +602,50 @@ class _AyahTile extends StatelessWidget {
               const SizedBox(height: 12),
 
               // ── Arabic text ─────────────────────────────────────────────
-              Text(
-                arabicText,
-                textAlign: TextAlign.right,
-                textDirection: TextDirection.rtl,
-                style: GoogleFonts.amiri(
-                  fontSize: qp.fontSize,
-                  height: 2.0,
+              Selector<SettingsProvider, ({String font, double size})>(
+                selector: (_, s) => (font: s.arabicFont, size: s.arabicFontSize),
+                builder: (ctx, cfg, _) => Text(
+                  arabicText,
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
+                  style: ArabicFontHelper.getStyle(
+                    cfg.font,
+                    fontSize: cfg.size,
+                    height: 2.0,
+                    color: Theme.of(ctx).colorScheme.onSurface,
+                  ),
                 ),
               ),
 
               // ── Transliteration ─────────────────────────────────────────
-              if (qp.showTranslit && translit != null) ...[
-                const SizedBox(height: 6),
-                Text(
-                  translit,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                    height: 1.6,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant
-                        .withValues(alpha: 0.8),
+              if (qp.showTranslit) ...[
+                if (translit != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    translit,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                      height: 1.6,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant
+                          .withValues(alpha: 0.8),
+                    ),
                   ),
-                ),
+                ] else if (translitFailed && ayah == 1 &&
+                    !TransliterationData.hasSurah(surah)) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    isEn
+                        ? 'Transliteration unavailable — tap refresh'
+                        : 'Latin tidak tersedia, coba refresh',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant
+                          .withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
               ],
 
               // ── Translation ─────────────────────────────────────────────
