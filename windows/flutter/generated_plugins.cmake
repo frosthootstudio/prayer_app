@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
   awesome_notifications
+  firebase_core
   gal
   geolocator_windows
   permission_handler_windows

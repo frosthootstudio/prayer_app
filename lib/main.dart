@@ -1,3 +1,8 @@
+import 'dart:ui';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -21,6 +26,7 @@ import 'providers/settings_provider.dart';
 import 'providers/tracking_provider.dart';
 import 'screens/main_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'services/analytics_service.dart';
 import 'services/notification_service.dart';
 import 'services/permission_service.dart';
 
@@ -48,6 +54,32 @@ void _workmanagerDispatcher() {
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // ── Firebase init (must be before anything that may throw) ──────────────
+  // Crashlytics is disabled in debug builds so noisy dev errors don't pollute
+  // the production crash dashboard.
+  try {
+    await Firebase.initializeApp();
+    await FirebaseCrashlytics.instance
+        .setCrashlyticsCollectionEnabled(!kDebugMode);
+
+    // Catch all uncaught Flutter framework errors.
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    };
+
+    // Catch all uncaught async errors that aren't handled by the framework.
+    PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+    await AnalyticsService.instance.initialize();
+  } catch (e, stack) {
+    debugPrint('Firebase init error: $e\n$stack');
+    // Continue boot — Firebase failure must never block the app.
+  }
 
   late SettingsProvider settingsProvider;
   late TrackingProvider trackingProvider;
@@ -166,6 +198,7 @@ class _PrayerAppState extends State<PrayerApp> {
     return MaterialApp(
       title: 'Waktu Shalat',
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [AnalyticsService.instance.observer],
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
       themeMode: themeMode,
