@@ -59,6 +59,13 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- AdMob App ID — currently TEST id (ca-app-pub-3940256099942544~3347511713).
+             Replace with production App ID once AdMob account is approved.
+             REQUIRED by Google Mobile Ads SDK; app crashes on init without it. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
         <!-- Small home screen widget (2×2) -->
         <receiver
             android:name=".PrayerWidgetSmallProvider"
