@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -26,6 +27,7 @@ import 'providers/settings_provider.dart';
 import 'providers/tracking_provider.dart';
 import 'screens/main_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'services/ad_service.dart';
 import 'services/analytics_service.dart';
 import 'services/notification_service.dart';
 import 'services/permission_service.dart';
@@ -79,6 +81,15 @@ Future<void> main() async {
   } catch (e, stack) {
     debugPrint('Firebase init error: $e\n$stack');
     // Continue boot — Firebase failure must never block the app.
+  }
+
+  // ── AdMob init (Ship 3: scaffolding only, no guards yet) ───────────────
+  // Wrapped in try/catch so SDK init failure never blocks app boot.
+  try {
+    await MobileAds.instance.initialize();
+    await AdService.instance.initialize();
+  } catch (e, stack) {
+    debugPrint('AdMob init error: $e\n$stack');
   }
 
   late SettingsProvider settingsProvider;
