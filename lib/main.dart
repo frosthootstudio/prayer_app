@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -29,6 +30,7 @@ import 'screens/main_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/ad_service.dart';
 import 'services/analytics_service.dart';
+import 'services/iap_service.dart';
 import 'services/notification_service.dart';
 import 'services/permission_service.dart';
 
@@ -132,6 +134,17 @@ Future<void> main() async {
 
     settingsProvider = SettingsProvider();
     await settingsProvider.initialize();
+
+    // ── IAP init (Ship 4: scaffolding) ─────────────────────────────────
+    // Fire-and-forget so Play Store queryProductDetails network call
+    // doesn't block splash screen. Premium state is read from Hive
+    // (instant) so app behavior never waits on IAP init.
+    // Requires `settings` Hive box to be open — that's done above.
+    unawaited(
+      IapService.instance.initialize().catchError((Object e, StackTrace s) {
+        debugPrint('IapService init error (non-blocking): $e\n$s');
+      }),
+    );
 
     onboardingDone =
         Hive.box('settings').get('onboarding_done', defaultValue: false) as bool;
