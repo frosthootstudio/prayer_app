@@ -130,8 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
           // ── Prayer group card + sun info ───────────────────────────────────
+          // Wrapped in SingleChildScrollView so content gracefully scrolls on
+          // short screens (e.g. when Ramadan card + Sun info are both visible).
+          // Without this, the inner Column overflows the Expanded constraint.
           Expanded(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
@@ -167,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
 
-                  const SizedBox(height: 64),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
