@@ -85,13 +85,15 @@ Future<void> main() async {
     // Continue boot — Firebase failure must never block the app.
   }
 
-  // ── AdMob init (Ship 3: scaffolding only, no guards yet) ───────────────
-  // Wrapped in try/catch so SDK init failure never blocks app boot.
+  // ── AdMob SDK init (Ship 3) ─────────────────────────────────────────────
+  // Initializes the underlying Mobile Ads SDK only. AdService.initialize()
+  // is called LATER (after Hive open) because guard-state stamping needs
+  // the `settings` box. Wrapped in try/catch so SDK init failure never
+  // blocks app boot.
   try {
     await MobileAds.instance.initialize();
-    await AdService.instance.initialize();
   } catch (e, stack) {
-    debugPrint('AdMob init error: $e\n$stack');
+    debugPrint('AdMob SDK init error: $e\n$stack');
   }
 
   late SettingsProvider settingsProvider;
@@ -143,6 +145,17 @@ Future<void> main() async {
     unawaited(
       IapService.instance.initialize().catchError((Object e, StackTrace s) {
         debugPrint('IapService init error (non-blocking): $e\n$s');
+      }),
+    );
+
+    // ── AdService init (Bulan 2: stamps install timestamp + preloads) ──
+    // Must run AFTER `settings` Hive box is open (settingsProvider.initialize
+    // above) so first-launch stamping persists. Fire-and-forget so the
+    // network ad fetch doesn't block splash; guards run lazily on each
+    // showAdIfAvailable() call so a failed/late init doesn't break logic.
+    unawaited(
+      AdService.instance.initialize().catchError((Object e, StackTrace s) {
+        debugPrint('AdService init error (non-blocking): $e\n$s');
       }),
     );
 
@@ -206,10 +219,70 @@ class PrayerApp extends StatefulWidget {
   State<PrayerApp> createState() => _PrayerAppState();
 }
 
-class _PrayerAppState extends State<PrayerApp> {
+class _PrayerAppState extends State<PrayerApp> with WidgetsBindingObserver {
+  /// Timestamp of when the app was last backgrounded. Used to skip the
+  /// App Open Ad on quick app switches (e.g. user briefly checks Slack
+  /// notification then comes back) — annoying to interrupt with an ad.
+  DateTime? _backgroundedAt;
+
+  /// Resumes within this window are treated as quick-switch and don't
+  /// trigger an ad. Tunes the perceived "intentional re-open" threshold.
+  static const Duration _quickSwitchThreshold = Duration(seconds: 30);
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // Cold-start ad attempt — fired after the first frame so:
+    //   1. Provider tree is ready (we read PrayerProvider for prayer times)
+    //   2. AdMob has had a moment to fetch the cold ad
+    // The kindness window guard (24h post-install) means new users won't
+    // actually see an ad here for the first day.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowAppOpenAd();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _backgroundedAt = DateTime.now();
+    } else if (state == AppLifecycleState.resumed) {
+      if (_backgroundedAt != null) {
+        final awayDuration = DateTime.now().difference(_backgroundedAt!);
+        _backgroundedAt = null;
+        if (awayDuration < _quickSwitchThreshold) {
+          debugPrint(
+            '[AdService] Resume after only ${awayDuration.inSeconds}s '
+            '— skipping ad (quick-switch threshold)',
+          );
+          return;
+        }
+      }
+      _maybeShowAppOpenAd();
+    }
+  }
+
+  /// Reads current prayer times + premium state and asks AdService to
+  /// show the App Open Ad. AdService runs all guards internally; this
+  /// method is just the wiring.
+  void _maybeShowAppOpenAd() {
+    if (!mounted) return;
+    final prayerProvider = context.read<PrayerProvider>();
+    final upcomingTimes =
+        prayerProvider.prayerTimes.map((p) => p.time).toList();
+
+    AdService.instance.showAdIfAvailable(
+      prayerTimesToday: upcomingTimes,
+      isPremium: IapService.instance.isPremium,
+    );
   }
 
   @override
