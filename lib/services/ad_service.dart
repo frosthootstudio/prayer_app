@@ -23,28 +23,29 @@ class AdService {
   static final AdService instance = AdService._();
 
   // ── Ad unit IDs ────────────────────────────────────────────────────────
-  // Google's official test IDs — render real-looking ads but never bill
-  // and never get the AdMob account flagged.
-  // Source: https://developers.google.com/admob/flutter/test-ads
+  // Frosthoot Studio production AdMob account (Publisher ID:
+  // pub-4236028330675226, registered 2026-04-27). Swapped from Google's
+  // official test IDs at end of Bulan 2 (2026-04-29) after all guards
+  // verified on Waydroid.
   //
-  // Production IDs (Frosthoot Studio AdMob, registered 2026-04-27):
-  //   Android App ID         : ca-app-pub-4236028330675226~1941898552
-  //                            (also in AndroidManifest.xml meta-data)
-  //   Android App Open unit  : ca-app-pub-4236028330675226/7453854346
-  //   iOS App Open unit      : (not yet registered — iOS not shipped)
+  // Test IDs kept commented for quick rollback if needed:
+  //   _androidTestAppOpenUnitId = 'ca-app-pub-3940256099942544/9257395921'
+  //   _iosTestAppOpenUnitId     = 'ca-app-pub-3940256099942544/5575463023'
   //
-  // SWAP to production at end of Bulan 2 once all guards verified working.
-  // Using prod IDs in dev = risk of "invalid traffic" account flag from
-  // Google.
+  // iOS is NOT YET registered in AdMob — iOS not shipped. When iOS ships,
+  // register iOS app in AdMob Console + add real iOS unit ID below.
+  //
+  // ⚠️  DO NOT click ads on dev devices once these are live — risk of
+  //     AdMob "invalid traffic" account flag.
 
-  static const String _androidTestAppOpenUnitId =
-      'ca-app-pub-3940256099942544/9257395921';
-  static const String _iosTestAppOpenUnitId =
-      'ca-app-pub-3940256099942544/5575463023';
+  static const String _androidProdAppOpenUnitId =
+      'ca-app-pub-4236028330675226/7453854346';
+  static const String _iosProdAppOpenUnitId =
+      'ca-app-pub-3940256099942544/5575463023'; // still TEST until iOS ships
 
   String get _appOpenUnitId {
-    if (Platform.isAndroid) return _androidTestAppOpenUnitId;
-    if (Platform.isIOS) return _iosTestAppOpenUnitId;
+    if (Platform.isAndroid) return _androidProdAppOpenUnitId;
+    if (Platform.isIOS) return _iosProdAppOpenUnitId;
     throw UnsupportedError('AdMob only supports Android & iOS');
   }
 
