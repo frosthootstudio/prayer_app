@@ -6,9 +6,25 @@
 -keep class * extends com.google.flatbuffers.Table { *; }
 -keep class * implements com.google.flatbuffers.FlatBufferBuilder { *; }
 
-# Awesome Notifications — keep all classes AND members (reflection-heavy)
+# Awesome Notifications — keep all classes AND members (reflection-heavy).
+# Crashlytics 2026-05-01 showed ClassNotFoundException for
+# me.carda.awesome_notifications.core.broadcasters.* across 14 users in
+# 1.1.2-1.1.5 — receivers loaded by Android system at BOOT_COMPLETED /
+# MY_PACKAGE_REPLACED. The wildcard keep below SHOULD cover it, but adding
+# broader defense for any plugin-registered Service/Receiver/Provider as
+# safety net — these are referenced from AndroidManifest by name and break
+# silently if R8 renames them.
 -keep class me.carda.awesome_notifications.** { *; }
 -keepclassmembers class me.carda.awesome_notifications.** { *; }
+
+# Defensive — keep all Service/BroadcastReceiver/ContentProvider subclasses.
+# These are instantiated by the Android system via class name lookup from
+# AndroidManifest entries; obfuscation breaks that lookup.
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends androidx.work.Worker
+-keep public class * extends androidx.work.ListenableWorker
 
 # Home Widget
 -keep class es.antonborri.home_widget.** { *; }
