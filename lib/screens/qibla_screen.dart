@@ -59,11 +59,34 @@ class _QiblaScreenState extends State<QiblaScreen> {
     setState(() => _locationReady = ready);
     if (!ready) return;
 
-    // 3. Subscribe to combined compass + location stream
-    _sub = FlutterQiblah.qiblahStream.listen(_onQiblah);
+    // 3. Subscribe to combined compass + location stream.
+    //
+    // `onError` handler is critical — devices with miscalibrated/broken
+    // magnetometers occasionally emit NaN azimuth, which causes the
+    // underlying flutter_compass_v2 Azimuth constructor to throw with
+    // "Degrees must be finite but was 'NaN'". Without this handler,
+    // those errors crash the app (Crashlytics confirmed 11 users in
+    // 1.1.5). cancelOnError:false keeps the stream alive after a bad
+    // sample so we recover on the next valid reading.
+    _sub = FlutterQiblah.qiblahStream.listen(
+      _onQiblah,
+      onError: (Object error, StackTrace stack) {
+        debugPrint('[Qibla] Sensor stream error (skipping sample): $error');
+      },
+      cancelOnError: false,
+    );
   }
 
   void _onQiblah(QiblahDirection q) {
+    // Defensive: skip samples where any value is NaN/Infinity. Some
+    // devices briefly emit invalid sensor data during calibration; the
+    // stream's onError handler catches the package-thrown variant, but
+    // this guards the silent NaN-in-double case that would otherwise
+    // poison _compassAngle / _needleAngle and break rotation.
+    if (!q.direction.isFinite || !q.qiblah.isFinite || !q.offset.isFinite) {
+      return;
+    }
+
     // Shortest-path delta to avoid 359° → 0° jumps
     double dDir = q.direction - _prevDirection;
     if (dDir >  180) dDir -= 360;
