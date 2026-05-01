@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../models/prayer_model.dart';
 import '../providers/prayer_provider.dart';
@@ -26,13 +27,26 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _showPermBanner = false;
 
+  // ── Prayer schedule swiper state ──────────────────────────────────────────
+  // Page 0 = today, page 1 = tomorrow. User swipes left on the schedule card
+  // to peek tomorrow's prayer times without leaving the home screen.
+  late final PageController _scheduleController;
+  int _schedulePage = 0;
+
   @override
   void initState() {
     super.initState();
+    _scheduleController = PageController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PrayerProvider>().initialize();
       _checkPermissions();
     });
+  }
+
+  @override
+  void dispose() {
+    _scheduleController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkPermissions() async {
@@ -138,18 +152,81 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  _PrayerGroupCard(
-                    prayers:            prayers,
-                    currentIdx:         currentIdx,
-                    cityName:           provider.cityName,
-                    notifPrefs:         provider.notifPrefs,
-                    masterNotifEnabled: settings.masterNotifEnabled,
-                    imsakTime:          provider.isRamadanActive ? provider.imsakTime : null,
-                    onRefresh: () =>
-                        context.read<PrayerProvider>().retryLocation(),
-                    onShare: () => _showShareSheet(context, provider, settings),
-                    onToggleNotif: (key) =>
-                        context.read<PrayerProvider>().toggleNotification(key),
+                  // Swipeable schedule: page 0 = today, page 1 = tomorrow.
+                  // PageView needs a fixed height when nested inside a
+                  // SingleChildScrollView (otherwise infinite-height conflict).
+                  // Height tuned to fit the worst case (Ramadan + Imsak row);
+                  // slight overshoot in non-Ramadan mode is acceptable.
+                  SizedBox(
+                    height: provider.isRamadanActive ? 430 : 380,
+                    child: PageView(
+                      controller: _scheduleController,
+                      onPageChanged: (i) =>
+                          setState(() => _schedulePage = i),
+                      children: [
+                        // Today
+                        _PrayerGroupCard(
+                          prayers:            prayers,
+                          currentIdx:         currentIdx,
+                          cityName:           provider.cityName,
+                          notifPrefs:         provider.notifPrefs,
+                          masterNotifEnabled: settings.masterNotifEnabled,
+                          imsakTime: provider.isRamadanActive
+                              ? provider.imsakTime
+                              : null,
+                          onRefresh: () =>
+                              context.read<PrayerProvider>().retryLocation(),
+                          onShare: () =>
+                              _showShareSheet(context, provider, settings),
+                          onToggleNotif: (key) => context
+                              .read<PrayerProvider>()
+                              .toggleNotification(key),
+                        ),
+                        // Tomorrow
+                        _TomorrowScheduleCard(
+                          provider: provider,
+                          settings: settings,
+                          onRefresh: () =>
+                              context.read<PrayerProvider>().retryLocation(),
+                          onShare: () =>
+                              _showShareSheet(context, provider, settings),
+                          onToggleNotif: (key) => context
+                              .read<PrayerProvider>()
+                              .toggleNotification(key),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Page indicator + label
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _schedulePage == 0
+                            ? settings.getLabel('today')
+                            : settings.getLabel('tomorrow'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: context.appTextFaded,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SmoothPageIndicator(
+                        controller: _scheduleController,
+                        count: 2,
+                        effect: ExpandingDotsEffect(
+                          dotHeight: 5,
+                          dotWidth: 5,
+                          expansionFactor: 3,
+                          spacing: 4,
+                          activeDotColor: context.appAccent,
+                          dotColor: context.appDivider,
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 8),
@@ -206,6 +283,76 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {
       return null;
     }
+  }
+}
+
+// ── Tomorrow schedule wrapper ─────────────────────────────────────────────────
+//
+// Thin wrapper around _PrayerGroupCard that:
+//   - Computes tomorrow's prayer times via PrayerProvider.prayerTimesForDate.
+//   - Computes tomorrow's imsak (Fajr − 10min) if Ramadan mode is active.
+//   - Passes currentIdx: -1 so no prayer is highlighted as "current".
+//   - Returns a placeholder if GPS isn't cached yet (first launch).
+//
+// Notification toggles still call the same provider — toggling on the tomorrow
+// page also updates today's schedule (notification prefs are per-prayer, not
+// per-day). That's the intended behavior.
+
+class _TomorrowScheduleCard extends StatelessWidget {
+  final PrayerProvider provider;
+  final SettingsProvider settings;
+  final VoidCallback onRefresh;
+  final VoidCallback onShare;
+  final void Function(String key) onToggleNotif;
+
+  const _TomorrowScheduleCard({
+    required this.provider,
+    required this.settings,
+    required this.onRefresh,
+    required this.onShare,
+    required this.onToggleNotif,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    final tomorrowPrayers = provider.prayerTimesForDate(tomorrow);
+
+    if (tomorrowPrayers == null || tomorrowPrayers.isEmpty) {
+      // No GPS yet — show placeholder so the user understands tomorrow's
+      // schedule needs the same location data as today.
+      return Container(
+        decoration: BoxDecoration(
+          color: context.appCardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.appDivider, width: 1),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Text(
+              settings.getLabel('city'),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.appTextFaded, fontSize: 13),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return _PrayerGroupCard(
+      prayers:            tomorrowPrayers,
+      currentIdx:         -1, // no "current" highlight on a future day
+      cityName:           provider.cityName,
+      notifPrefs:         provider.notifPrefs,
+      masterNotifEnabled: settings.masterNotifEnabled,
+      imsakTime: provider.isRamadanActive
+          ? provider.imsakTimeFor(tomorrowPrayers)
+          : null,
+      onRefresh:     onRefresh,
+      onShare:       onShare,
+      onToggleNotif: onToggleNotif,
+    );
   }
 }
 

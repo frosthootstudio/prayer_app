@@ -53,6 +53,37 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  /// Computes prayer times for an arbitrary date using cached GPS + current
+  /// settings. Used by the home screen "swipe to see tomorrow" feature so we
+  /// don't have to maintain a second cached schedule.
+  ///
+  /// Returns null if no GPS is cached yet (first launch before location).
+  /// All `isPassed`/`isNext` flags will be false-ish since this is a future
+  /// date — caller should treat the list as informational.
+  List<PrayerInfo>? prayerTimesForDate(DateTime date) {
+    if (_lastLat == null || _lastLng == null) return null;
+    return _calc.calculate(
+      _lastLat!,
+      _lastLng!,
+      forDate:       date,
+      method:        _settings.calcMethod,
+      madhab:        _settings.madhab,
+      language:      _settings.language,
+      prayerOffsets: _settings.prayerTimeOffsets,
+    );
+  }
+
+  /// Imsak time for an arbitrary date (Fajr − 10min). Returns null if the
+  /// passed list is empty.
+  DateTime? imsakTimeFor(List<PrayerInfo> prayers) {
+    try {
+      final fajr = prayers.firstWhere((p) => p.key == 'fajr');
+      return fajr.time.subtract(const Duration(minutes: 10));
+    } catch (_) {
+      return null;
+    }
+  }
+
   bool get isRamadanActive =>
       _settings.ramadanMode && RamadanService.isRamadan();
 
