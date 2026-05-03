@@ -8,12 +8,14 @@ import 'package:audioplayers/audioplayers.dart';
 
 import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/iap_service.dart';
 import '../services/notification_service.dart';
 import '../services/permission_service.dart';
 import '../services/rating_service.dart';
 import '../services/prayer_calculation_service.dart';
 import '../utils/app_theme.dart';
 import '../widgets/permission_fix_sheet.dart';
+import 'support_developer_screen.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -231,6 +233,17 @@ class SettingsScreen extends StatelessWidget {
                           context.read<SettingsProvider>().setLanguage(l),
                     ),
                   ),
+                ]),
+
+                const SizedBox(height: 20),
+
+                // ── DUKUNGAN / SUPPORT ───────────────────────────────────────
+                // Donation-style "remove ads + support developer" entry.
+                // Tap opens full-screen paywall (SupportDeveloperScreen).
+                // Premium state hides CTA-style and shows status-style instead.
+                _SectionHeader(settings.getLabel('support')),
+                _SettingCard(children: [
+                  _SupportRow(settings: settings),
                 ]),
 
                 const SizedBox(height: 20),
@@ -588,6 +601,97 @@ class _ActionRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Support / premium IAP entry row (Bulan 3) ────────────────────────────
+//
+// Two-line list tile that listens to IapService.isPremiumNotifier so the
+// label/icon flips automatically when a purchase succeeds while the
+// Settings screen is open. Tap opens the full SupportDeveloperScreen.
+
+class _SupportRow extends StatelessWidget {
+  final SettingsProvider settings;
+
+  const _SupportRow({required this.settings});
+
+  void _open(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/support_developer'),
+        builder: (_) => const SupportDeveloperScreen(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: IapService.instance.isPremiumNotifier,
+      builder: (_, isPremium, __) {
+        final accent = context.appAccent;
+        final icon = isPremium
+            ? Icons.favorite_rounded
+            : Icons.favorite_border_rounded;
+        final title = isPremium
+            ? settings.getLabel('supportStatusActive')
+            : settings.getLabel('supportTitle');
+        final subtitle = isPremium
+            ? settings.getLabel('supportBenefit1') // "Bebas iklan selamanya"
+            : settings.getLabel('supportSubtitle');
+
+        return InkWell(
+          onTap: () => _open(context),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+            child: Row(
+              children: [
+                // Icon bubble with brand accent
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: accent, size: 20),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: context.appTextPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: context.appTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: context.appTextFaded,
+                  size: 22,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
