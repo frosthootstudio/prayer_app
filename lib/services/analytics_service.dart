@@ -86,6 +86,59 @@ class AnalyticsService {
             },
           ));
 
+  // ── IAP / monetization events (Bulan 3) ────────────────────────────────
+  // Funnel: support_screen_viewed → purchase_initiated → purchase_completed
+  //                                                    → purchase_failed
+  //                                                    → purchase_canceled
+  // Restore flow: purchase_restored
+
+  Future<void> logSupportScreenViewed() =>
+      _safe(() => _analytics.logEvent(name: 'support_screen_viewed'));
+
+  Future<void> logPurchaseInitiated({required String productId}) =>
+      _safe(() => _analytics.logEvent(
+            name: 'purchase_initiated',
+            parameters: {'product_id': productId},
+          ));
+
+  Future<void> logPurchaseCompleted({
+    required String productId,
+    String? priceLocalized,
+    String? currencyCode,
+  }) =>
+      _safe(() => _analytics.logEvent(
+            name: 'purchase_completed',
+            parameters: {
+              'product_id': productId,
+              if (priceLocalized != null) 'price_localized': priceLocalized,
+              if (currencyCode != null) 'currency': currencyCode,
+            },
+          ));
+
+  Future<void> logPurchaseFailed({
+    required String productId,
+    String? reason,
+  }) =>
+      _safe(() => _analytics.logEvent(
+            name: 'purchase_failed',
+            parameters: {
+              'product_id': productId,
+              if (reason != null) 'reason': reason,
+            },
+          ));
+
+  Future<void> logPurchaseCanceled({required String productId}) =>
+      _safe(() => _analytics.logEvent(
+            name: 'purchase_canceled',
+            parameters: {'product_id': productId},
+          ));
+
+  Future<void> logPurchaseRestored({required String productId}) =>
+      _safe(() => _analytics.logEvent(
+            name: 'purchase_restored',
+            parameters: {'product_id': productId},
+          ));
+
   // ── User properties (long-lived, used for audience segmentation) ───────
 
   Future<void> setUserLanguage(String code) =>
