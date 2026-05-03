@@ -6,16 +6,16 @@
 -keep class * extends com.google.flatbuffers.Table { *; }
 -keep class * implements com.google.flatbuffers.FlatBufferBuilder { *; }
 
-# Awesome Notifications — keep all classes AND members (reflection-heavy).
-# Crashlytics 2026-05-01 showed ClassNotFoundException for
-# me.carda.awesome_notifications.core.broadcasters.* across 14 users in
-# 1.1.2-1.1.5 — receivers loaded by Android system at BOOT_COMPLETED /
-# MY_PACKAGE_REPLACED. The wildcard keep below SHOULD cover it, but adding
-# broader defense for any plugin-registered Service/Receiver/Provider as
-# safety net — these are referenced from AndroidManifest by name and break
-# silently if R8 renames them.
+# Awesome Notifications — keep EVERYTHING (reflection-heavy plugin).
+# Crashlytics still showed ClassNotFoundException in 1.1.6 despite class
+# wildcard keep — escalating to interface + enum + dontwarn to fully
+# disable R8 from touching this package.
 -keep class me.carda.awesome_notifications.** { *; }
+-keep interface me.carda.awesome_notifications.** { *; }
+-keep enum me.carda.awesome_notifications.** { *; }
 -keepclassmembers class me.carda.awesome_notifications.** { *; }
+-keepclassmembers interface me.carda.awesome_notifications.** { *; }
+-dontwarn me.carda.awesome_notifications.**
 
 # Defensive — keep all Service/BroadcastReceiver/ContentProvider subclasses.
 # These are instantiated by the Android system via class name lookup from
