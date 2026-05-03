@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import androidx.core.view.WindowCompat
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -25,11 +26,21 @@ class MainActivity : AudioServiceActivity() {
         super.onCreate(savedInstanceState)
         // Start keepalive foreground service so MIUI/HyperOS won't kill
         // the notification scheduler when the app is in the background.
-        val serviceIntent = Intent(this, PrayerForegroundService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
+        //
+        // Wrapped in try/catch because: (1) Android 12+ throws
+        // ForegroundServiceStartNotAllowedException if app is started in
+        // background contexts; (2) some OEMs (Xiaomi, Oppo, Huawei) block
+        // FGS starts via custom restrictions. App must continue boot even
+        // if keepalive fails — notifications still work via WorkManager.
+        try {
+            val serviceIntent = Intent(this, PrayerForegroundService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
+        } catch (e: Exception) {
+            Log.w("MainActivity", "Failed to start PrayerForegroundService: $e")
         }
     }
 
