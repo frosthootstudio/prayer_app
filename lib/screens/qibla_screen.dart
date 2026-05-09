@@ -41,6 +41,11 @@ class _QiblaScreenState extends State<QiblaScreen> {
   bool? _sensorAvailable;
   bool  _locationReady = false;
 
+  // Tracks whether `_sensorAvailable == false` was reached via the
+  // persistent block flag (true = recoverable, show reset button) vs
+  // via genuine hardware unsupported (false = no point retrying).
+  bool _wasBlocked = false;
+
   StreamSubscription<QiblahDirection>? _sub;
 
   // Cumulative angles in degrees to prevent wrap-around jumps
@@ -97,7 +102,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
     if (_isSensorBlocked) {
       debugPrint('[Qibla] Sensor previously marked blocked — skipping init');
       if (!mounted) return;
-      setState(() => _sensorAvailable = false);
+      setState(() {
+        _sensorAvailable = false;
+        _wasBlocked = true;
+      });
       return;
     }
 
@@ -151,6 +159,33 @@ class _QiblaScreenState extends State<QiblaScreen> {
     }
   }
 
+  /// Clears the persistent block flags and re-runs sensor init. Wired to
+  /// the "Coba Lagi" button shown when _wasBlocked is true. Each reset
+  /// gives the user another 3 failure attempts before re-blocking, which
+  /// is the trade-off — protects from silent crash loops while letting
+  /// users with recalibrated magnetometers recover.
+  Future<void> _resetSensor() async {
+    try {
+      final box = Hive.box('settings');
+      await box.put(_kSensorBlockedKey, false);
+      await box.put(_kSensorFailCountKey, 0);
+      debugPrint('[Qibla] Sensor reset by user — re-running init');
+    } catch (e) {
+      debugPrint('[Qibla] Sensor reset failed: $e');
+    }
+    // Cancel any straggling subscription before re-init (defensive — _sub
+    // should be null if we're in the blocked state, but cheap to be safe).
+    await _sub?.cancel();
+    _sub = null;
+    if (!mounted) return;
+    setState(() {
+      _sensorAvailable = null;
+      _wasBlocked = false;
+      _locationReady = false;
+    });
+    await _init();
+  }
+
   void _onQiblah(QiblahDirection q) {
     // Defensive: skip samples where any value is NaN/Infinity. Some
     // devices briefly emit invalid sensor data during calibration; the
@@ -195,6 +230,15 @@ class _QiblaScreenState extends State<QiblaScreen> {
     }
 
     if (_sensorAvailable == false) {
+      if (_wasBlocked) {
+        return _InfoCard(
+          icon: Icons.compass_calibration_outlined,
+          message: settings.getLabel('qiblaSensorBlocked'),
+          hint: settings.getLabel('qiblaCalibrateHint'),
+          actionLabel: settings.getLabel('qiblaResetSensor'),
+          onAction: _resetSensor,
+        );
+      }
       return _InfoCard(
         icon: Icons.sensors_off_outlined,
         message: settings.getLabel('sensorUnavailable'),
@@ -459,10 +503,19 @@ class _NeedlePainter extends CustomPainter {
 // ── Info card (sensor/location errors) ───────────────────────────────────────
 
 class _InfoCard extends StatelessWidget {
-  final IconData icon;
-  final String   message;
+  final IconData      icon;
+  final String        message;
+  final String?       hint;
+  final String?       actionLabel;
+  final VoidCallback? onAction;
 
-  const _InfoCard({required this.icon, required this.message});
+  const _InfoCard({
+    required this.icon,
+    required this.message,
+    this.hint,
+    this.actionLabel,
+    this.onAction,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -483,6 +536,33 @@ class _InfoCard extends StatelessWidget {
                 height: 1.5,
               ),
             ),
+            if (hint != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                hint!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: context.appTextFaded,
+                  height: 1.5,
+                ),
+              ),
+            ],
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: onAction,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: Text(actionLabel!),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.appAccent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 12,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
