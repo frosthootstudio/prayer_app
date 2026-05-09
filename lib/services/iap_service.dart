@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -177,6 +178,7 @@ class IapService {
       );
     } catch (e, stack) {
       debugPrint('[IapService] init error: $e\n$stack');
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'iap_init_failed', fatal: false);
     }
   }
 
@@ -250,6 +252,7 @@ class IapService {
       return launched;
     } catch (e, stack) {
       debugPrint('[IapService] buyPremium error: $e\n$stack');
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'iap_buy_failed', fatal: false);
       purchaseStatus.value = IapPurchaseStatus.error;
       lastErrorMessage.value = e.toString();
       AnalyticsService.instance.logPurchaseFailed(
@@ -278,6 +281,7 @@ class IapService {
       await _iap.restorePurchases();
     } catch (e) {
       debugPrint('[IapService] restore error: $e');
+      FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: 'iap_restore_failed', fatal: false);
       purchaseStatus.value = IapPurchaseStatus.error;
       lastErrorMessage.value = e.toString();
       _restoring = false;
@@ -379,6 +383,7 @@ class IapService {
       debugPrint('[IapService] Premium GRANTED (token=${purchase.purchaseID})');
     } catch (e, stack) {
       debugPrint('[IapService] grantPremium error: $e\n$stack');
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'iap_grant_failed', fatal: false);
     }
   }
 

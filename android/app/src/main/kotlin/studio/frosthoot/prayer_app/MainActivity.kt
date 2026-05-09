@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import androidx.core.view.WindowCompat
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -24,24 +23,25 @@ class MainActivity : AudioServiceActivity() {
         // ComponentActivity.enableEdgeToEdge() extension at compile time.
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        // Start keepalive foreground service so MIUI/HyperOS won't kill
-        // the notification scheduler when the app is in the background.
+
+        // ── PrayerForegroundService start REMOVED in 1.2.1+20 ─────────────
         //
-        // Wrapped in try/catch because: (1) Android 12+ throws
-        // ForegroundServiceStartNotAllowedException if app is started in
-        // background contexts; (2) some OEMs (Xiaomi, Oppo, Huawei) block
-        // FGS starts via custom restrictions. App must continue boot even
-        // if keepalive fails — notifications still work via WorkManager.
-        try {
-            val serviceIntent = Intent(this, PrayerForegroundService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(serviceIntent)
-            } else {
-                startService(serviceIntent)
-            }
-        } catch (e: Exception) {
-            Log.w("MainActivity", "Failed to start PrayerForegroundService: $e")
-        }
+        // The keepalive FGS was causing ForegroundServiceDidNotStartInTime
+        // crashes on Android 12-14 due to:
+        //   1. Manifest declares `specialUse` (API 34+ feature) but device
+        //      OS doesn't fully support it
+        //   2. Runtime startForeground() type mismatch with manifest type
+        //   3. 5-second deadline race with Flutter engine boot
+        //
+        // The service was always "best effort" for MIUI/HyperOS notification
+        // reliability. Notifications still work via:
+        //   - awesome_notifications scheduled exact alarms (primary)
+        //   - WorkManager periodic widget update (backup)
+        //
+        // If MIUI keepalive becomes critical later, re-introduce with:
+        //   - Defer FGS start until after Flutter engine is ready
+        //   - Use a use-case-appropriate foregroundServiceType
+        //   - Or migrate to JobScheduler/WorkManager for the keepalive role
     }
 
     private fun tryStart(intent: Intent): Boolean = try {

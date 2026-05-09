@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -136,12 +137,20 @@ class AdService {
             _loadedAt = null;
             _isLoading = false;
             debugPrint('[AdService] App Open Ad load failed: $error');
+            FirebaseCrashlytics.instance.recordError(
+              error, StackTrace.current,
+              reason: 'app_open_ad_load_failed', fatal: false,
+            );
           },
         ),
       );
     } catch (e) {
       _isLoading = false;
       debugPrint('[AdService] loadAd threw: $e');
+      FirebaseCrashlytics.instance.recordError(
+        e, StackTrace.current,
+        reason: 'ad_service_load_threw', fatal: false,
+      );
     }
   }
 
@@ -185,6 +194,10 @@ class AdService {
         _appOpenAd = null;
         _loadedAt = null;
         debugPrint('[AdService] Ad failed to show: $error');
+        FirebaseCrashlytics.instance.recordError(
+          error, StackTrace.current,
+          reason: 'app_open_ad_show_failed', fatal: false,
+        );
         loadAd();
       },
     );

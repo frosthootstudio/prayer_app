@@ -137,7 +137,7 @@ class _SupportDeveloperScreenState extends State<SupportDeveloperScreen> {
         foregroundColor: context.appTextPrimary,
         title: ValueListenableBuilder<bool>(
           valueListenable: IapService.instance.isPremiumNotifier,
-          builder: (_, isPremium, __) => Text(
+          builder: (_, isPremium, _) => Text(
             isPremium
                 ? settings.getLabel('supportStatusActive')
                 : settings.getLabel('supportTitle'),
@@ -150,7 +150,7 @@ class _SupportDeveloperScreenState extends State<SupportDeveloperScreen> {
       ),
       body: ValueListenableBuilder<bool>(
         valueListenable: IapService.instance.isPremiumNotifier,
-        builder: (_, isPremium, __) {
+        builder: (_, isPremium, _) {
           return isPremium
               ? _PremiumThanksView(settings: settings)
               : _PaywallView(settings: settings);
@@ -344,7 +344,7 @@ class _BuyButton extends StatelessWidget {
         IapService.instance.purchaseStatus,
         IapService.instance.productsReadyNotifier,
       ]),
-      builder: (_, __) {
+      builder: (_, _) {
         final status = IapService.instance.purchaseStatus.value;
         final productsReady = IapService.instance.productsReadyNotifier.value;
         final product = IapService.instance.premiumProduct;

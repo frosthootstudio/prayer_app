@@ -110,8 +110,8 @@ class AnalyticsService {
             name: 'purchase_completed',
             parameters: {
               'product_id': productId,
-              if (priceLocalized != null) 'price_localized': priceLocalized,
-              if (currencyCode != null) 'currency': currencyCode,
+              'price_localized': ?priceLocalized,
+              'currency': ?currencyCode,
             },
           ));
 
@@ -123,7 +123,7 @@ class AnalyticsService {
             name: 'purchase_failed',
             parameters: {
               'product_id': productId,
-              if (reason != null) 'reason': reason,
+              'reason': ?reason,
             },
           ));
 

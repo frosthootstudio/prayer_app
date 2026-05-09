@@ -7,9 +7,30 @@
 -keep class * implements com.google.flatbuffers.FlatBufferBuilder { *; }
 
 # Awesome Notifications — keep EVERYTHING (reflection-heavy plugin).
-# Crashlytics still showed ClassNotFoundException in 1.1.6 despite class
-# wildcard keep — escalating to interface + enum + dontwarn to fully
-# disable R8 from touching this package.
+# Crashlytics still showed ClassNotFoundException across 31 users in 1.1.2-
+# 1.2.1 despite wildcard + interface + enum keeps. Adding EXPLICIT keep for
+# each receiver/service declared in the merged AndroidManifest — Android
+# instantiates these by class name string, so any R8 rename/strip breaks
+# them. Belt-and-suspenders: explicit + wildcard + dontwarn.
+#
+# List sourced from:
+#   build/app/intermediates/merged_manifests/release/processReleaseManifest/
+#   AndroidManifest.xml (grep me.carda.awesome_notifications)
+#
+# If awesome_notifications package adds NEW receivers in future versions,
+# this list needs to grow. Re-grep merged manifest after plugin upgrade.
+
+-keep class me.carda.awesome_notifications.core.broadcasters.receivers.DartBackgroundService { *; }
+-keep class me.carda.awesome_notifications.DartNotificationActionReceiver { *; }
+-keep class me.carda.awesome_notifications.DartDismissedNotificationReceiver { *; }
+-keep class me.carda.awesome_notifications.DartScheduledNotificationReceiver { *; }
+-keep class me.carda.awesome_notifications.DartRefreshSchedulesReceiver { *; }
+-keep class me.carda.awesome_notifications.DartBackgroundService { *; }
+-keep class me.carda.awesome_notifications.core.services.ForegroundService { *; }
+-keep class me.carda.awesome_notifications.core.managers.StatusBarManager { *; }
+
+# Catch-all wildcards (defense in depth) — keeps all other internal classes
+# the plugin loads via reflection (managers, models, channels, etc.)
 -keep class me.carda.awesome_notifications.** { *; }
 -keep interface me.carda.awesome_notifications.** { *; }
 -keep enum me.carda.awesome_notifications.** { *; }

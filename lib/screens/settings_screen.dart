@@ -629,7 +629,7 @@ class _SupportRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: IapService.instance.isPremiumNotifier,
-      builder: (_, isPremium, __) {
+      builder: (_, isPremium, _) {
         final accent = context.appAccent;
         final icon = isPremium
             ? Icons.favorite_rounded

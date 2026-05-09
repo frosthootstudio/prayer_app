@@ -25,12 +25,21 @@
     <!-- Battery optimisation exemption (shows system dialog asking for unrestricted bg) -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 
-    <!-- Foreground service keeps notification scheduler alive on MIUI/HyperOS -->
+    <!-- FOREGROUND_SERVICE permissions kept for awesome_notifications +
+         just_audio_background. FOREGROUND_SERVICE_SPECIAL_USE removed
+         alongside PrayerForegroundService removal (1.2.1+20). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
 
     <!-- Background audio (murottal / adzan playback) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+
+    <!-- Google Advertising ID (required for AdMob personalized ads on Android 13+).
+         google_mobile_ads ^5.x stopped auto-declaring this permission, so we
+         declare it explicitly here. Must match Play Console "Advertising ID"
+         declaration (Yes + Advertising/marketing + Personalization). Without
+         this, advertising_id is zeroed on Android 13+ and AdMob falls back to
+         non-personalized ads with significantly lower eCPM. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <application
         android:label="Waktu Shalat"
@@ -92,15 +101,13 @@
                 android:resource="@xml/prayer_widget_medium_info" />
         </receiver>
 
-        <!-- Keepalive foreground service for reliable notifications on MIUI/HyperOS -->
-        <service
-            android:name=".PrayerForegroundService"
-            android:foregroundServiceType="specialUse"
-            android:exported="false">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Prayer notification keepalive" />
-        </service>
+        <!-- PrayerForegroundService DECLARATION REMOVED in 1.2.1+20.
+             Was causing ForegroundServiceDidNotStartInTime crashes on
+             Android 12-14 due to manifest/runtime type mismatch.
+             Notifications now rely on awesome_notifications exact alarms +
+             WorkManager. Kotlin class file PrayerForegroundService.kt kept
+             in tree for git history but is no longer wired up. -->
+        <!-- removed: <service android:name=".PrayerForegroundService" .../> -->
 
         <!-- Reschedule notifications after reboot or app update -->
         <receiver

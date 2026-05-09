@@ -4,10 +4,30 @@ import 'dart:math' show cos, pi, sin;
 import 'package:flutter/material.dart';
 import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/settings_provider.dart';
 import '../utils/app_theme.dart';
+
+// ── Sensor reliability tracking ─────────────────────────────────────────────
+//
+// Crashlytics shows recurring `Azimuth.<init>: Degrees must be finite but
+// was 'NaN'` from flutter_compass_v2's native side on certain devices with
+// miscalibrated magnetometers. The throw happens BEFORE Dart can intercept
+// (it's a JVM-level exception), so onError handlers + isFinite filters
+// can't fully prevent it.
+//
+// Defense-in-depth: persist a fail counter across sessions. Once a device
+// has racked up N failures, mark Qibla as unavailable on that device so we
+// stop re-subscribing the broken stream. User can reset via clearing app
+// data — small UX cost, but protects the 18 affected users from repeat
+// crashes (currently 76 events / 18 users in Crashlytics).
+
+const String _kSensorBlockedKey   = 'qibla_sensor_blocked';
+const String _kSensorFailCountKey = 'qibla_sensor_fail_count';
+const int    _kMaxSensorFailures  = 3;
 
 class QiblaScreen extends StatefulWidget {
   const QiblaScreen({super.key});
@@ -37,44 +57,98 @@ class _QiblaScreenState extends State<QiblaScreen> {
     _init();
   }
 
-  Future<void> _init() async {
-    // 1. Check sensor
-    final supported = await FlutterQiblah.androidDeviceSensorSupport();
-    if (!mounted) return;
-    setState(() => _sensorAvailable = supported ?? false);
-    if (_sensorAvailable == false) return;
+  /// Reads the persisted block flag — true if previous sessions exceeded
+  /// the failure threshold. Defaults false on any Hive error.
+  bool get _isSensorBlocked {
+    try {
+      return Hive.box('settings')
+              .get(_kSensorBlockedKey, defaultValue: false) as bool;
+    } catch (_) {
+      return false;
+    }
+  }
 
-    // 2. Check / request location permission
-    var status = await FlutterQiblah.checkLocationStatus();
-    if (!mounted) return;
-    if (status.enabled && status.status == LocationPermission.denied) {
-      await FlutterQiblah.requestPermissions();
-      status = await FlutterQiblah.checkLocationStatus();
+  /// Increments the persisted failure counter. Once threshold is hit, sets
+  /// the block flag so subsequent screen opens skip subscribe entirely.
+  void _recordSensorFailure() {
+    try {
+      final box = Hive.box('settings');
+      final newCount =
+          (box.get(_kSensorFailCountKey, defaultValue: 0) as int) + 1;
+      box.put(_kSensorFailCountKey, newCount);
+      if (newCount >= _kMaxSensorFailures) {
+        box.put(_kSensorBlockedKey, true);
+        debugPrint(
+          '[Qibla] Sensor blocked after $newCount failures — '
+          'will skip subscribe on next open',
+        );
+      }
+      FirebaseCrashlytics.instance.setCustomKey('qibla_fail_count', newCount);
+      FirebaseCrashlytics.instance.setCustomKey('qibla_blocked', newCount >= _kMaxSensorFailures);
+    } catch (e) {
+      debugPrint('[Qibla] Failed to persist sensor failure: $e');
+    }
+  }
+
+  Future<void> _init() async {
+    // Bail early if previous sessions exceeded failure threshold. User
+    // sees the "sensor unavailable" UI with no risk of re-triggering the
+    // native Azimuth NaN crash.
+    if (_isSensorBlocked) {
+      debugPrint('[Qibla] Sensor previously marked blocked — skipping init');
       if (!mounted) return;
+      setState(() => _sensorAvailable = false);
+      return;
     }
 
-    final ready = status.enabled &&
-        (status.status == LocationPermission.always ||
-            status.status == LocationPermission.whileInUse);
-    setState(() => _locationReady = ready);
-    if (!ready) return;
+    // Wrap entire init in try/catch — flutter_qiblah's native methods can
+    // throw on some devices (notably during sensor support check on devices
+    // with no magnetometer). Without this wrap, the exception bubbles to
+    // PlatformDispatcher and ends up as a fatal crash.
+    try {
+      // 1. Check sensor
+      final supported = await FlutterQiblah.androidDeviceSensorSupport();
+      if (!mounted) return;
+      setState(() => _sensorAvailable = supported ?? false);
+      if (_sensorAvailable == false) return;
 
-    // 3. Subscribe to combined compass + location stream.
-    //
-    // `onError` handler is critical — devices with miscalibrated/broken
-    // magnetometers occasionally emit NaN azimuth, which causes the
-    // underlying flutter_compass_v2 Azimuth constructor to throw with
-    // "Degrees must be finite but was 'NaN'". Without this handler,
-    // those errors crash the app (Crashlytics confirmed 11 users in
-    // 1.1.5). cancelOnError:false keeps the stream alive after a bad
-    // sample so we recover on the next valid reading.
-    _sub = FlutterQiblah.qiblahStream.listen(
-      _onQiblah,
-      onError: (Object error, StackTrace stack) {
-        debugPrint('[Qibla] Sensor stream error (skipping sample): $error');
-      },
-      cancelOnError: false,
-    );
+      // 2. Check / request location permission
+      var status = await FlutterQiblah.checkLocationStatus();
+      if (!mounted) return;
+      if (status.enabled && status.status == LocationPermission.denied) {
+        await FlutterQiblah.requestPermissions();
+        status = await FlutterQiblah.checkLocationStatus();
+        if (!mounted) return;
+      }
+
+      final ready = status.enabled &&
+          (status.status == LocationPermission.always ||
+              status.status == LocationPermission.whileInUse);
+      setState(() => _locationReady = ready);
+      if (!ready) return;
+
+      // 3. Subscribe to combined compass + location stream.
+      //
+      // onError handler increments persistent failure counter — if a device
+      // racks up too many errors, future sessions skip subscribe entirely.
+      // cancelOnError:false keeps the stream alive after a bad sample so we
+      // recover on the next valid reading (some devices recalibrate).
+      _sub = FlutterQiblah.qiblahStream.listen(
+        _onQiblah,
+        onError: (Object error, StackTrace stack) {
+          debugPrint('[Qibla] Sensor stream error: $error');
+          FirebaseCrashlytics.instance.recordError(error, stack, reason: 'qibla_stream_error', fatal: false);
+          _recordSensorFailure();
+        },
+        cancelOnError: false,
+      );
+    } catch (e, stack) {
+      debugPrint('[Qibla] _init failed: $e\n$stack');
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'qibla_init_failed', fatal: false);
+      _recordSensorFailure();
+      if (!mounted) return;
+      setState(() => _sensorAvailable = false);
+    }
   }
 
   void _onQiblah(QiblahDirection q) {

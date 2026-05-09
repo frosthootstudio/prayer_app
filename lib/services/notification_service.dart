@@ -1,4 +1,5 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -108,6 +109,10 @@ class NotificationService {
     } catch (e) {
       // Initialization failed (e.g. missing drawable resource); fall back to
       // UTC timezone so scheduling still works on next call.
+      FirebaseCrashlytics.instance.recordError(
+        e, StackTrace.current,
+        reason: 'notif_init_failed', fatal: false,
+      );
       _localTz = 'UTC';
     }
     _initialized = true;
