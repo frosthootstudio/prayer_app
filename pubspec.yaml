@@ -54,6 +54,7 @@ dependencies:
   audio_service: ^0.18.18
   audioplayers: ^6.1.0
   in_app_review: ^2.0.9
+  package_info_plus: ^8.3.0
 
   # Share prayer schedule
   screenshot: ^3.0.0

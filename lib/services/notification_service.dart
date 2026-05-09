@@ -45,13 +45,19 @@ class NotificationService {
     'isha'   : 15,
   };
 
-  static bool   _initialized = false;
-  static String _localTz     = 'UTC';
+  static bool    _initialized = false;
+  static String  _localTz     = 'UTC';
+
+  /// Last init error message, null if initialize() succeeded. Surfaced by
+  /// DiagnosticScreen so support tickets show whether tz/local-notif init
+  /// failed silently. Reset on each initialize() call.
+  static String? lastInitError;
 
   // ── Init ──────────────────────────────────────────────────────────────────
 
   static Future<void> initialize() async {
     if (_initialized) return;
+    lastInitError = null;
 
     // Build one channel for every AdzanSound variant.
     // soundSource == null → channel falls back to system alarm ringtone.
@@ -113,6 +119,7 @@ class NotificationService {
         e, StackTrace.current,
         reason: 'notif_init_failed', fatal: false,
       );
+      lastInitError = e.toString();
       _localTz = 'UTC';
     }
     _initialized = true;

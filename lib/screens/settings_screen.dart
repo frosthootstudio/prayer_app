@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../utils/arabic_font_helper.dart';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
@@ -15,6 +16,7 @@ import '../services/rating_service.dart';
 import '../services/prayer_calculation_service.dart';
 import '../utils/app_theme.dart';
 import '../widgets/permission_fix_sheet.dart';
+import 'diagnostic_screen.dart';
 import 'support_developer_screen.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -257,7 +259,7 @@ class SettingsScreen extends StatelessWidget {
                     onTap: () => RatingService.requestRating(),
                   ),
                   const _CardDivider(),
-                  _InfoRow(label: settings.getLabel('version'),     value: '1.1.1 (build 11)'),
+                  _VersionTapRow(label: settings.getLabel('version')),
                   const _CardDivider(),
                   _InfoRow(label: settings.getLabel('developedBy'), value: 'Frosthoot Studio'),
                   const _CardDivider(),
@@ -822,6 +824,66 @@ class _DzikirDisclaimerRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Hidden diagnostic entry (5x tap on Version row) ───────────────────────
+
+class _VersionTapRow extends StatefulWidget {
+  final String label;
+  const _VersionTapRow({required this.label});
+
+  @override
+  State<_VersionTapRow> createState() => _VersionTapRowState();
+}
+
+class _VersionTapRowState extends State<_VersionTapRow> {
+  int _taps = 0;
+  DateTime _lastTap = DateTime.fromMillisecondsSinceEpoch(0);
+  String _version = '...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await _getPackageInfo();
+    if (mounted) setState(() => _version = info);
+  }
+
+  Future<String> _getPackageInfo() async {
+    try {
+      final pi = await PackageInfo.fromPlatform();
+      return '${pi.version} (build ${pi.buildNumber})';
+    } catch (_) {
+      return '?';
+    }
+  }
+
+  void _onTap() {
+    final now = DateTime.now();
+    if (now.difference(_lastTap).inSeconds > 2) {
+      _taps = 0;
+    }
+    _lastTap = now;
+    _taps++;
+    if (_taps >= 5) {
+      _taps = 0;
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => const DiagnosticScreen(),
+      ));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _onTap,
+      child: _InfoRow(label: widget.label, value: _version),
     );
   }
 }
