@@ -34,6 +34,14 @@ import 'services/iap_service.dart';
 import 'services/notification_service.dart';
 import 'services/permission_service.dart';
 
+// ── Qibla sensor block keys ──────────────────────────────────────────────────
+// Mirror QiblaScreen constants so PlatformDispatcher.onError can persist
+// failure counts for native Azimuth NaN throws that bypass Dart-level
+// qiblahStream onError handlers.
+const String _kQiblaBlockedKey   = 'qibla_sensor_blocked';
+const String _kQiblaFailCountKey = 'qibla_sensor_fail_count';
+const int    _kQiblaMaxFailures  = 3;
+
 // ── WorkManager background task ───────────────────────────────────────────────
 //
 // Runs every 15 minutes (Android minimum) to refresh the home-screen widget
@@ -75,6 +83,42 @@ Future<void> main() async {
 
     // Catch all uncaught async errors that aren't handled by the framework.
     PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+      final stackStr = stack.toString();
+      final isAzimuthNaN = stackStr.contains('Azimuth') &&
+          (stackStr.contains('Degrees must be finite') || stackStr.contains('NaN'));
+
+      if (isAzimuthNaN) {
+        // Record non-fatal so it doesn't tank crash-free rate. The user's
+        // session can recover (next sample or app restart) — this isn't a
+        // permanent app failure.
+        FirebaseCrashlytics.instance.recordError(
+          error, stack,
+          reason: 'qibla_native_azimuth_nan',
+          fatal: false,
+        );
+        // Increment persistent failure counter so QiblaScreen skips subscribe
+        // on next open after threshold (currently 3). Wrapped in try/catch
+        // because the settings box may not be open if this fires very early
+        // in boot — that's a tolerable miss; subsequent failures will record.
+        try {
+          final box = Hive.box('settings');
+          final newCount =
+              (box.get(_kQiblaFailCountKey, defaultValue: 0) as int) + 1;
+          box.put(_kQiblaFailCountKey, newCount);
+          if (newCount >= _kQiblaMaxFailures) {
+            box.put(_kQiblaBlockedKey, true);
+          }
+          FirebaseCrashlytics.instance
+              .setCustomKey('qibla_fail_count', newCount);
+          FirebaseCrashlytics.instance
+              .setCustomKey('qibla_blocked', newCount >= _kQiblaMaxFailures);
+        } catch (_) {
+          // settings box not open yet — accept the miss.
+        }
+        return true;
+      }
+
+      // All other uncaught async errors — record as fatal, same as before.
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
     };
