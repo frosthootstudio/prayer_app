@@ -87,9 +87,18 @@ class IapService {
   bool _initialized = false;
 
   /// Tracks whether we're inside a `restore()` call. Set true before the
-  /// `restorePurchases()` future is awaited; checked when the stream fires
-  /// `PurchaseStatus.restored` to flip [_restoredAnyPurchase] true.
+  /// plugin call, set false when the wait completes or times out. Used by
+  /// the purchase stream handler to know whether a `PurchaseStatus.restored`
+  /// event should surface as `IapPurchaseStatus.restored` (only during an
+  /// explicit restore() call) vs silent grant (boot-time stream replay).
   bool _restoring = false;
+
+  /// Completer wired up by restore() and completed by the purchase stream
+  /// handler when it processes a restored event. Replaces the previous
+  /// fixed 5s sleep — typical restore now resolves in <1s, and slow networks
+  /// have up to 15s before timeout.
+  Completer<void>? _restoreCompleter;
+
   bool _restoredAnyPurchase = false;
 
   // ── Listenable state surfaces (consumed by UI) ─────────────────────────
@@ -267,33 +276,55 @@ class IapService {
   /// settings — required by Play Store policy for non-consumable IAPs.
   ///
   /// `restorePurchases()` returns immediately and the actual restore events
-  /// arrive on the purchase stream. If no past purchase exists, the stream
-  /// never fires — so we use a 5s timeout to distinguish:
-  ///   - found purchase → [purchaseStatus] = restored (set by stream handler)
-  ///   - timeout reached, nothing came → [purchaseStatus] = noPurchaseToRestore
+  /// arrive on the purchase stream. We wait on a Completer that's resolved
+  /// by the stream handler, with a 15s hard timeout for the "no purchase
+  /// exists" path (stream never fires in that case).
+  ///
+  /// Cleanup is idempotent — if the completer is already completed by the
+  /// stream, the timeout path becomes a no-op via `isCompleted` guard.
   Future<void> restore() async {
     lastErrorMessage.value = null;
     purchaseStatus.value = IapPurchaseStatus.processing;
     _restoring = true;
     _restoredAnyPurchase = false;
+    _restoreCompleter = Completer<void>();
 
     try {
       await _iap.restorePurchases();
     } catch (e) {
       debugPrint('[IapService] restore error: $e');
-      FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: 'iap_restore_failed', fatal: false);
+      FirebaseCrashlytics.instance.recordError(
+        e, StackTrace.current,
+        reason: 'iap_restore_failed', fatal: false,
+      );
       purchaseStatus.value = IapPurchaseStatus.error;
       lastErrorMessage.value = e.toString();
       _restoring = false;
+      _restoreCompleter = null;
       return;
     }
 
-    // Wait briefly for stream events. If none came, conclude that there's
-    // nothing to restore.
-    await Future<void>.delayed(const Duration(seconds: 5));
+    // Race: either stream handler completes (fast path) or 15s timeout
+    // (no-purchase path). 15s chosen to accommodate slow Indonesian 3G/4G
+    // — Play Store latency p95 ~8s anecdotally; +7s safety margin.
+    try {
+      await _restoreCompleter!.future.timeout(const Duration(seconds: 15));
+    } on TimeoutException {
+      // Expected when account has no past purchase. Not an error.
+      debugPrint('[IapService] restore timed out — no past purchase');
+    }
+
     _restoring = false;
+    final completer = _restoreCompleter;
+    _restoreCompleter = null;
+
     if (!_restoredAnyPurchase) {
       purchaseStatus.value = IapPurchaseStatus.noPurchaseToRestore;
+    }
+    // Defensive: if the completer is somehow still pending here (race with
+    // an in-flight stream event), complete it so any awaiter releases.
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
     }
   }
 
@@ -330,6 +361,12 @@ class IapService {
             // pop a snackbar mid-app-launch.
             if (_restoring) {
               purchaseStatus.value = IapPurchaseStatus.restored;
+            }
+            // Signal restore() that the stream produced an event — short-circuit
+            // the 15s wait. Guarded with isCompleted because the stream can fire
+            // multiple events (one per restored product) and we only complete once.
+            if (_restoring && !(_restoreCompleter?.isCompleted ?? true)) {
+              _restoreCompleter!.complete();
             }
             AnalyticsService.instance.logPurchaseRestored(
               productId: premiumLifetimeId,
