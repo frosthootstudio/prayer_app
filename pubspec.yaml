@@ -54,11 +54,11 @@ dependencies:
   audio_service: ^0.18.18
   audioplayers: ^6.1.0
   in_app_review: ^2.0.9
-  package_info_plus: ^8.3.0
+  package_info_plus: ^10.0.0
 
   # Share prayer schedule
   screenshot: ^3.0.0
-  share_plus: ^10.1.4
+  share_plus: ^13.0.0
   path_provider: ^2.1.5
   gal: ^2.3.1
 
@@ -72,6 +72,13 @@ dependencies:
 
   # In-App Purchase — one-time premium unlock (no subscription)
   in_app_purchase: ^3.2.0
+
+# geolocator_linux 0.2.4 caps package_info_plus at ^9 but we need ^10 (share_plus
+# 13 requires win32 ^6 which package_info_plus 9 cannot satisfy). geolocator_linux
+# is a Linux-desktop-only package not compiled for Android/iOS, so this override
+# is safe for mobile targets.
+dependency_overrides:
+  package_info_plus: ^10.0.0
 
 dev_dependencies:
   flutter_test:

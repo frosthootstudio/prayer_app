@@ -44,15 +44,19 @@ class ShareService {
     final file    = File('${tmpDir.path}/prayer_schedule.png');
     await file.writeAsBytes(bytes);
 
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'image/png')],
-      text: _buildShareText(
-        prayers:       prayers,
-        cityName:      cityName,
-        gregorianDate: gregorianDate,
-        hijriDate:     hijriDate,
-        imsakTime:     imsakTime,
-        language:      language,
+    // share_plus v13: static Share.shareXFiles removed; use SharePlus
+    // instance with ShareParams. Behavior identical, just different shape.
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, mimeType: 'image/png')],
+        text: _buildShareText(
+          prayers:       prayers,
+          cityName:      cityName,
+          gregorianDate: gregorianDate,
+          hijriDate:     hijriDate,
+          imsakTime:     imsakTime,
+          language:      language,
+        ),
       ),
     );
   }
