@@ -25,9 +25,7 @@
     <!-- Battery optimisation exemption (shows system dialog asking for unrestricted bg) -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 
-    <!-- FOREGROUND_SERVICE permissions kept for awesome_notifications +
-         just_audio_background. FOREGROUND_SERVICE_SPECIAL_USE removed
-         alongside PrayerForegroundService removal (1.2.1+20). -->
+    <!-- Required by awesome_notifications + just_audio_background. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <!-- Background audio (murottal / adzan playback) -->
@@ -100,14 +98,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_widget_medium_info" />
         </receiver>
-
-        <!-- PrayerForegroundService DECLARATION REMOVED in 1.2.1+20.
-             Was causing ForegroundServiceDidNotStartInTime crashes on
-             Android 12-14 due to manifest/runtime type mismatch.
-             Notifications now rely on awesome_notifications exact alarms +
-             WorkManager. Kotlin class file PrayerForegroundService.kt kept
-             in tree for git history but is no longer wired up. -->
-        <!-- removed: <service android:name=".PrayerForegroundService" .../> -->
 
         <!-- Reschedule notifications after reboot or app update -->
         <receiver

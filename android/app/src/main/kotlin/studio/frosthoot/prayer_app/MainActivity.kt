@@ -24,24 +24,10 @@ class MainActivity : AudioServiceActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
 
-        // ── PrayerForegroundService start REMOVED in 1.2.1+20 ─────────────
-        //
-        // The keepalive FGS was causing ForegroundServiceDidNotStartInTime
-        // crashes on Android 12-14 due to:
-        //   1. Manifest declares `specialUse` (API 34+ feature) but device
-        //      OS doesn't fully support it
-        //   2. Runtime startForeground() type mismatch with manifest type
-        //   3. 5-second deadline race with Flutter engine boot
-        //
-        // The service was always "best effort" for MIUI/HyperOS notification
-        // reliability. Notifications still work via:
-        //   - awesome_notifications scheduled exact alarms (primary)
-        //   - WorkManager periodic widget update (backup)
-        //
-        // If MIUI keepalive becomes critical later, re-introduce with:
-        //   - Defer FGS start until after Flutter engine is ready
-        //   - Use a use-case-appropriate foregroundServiceType
-        //   - Or migrate to JobScheduler/WorkManager for the keepalive role
+        // Notification reliability relies on awesome_notifications exact
+        // alarms + WorkManager. No custom keepalive FGS — see git log for
+        // 1.2.1+20 if MIUI/HyperOS reliability degrades and a service-based
+        // approach needs reconsidering.
     }
 
     private fun tryStart(intent: Intent): Boolean = try {
