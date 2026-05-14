@@ -1,5 +1,59 @@
 # Changelog — Waktu Shalat
 
+## [1.5.0+25] — 2026-05-14
+
+> **Catatan:** rilis ini menggabungkan beberapa perubahan internal yang
+> sebelumnya direncanakan terpisah (1.2.3 hardening + 1.3.0 deps +
+> 1.4.0 font). Tidak ada rilis publik antara 1.2.2+21 → 1.5.0+25;
+> versi tengah dilewati untuk konsistensi nomor build.
+
+### Fitur Baru
+
+- **Font Arab "Amiri Quran"** — opsi baru di Pengaturan → Font Arab,
+  gaya mushaf Madinah (Naskh khusus Al-Qur'an). Memenuhi permintaan
+  pengguna untuk opsi Uthmani yang lebih dekat dengan cetakan Mushaf
+  Madinah. Font Amiri biasa tetap tersedia untuk teks Arab umum.
+- **Tombol "Coba Lagi" di Kiblat** — jika sensor kompas pernah gagal
+  berulang dan otomatis dinonaktifkan, kini ada cara untuk mengaktifkan
+  ulang setelah kalibrasi (gerakan angka 8). Sebelumnya harus hapus
+  data aplikasi.
+
+### Perbaikan Stabilitas
+
+- **Crash Kiblat (Azimuth NaN)** ditangkap di layer global sebelum
+  menjadi crash fatal — sebelumnya tetap masuk Crashlytics meski sudah
+  ada filter di level layar. Tidak lagi menurunkan tingkat
+  crash-free secara tidak adil.
+- **Pelaporan error non-fatal ke Crashlytics** untuk Kiblat, AdMob,
+  IAP, dan inisialisasi notifikasi — sebelumnya error dalam blok
+  try/catch hanya muncul di log debug, jadi tidak terlihat di
+  dashboard produksi.
+- **Restore pembelian Premium** lebih cepat di jaringan lambat (dari
+  5 detik tetap menjadi rata-rata <1 detik via Completer pattern,
+  dengan timeout 15 detik). Memperbaiki kasus "Premium hilang setelah
+  install ulang" di pengguna jaringan lemot.
+- **Iklan App Open** tidak lagi muncul pada saat aplikasi masih
+  menghitung jadwal shalat (race condition di cold start) — pengaman
+  extra untuk memastikan iklan tidak pernah muncul saat azan.
+
+### Pemeliharaan Internal
+
+- Layar diagnostik tersembunyi di Pengaturan → Tentang → ketuk versi
+  5 kali. Untuk dukungan teknis: tampilkan status izin, sensor,
+  AdMob, IAP, dan info perangkat. Tombol "Salin ke Clipboard".
+- Update dependency utama:
+  - Firebase (Core 4, Analytics 12, Crashlytics 5)
+  - Google Mobile Ads SDK (5 → 8)
+  - share_plus (10 → 13)
+  - geocoding, package_info_plus, dll
+- Migrasi ke "built-in Kotlin" Flutter (menghapus deklarasi Kotlin
+  Gradle Plugin yang redundan, persiapan kompatibilitas Flutter
+  versi mendatang)
+- Penghapusan kode mati: `PrayerForegroundService.kt` (dinonaktifkan
+  sejak 1.2.1+20) dan `CLAUDE_CONTEXT.md` lama
+
+---
+
 ## [1.1.1] — 2026-04-26
 
 ### Perbaikan
