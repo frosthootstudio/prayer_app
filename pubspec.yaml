@@ -33,7 +33,7 @@ dependencies:
 
   # Date formatting
   intl: ^0.20.2
-  google_fonts: ^8.0.2
+  google_fonts: ^8.1.0
   awesome_notifications: ^0.11.0
   flutter_qiblah: ^3.2.0
   smooth_page_indicator: ^2.0.1
