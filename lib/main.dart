@@ -273,24 +273,69 @@ class _PrayerAppState extends State<PrayerApp> with WidgetsBindingObserver {
   /// trigger an ad. Tunes the perceived "intentional re-open" threshold.
   static const Duration _quickSwitchThreshold = Duration(seconds: 30);
 
+  /// Listener registered in initState that fires the cold-start ad once
+  /// PrayerProvider.prayerTimes becomes non-empty. Removed after first fire
+  /// so subsequent prayer-time recalculations don't re-trigger ads.
+  /// Null if cold-start ad has already fired (or onboarding skipped it).
+  VoidCallback? _coldStartAdListener;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // Cold-start ad attempt — fired after the first frame so:
-    //   1. Provider tree is ready (we read PrayerProvider for prayer times)
-    //   2. AdMob has had a moment to fetch the cold ad
-    // The kindness window guard (24h post-install) means new users won't
-    // actually see an ad here for the first day.
+    // Cold-start ad attempt — registered after the first frame so the
+    // Provider tree is mounted. Doesn't fire immediately: waits for
+    // PrayerProvider.prayerTimes to populate so the prayer-window guard
+    // has data to check against. Without this wait, the ad could fire
+    // during an actual prayer window because the guard sees empty list.
+    //
+    // Warm resumes don't need this — didChangeAppLifecycleState runs
+    // long after PrayerProvider is initialized.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _maybeShowAppOpenAd();
+      _scheduleColdStartAd();
     });
+  }
+
+  /// Either fires the cold-start ad immediately (if prayerTimes already
+  /// populated — warm cache case) or registers a one-shot listener that
+  /// fires it on the first non-empty prayerTimes update.
+  void _scheduleColdStartAd() {
+    if (!mounted) return;
+    final pp = context.read<PrayerProvider>();
+
+    // Fast path: PrayerProvider already initialized (e.g. via hot-reload
+    // or the post-onboarding launch where init happens earlier).
+    if (pp.prayerTimes.isNotEmpty) {
+      _maybeShowAppOpenAd();
+      return;
+    }
+
+    // Slow path: wait for first non-empty update. Listener self-removes
+    // after firing once. If prayerTimes never populates (no GPS, offline,
+    // user denies location forever), the ad never shows — which is the
+    // desired safe behavior: don't show ads when we can't verify timing.
+    _coldStartAdListener = () {
+      if (pp.prayerTimes.isNotEmpty && _coldStartAdListener != null) {
+        pp.removeListener(_coldStartAdListener!);
+        _coldStartAdListener = null;
+        _maybeShowAppOpenAd();
+      }
+    };
+    pp.addListener(_coldStartAdListener!);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (_coldStartAdListener != null && mounted) {
+      try {
+        context.read<PrayerProvider>().removeListener(_coldStartAdListener!);
+      } catch (_) {
+        // Provider tree may already be unmounted during shutdown — ignore.
+      }
+      _coldStartAdListener = null;
+    }
     super.dispose();
   }
 

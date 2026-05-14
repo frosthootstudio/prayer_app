@@ -284,6 +284,15 @@ class AdService {
 
     // 7. Prayer-time window — skip if within ±N min of any adzan today.
     //    Worship moments should never be interrupted by ads.
+    //
+    //    Empty list means PrayerProvider hasn't computed prayer times yet
+    //    (cold-start race before GPS resolves). Treat as conservative skip:
+    //    we can't verify we're outside a prayer window, so don't risk it.
+    //    main.dart waits for non-empty prayerTimes before calling this on
+    //    cold start, so this branch is purely defense-in-depth.
+    if (prayerTimesToday.isEmpty) {
+      return 'prayer times not yet loaded';
+    }
     for (final prayerTime in prayerTimesToday) {
       final diff = now.difference(prayerTime).abs();
       if (diff < _prayerWindowHalf) {
