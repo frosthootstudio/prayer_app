@@ -68,7 +68,7 @@ dependencies:
   firebase_crashlytics: ^5.0.0
 
   # AdMob — App Open Ad only (no banners, native, interstitial, rewarded)
-  google_mobile_ads: ^5.3.1
+  google_mobile_ads: ^8.0.0
 
   # In-App Purchase — one-time premium unlock (no subscription)
   in_app_purchase: ^3.2.0
