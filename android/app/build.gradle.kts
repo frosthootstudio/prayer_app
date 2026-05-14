@@ -8,8 +8,9 @@ if (keyPropertiesFile.exists()) {
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // The Flutter Gradle Plugin must be applied after the Android plugin.
+    // Kotlin support is provided by Flutter natively — no explicit KGP
+    // declaration needed (migrated to built-in Kotlin in 1.5.0+25).
     id("dev.flutter.flutter-gradle-plugin")
     // Firebase
     id("com.google.gms.google-services")
