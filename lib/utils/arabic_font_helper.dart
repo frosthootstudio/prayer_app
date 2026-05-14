@@ -14,6 +14,7 @@ class ArabicFontHelper {
     final double size;
     switch (fontKey) {
       case 'amiri':       family = 'Amiri';           size = fontSize;     break;
+      case 'amiri_quran': family = 'AmiriQuran';      size = fontSize;     break;
       case 'noto_naskh':  family = 'NotoNaskhArabic'; size = fontSize;     break;
       case 'lateef':      family = 'Lateef';          size = fontSize + 4; break;
       case 'scheherazade':
@@ -51,6 +52,13 @@ class ArabicFontHelper {
       'style':  'Uthmani',
     },
     {
+      'key':    'amiri_quran',
+      'name':   'Amiri Quran',
+      'descId': 'Naskh khusus mushaf — gaya Madinah',
+      'descEn': 'Mushaf-specialized Naskh — Madinah style',
+      'style':  'Uthmani',
+    },
+    {
       'key':    'scheherazade',
       'name':   'Scheherazade',
       'descId': 'Tradisional Indonesia/Pakistan',
@@ -83,7 +91,7 @@ class ArabicFontHelper {
   /// fontFamilyFallback in getStyle handles missing glyphs. Kept as
   /// opt-in escape hatch if fallback rendering is undesirable.
   static String normalizeArabicText(String text, String fontKey) {
-    if (fontKey == 'amiri' || fontKey == 'noto_naskh') return text;
+    if (fontKey == 'amiri' || fontKey == 'amiri_quran' || fontKey == 'noto_naskh') return text;
     return text
         .replaceAll('ٱ', 'ا')                          // U+0671 alef wasla → alef
         .replaceAll('ٰ', '')                            // U+0670 dagger alef

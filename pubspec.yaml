@@ -110,6 +110,9 @@ flutter:
     - family: Amiri
       fonts:
         - asset: assets/fonts/arabic/Amiri-Regular.ttf
+    - family: AmiriQuran
+      fonts:
+        - asset: assets/fonts/arabic/AmiriQuran-Regular.ttf
     - family: ScheherazadeNew
       fonts:
         - asset: assets/fonts/arabic/ScheherazadeNew-Regular.ttf
