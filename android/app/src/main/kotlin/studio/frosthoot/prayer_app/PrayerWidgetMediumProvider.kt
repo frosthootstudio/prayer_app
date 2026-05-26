@@ -25,7 +25,14 @@ class PrayerWidgetMediumProvider : AppWidgetProvider() {
             // Read saved data from Flutter
             val prayerName   = widgetData.getString("next_prayer_name", "—") ?: "—"
             val prayerTime   = widgetData.getString("next_prayer_time", "—") ?: "—"
-            val prayerMillis = widgetData.getLong("next_prayer_millis", 0L)
+            // Safe-read: home_widget plugin may store millis as Integer or Long
+            // depending on magnitude. Direct getLong() crashes when stored type is
+            // Integer (Crashlytics 1.2.1: ClassCastException — 20% of widget users).
+            val prayerMillis = when (val raw = widgetData.all["next_prayer_millis"]) {
+                is Long -> raw
+                is Int  -> raw.toLong()
+                else    -> 0L
+            }
             val isAllPassed  = widgetData.getBoolean("all_prayers_passed", false)
             val language     = widgetData.getString("language", "id") ?: "id"
             val listJson     = widgetData.getString("prayer_list", "[]") ?: "[]"
