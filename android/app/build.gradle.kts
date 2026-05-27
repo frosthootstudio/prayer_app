@@ -19,7 +19,7 @@ plugins {
 
 android {
     namespace = "studio.frosthoot.prayer_app"
-    compileSdk = 37
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -33,7 +33,7 @@ android {
     defaultConfig {
         applicationId = "studio.frosthoot.prayer_app"
         minSdk = flutter.minSdkVersion
-        targetSdk = 37
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
