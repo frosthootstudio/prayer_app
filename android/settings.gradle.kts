@@ -19,7 +19,7 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.11.1" apply false
+    id("com.android.application") version "9.1.0" apply false
     // KGP version declaration retained for the 11 plugins that still apply
     // kotlin-android explicitly (audio_session, audioplayers_android,
     // firebase_analytics, flutter_compass_v2, flutter_qiblah, home_widget,

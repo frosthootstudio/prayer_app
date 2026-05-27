@@ -39,12 +39,11 @@ dependencies:
   smooth_page_indicator: ^2.0.1
   flutter_native_splash: ^2.4.7
 
-  # Home screen widget
-  home_widget: ^0.9.0
+  home_widget: ^0.9.2
   workmanager: ^0.9.0
 
   # Hijri calendar & calendar widget
-  hijri: ^3.0.0
+  hijri: ^3.0.1
   table_calendar: ^3.1.3
   quran: ^1.4.1
   http: ^1.2.0
@@ -53,7 +52,7 @@ dependencies:
   just_audio_background: ^0.0.1-beta.17
   audio_service: ^0.18.18
   audioplayers: ^6.1.0
-  in_app_review: ^2.0.9
+  in_app_review: ^2.0.12
   package_info_plus: ^10.0.0
 
   # Share prayer schedule
@@ -63,9 +62,9 @@ dependencies:
   gal: ^2.3.1
 
   # Firebase — Analytics & Crashlytics (no ads in-app, App Open Ad only)
-  firebase_core: ^4.0.0
-  firebase_analytics: ^12.0.0
-  firebase_crashlytics: ^5.0.0
+  firebase_core: ^4.9.0
+  firebase_analytics: ^12.4.1
+  firebase_crashlytics: ^5.2.2
 
   # AdMob — App Open Ad only (no banners, native, interstitial, rewarded)
   google_mobile_ads: ^8.0.0
