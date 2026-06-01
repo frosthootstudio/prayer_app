@@ -99,17 +99,6 @@
                 android:resource="@xml/prayer_widget_medium_info" />
         </receiver>
 
-        <!-- Reschedule notifications after reboot or app update -->
-        <receiver
-            android:name="me.carda.awesome_notifications.core.broadcasters.receivers.DartBackgroundService"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
-            </intent-filter>
-        </receiver>
-
         <!-- Background audio service (murottal / just_audio_background) -->
         <service
             android:name="com.ryanheise.audioservice.AudioService"
