@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -11,6 +10,7 @@ import '../providers/tracking_provider.dart';
 import '../services/permission_service.dart';
 import '../services/ramadan_service.dart';
 import '../utils/app_theme.dart';
+import '../utils/time_format.dart';
 import '../widgets/next_prayer_card.dart';
 import '../widgets/permission_fix_sheet.dart';
 import '../widgets/share_bottom_sheet.dart';
@@ -569,7 +569,7 @@ class _PrayerRow extends StatelessWidget {
 
           // ── Prayer time ───────────────────────────────────────────────────
           Text(
-            DateFormat('HH:mm').format(prayer.time),
+            formatPrayerTime(context, prayer.time),
             style: GoogleFonts.poppins(
               color: nameColor,
               fontSize: 14,
@@ -651,7 +651,6 @@ class _SunInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('HH:mm');
     return Container(
       decoration: BoxDecoration(
         color: context.appCardBg,
@@ -674,7 +673,7 @@ class _SunInfoCard extends StatelessWidget {
                 _SunSection(
                   icon:  Icons.wb_twilight_rounded,
                   label: s.getLabel('sunRise'),
-                  time:  fmt.format(syuruqTime),
+                  time:  formatPrayerTime(ctx, syuruqTime),
                 ),
                 VerticalDivider(
                   width: 1, thickness: 1, indent: 10, endIndent: 10,
@@ -683,7 +682,7 @@ class _SunInfoCard extends StatelessWidget {
                 _SunSection(
                   icon:  Icons.wb_sunny_rounded,
                   label: s.getLabel('solarNoon'),
-                  time:  fmt.format(dhuhrTime),
+                  time:  formatPrayerTime(ctx, dhuhrTime),
                 ),
                 VerticalDivider(
                   width: 1, thickness: 1, indent: 10, endIndent: 10,
@@ -692,7 +691,7 @@ class _SunInfoCard extends StatelessWidget {
                 _SunSection(
                   icon:  Icons.brightness_4_rounded,
                   label: s.getLabel('sunSet'),
-                  time:  fmt.format(maghribTime),
+                  time:  formatPrayerTime(ctx, maghribTime),
                 ),
               ],
             );
@@ -931,7 +930,7 @@ class _ImsakRow extends StatelessWidget {
             ),
           ),
           Text(
-            DateFormat('HH:mm').format(time),
+            formatPrayerTime(context, time),
             style: GoogleFonts.poppins(
               color: context.appTextPrimary,
               fontSize: 14,

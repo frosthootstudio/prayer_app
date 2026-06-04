@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/time_format.dart';
 import 'countdown_timer.dart';
 
 /// Two side-by-side cards: current prayer (left) + next prayer (right).
@@ -35,10 +35,10 @@ class NextPrayerCard extends StatelessWidget {
                 ? settings.getPrayerName(currentPrayer.key)
                 : '—',
             timeStr: currentPrayer != null
-                ? DateFormat('hh:mm a').format(currentPrayer.time)
+                ? formatPrayerTime(context, currentPrayer.time)
                 : '—',
             subLine: (currentPrayer != null && endTime != null)
-                ? '${settings.getLabel('ends')} · ${DateFormat('HH:mm').format(endTime)}'
+                ? '${settings.getLabel('ends')} · ${formatPrayerTime(context, endTime)}'
                 : '',
             isWarm: true,
           ),
@@ -52,9 +52,9 @@ class NextPrayerCard extends StatelessWidget {
               ? _PrayerCard(
                   label: settings.getLabel('nextPrayer'),
                   prayerName: settings.getPrayerName(nextPrayer.key),
-                  timeStr: DateFormat('hh:mm a').format(nextPrayer.time),
+                  timeStr: formatPrayerTime(context, nextPrayer.time),
                   subLine:
-                      '${settings.getLabel('adhan')} · ${DateFormat('HH:mm').format(nextPrayer.time)}',
+                      '${settings.getLabel('adhan')} · ${formatPrayerTime(context, nextPrayer.time)}',
                   isWarm: false,
                   showCountdown: true,
                 )
