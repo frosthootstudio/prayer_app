@@ -140,6 +140,18 @@ class NotificationService {
     );
   }
 
+  /// Returns true if notifications are currently allowed. Wraps the plugin
+  /// call in try/catch — on some OEMs the check itself can throw if the
+  /// notification subsystem is in a bad state.
+  static Future<bool> isAllowed() async {
+    try {
+      return await AwesomeNotifications().isNotificationAllowed();
+    } catch (e) {
+      debugPrint('[Notif] isNotificationAllowed check failed: $e');
+      return false;
+    }
+  }
+
   // ── Adzan scheduling ──────────────────────────────────────────────────────
 
   /// Schedules a daily-repeating exact alarm for [prayer] using the channel
@@ -154,29 +166,36 @@ class NotificationService {
 
     final timeStr = DateFormat('HH:mm').format(prayer.time);
 
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id:                 id,
-        channelKey:         _adzanChannelKey(sound),
-        title:              'Waktu ${prayer.name}',
-        body:               '${prayer.name} · $timeStr',
-        notificationLayout: NotificationLayout.Default,
-        category:           NotificationCategory.Reminder,
-        wakeUpScreen:       true,
-        criticalAlert:      true,
-        autoDismissible:    false,
-      ),
-      schedule: NotificationCalendar(
-        hour:           prayer.time.hour,
-        minute:         prayer.time.minute,
-        second:         0,
-        millisecond:    0,
-        timeZone:       _localTz,
-        repeats:        true,
-        preciseAlarm:   true,
-        allowWhileIdle: true,
-      ),
-    );
+    try {
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id:                 id,
+          channelKey:         _adzanChannelKey(sound),
+          title:              'Waktu ${prayer.name}',
+          body:               '${prayer.name} · $timeStr',
+          notificationLayout: NotificationLayout.Default,
+          category:           NotificationCategory.Reminder,
+          wakeUpScreen:       true,
+          criticalAlert:      true,
+          autoDismissible:    false,
+        ),
+        schedule: NotificationCalendar(
+          hour:           prayer.time.hour,
+          minute:         prayer.time.minute,
+          second:         0,
+          millisecond:    0,
+          timeZone:       _localTz,
+          repeats:        true,
+          preciseAlarm:   true,
+          allowWhileIdle: true,
+        ),
+      );
+    } catch (e, stack) {
+      debugPrint('[Notif] scheduleOne(${prayer.key}) failed: $e');
+      FirebaseCrashlytics.instance.recordError(
+        e, stack, reason: 'notif_schedule_one_failed', fatal: false,
+      );
+    }
   }
 
   /// Cancels the adzan notification for [prayerKey].
@@ -206,29 +225,36 @@ class NotificationService {
         ? 'Prepare for ${prayer.name} prayer · $timeStr'
         : 'Bersiaplah untuk shalat ${prayer.name} · $timeStr';
 
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id:                 id,
-        channelKey:         _preChannelKey,
-        title:              title,
-        body:               body,
-        notificationLayout: NotificationLayout.Default,
-        category:           NotificationCategory.Reminder,
-        wakeUpScreen:       true,
-        criticalAlert:      true,
-        autoDismissible:    true,
-      ),
-      schedule: NotificationCalendar(
-        hour:           preTime.hour,
-        minute:         preTime.minute,
-        second:         0,
-        millisecond:    0,
-        timeZone:       _localTz,
-        repeats:        true,
-        preciseAlarm:   true,
-        allowWhileIdle: true,
-      ),
-    );
+    try {
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id:                 id,
+          channelKey:         _preChannelKey,
+          title:              title,
+          body:               body,
+          notificationLayout: NotificationLayout.Default,
+          category:           NotificationCategory.Reminder,
+          wakeUpScreen:       true,
+          criticalAlert:      true,
+          autoDismissible:    true,
+        ),
+        schedule: NotificationCalendar(
+          hour:           preTime.hour,
+          minute:         preTime.minute,
+          second:         0,
+          millisecond:    0,
+          timeZone:       _localTz,
+          repeats:        true,
+          preciseAlarm:   true,
+          allowWhileIdle: true,
+        ),
+      );
+    } catch (e, stack) {
+      debugPrint('[Notif] schedulePreAdzan(${prayer.key}) failed: $e');
+      FirebaseCrashlytics.instance.recordError(
+        e, stack, reason: 'notif_schedule_pre_failed', fatal: false,
+      );
+    }
   }
 
   static Future<void> cancelPreAdzan(String prayerKey) async {
@@ -248,6 +274,14 @@ class NotificationService {
     int        preAdzanMinutes  = 10,
     bool       isEnglish        = false,
   }) async {
+    // Bail early if notifications are disabled — common on aggressive OEMs
+    // (Tecno HiOS, Xiaomi) that revoke permission while backgrounded. Calling
+    // createNotification() without permission throws INSUFFICIENT_PERMISSIONS,
+    // which previously bubbled up as a fatal crash (Crashlytics 1.5.2).
+    if (!await isAllowed()) {
+      debugPrint('[Notif] scheduleAll skipped — notifications not allowed');
+      return;
+    }
     for (final prayer in prayers) {
       if (prayer.key == 'sunrise') continue;
       final enabled = notifPrefs[prayer.key] ?? true;
@@ -283,31 +317,38 @@ class NotificationService {
       final body = isEnglish
           ? 'This may be the Night of Power. Increase your worship!'
           : 'Ini bisa jadi malam penuh kemuliaan. Perbanyak ibadah!';
-      await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id:                 day, // 21, 23, 25, 27, or 29
-          channelKey:         _qadarChannelKey,
-          title:              title,
-          body:               body,
-          notificationLayout: NotificationLayout.Default,
-          category:           NotificationCategory.Reminder,
-          wakeUpScreen:       true,
-          autoDismissible:    false,
-        ),
-        schedule: NotificationCalendar(
-          year:           fireAt.year,
-          month:          fireAt.month,
-          day:            fireAt.day,
-          hour:           23,
-          minute:         0,
-          second:         0,
-          millisecond:    0,
-          timeZone:       _localTz,
-          repeats:        false,
-          preciseAlarm:   true,
-          allowWhileIdle: true,
-        ),
-      );
+      try {
+        await AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id:                 day, // 21, 23, 25, 27, or 29
+            channelKey:         _qadarChannelKey,
+            title:              title,
+            body:               body,
+            notificationLayout: NotificationLayout.Default,
+            category:           NotificationCategory.Reminder,
+            wakeUpScreen:       true,
+            autoDismissible:    false,
+          ),
+          schedule: NotificationCalendar(
+            year:           fireAt.year,
+            month:          fireAt.month,
+            day:            fireAt.day,
+            hour:           23,
+            minute:         0,
+            second:         0,
+            millisecond:    0,
+            timeZone:       _localTz,
+            repeats:        false,
+            preciseAlarm:   true,
+            allowWhileIdle: true,
+          ),
+        );
+      } catch (e, stack) {
+        debugPrint('[Notif] scheduleLailatulQadar(night $day) failed: $e');
+        FirebaseCrashlytics.instance.recordError(
+          e, stack, reason: 'notif_schedule_qadar_failed', fatal: false,
+        );
+      }
     }
   }
 
@@ -324,30 +365,37 @@ class NotificationService {
     AdzanSound sound = AdzanSound.adzan,
   }) async {
     final fireAt = DateTime.now().add(const Duration(seconds: 10));
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id:                 99,
-        channelKey:         _adzanChannelKey(sound),
-        title:              'Test Notifikasi Adzan',
-        body:               'Notifikasi adzan berfungsi dengan baik!',
-        notificationLayout: NotificationLayout.Default,
-        category:           NotificationCategory.Reminder,
-        wakeUpScreen:       true,
-        autoDismissible:    true,
-      ),
-      schedule: NotificationCalendar(
-        year:           fireAt.year,
-        month:          fireAt.month,
-        day:            fireAt.day,
-        hour:           fireAt.hour,
-        minute:         fireAt.minute,
-        second:         fireAt.second,
-        millisecond:    0,
-        timeZone:       _localTz,
-        repeats:        false,
-        preciseAlarm:   true,
-        allowWhileIdle: true,
-      ),
-    );
+    try {
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id:                 99,
+          channelKey:         _adzanChannelKey(sound),
+          title:              'Test Notifikasi Adzan',
+          body:               'Notifikasi adzan berfungsi dengan baik!',
+          notificationLayout: NotificationLayout.Default,
+          category:           NotificationCategory.Reminder,
+          wakeUpScreen:       true,
+          autoDismissible:    true,
+        ),
+        schedule: NotificationCalendar(
+          year:           fireAt.year,
+          month:          fireAt.month,
+          day:            fireAt.day,
+          hour:           fireAt.hour,
+          minute:         fireAt.minute,
+          second:         fireAt.second,
+          millisecond:    0,
+          timeZone:       _localTz,
+          repeats:        false,
+          preciseAlarm:   true,
+          allowWhileIdle: true,
+        ),
+      );
+    } catch (e, stack) {
+      debugPrint('[Notif] scheduleTest failed: $e');
+      FirebaseCrashlytics.instance.recordError(
+        e, stack, reason: 'notif_schedule_test_failed', fatal: false,
+      );
+    }
   }
 }
