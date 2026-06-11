@@ -234,12 +234,47 @@ Future<void> main() async {
     await murottalProvider.initialize();
   } catch (e, stack) {
     debugPrint('Init error: $e\n$stack');
-    // Fallback: create empty providers so the app can still launch
+    try {
+      FirebaseCrashlytics.instance
+          .recordError(e, stack, reason: 'boot_init_failed', fatal: false);
+    } catch (_) {
+      // Firebase itself may have failed to init — nothing to do.
+    }
+
+    // Real fallback: create fresh providers and attempt to initialize each
+    // one individually. The original failure may have occurred partway
+    // through the sequence above (e.g. JustAudioBackground.init), in which
+    // case earlier providers initialize fine here — Hive.openBox is
+    // idempotent. Each init is guarded so one failure doesn't cascade.
     settingsProvider  = SettingsProvider();
     trackingProvider  = TrackingProvider();
     dzikirProvider    = DzikirProvider();
     quranProvider     = QuranProvider();
     murottalProvider  = MurottalProvider();
+
+    try { await Hive.initFlutter(); } catch (_) {}
+    try { Hive.registerAdapter(IbadahTrackingAdapter()); } catch (_) {}
+
+    for (final entry in <String, Future<void> Function()>{
+      'settings': settingsProvider.initialize,
+      'tracking': trackingProvider.initialize,
+      'dzikir':   dzikirProvider.initialize,
+      'quran':    quranProvider.initialize,
+      'murottal': murottalProvider.initialize,
+    }.entries) {
+      try {
+        await entry.value();
+      } catch (e2) {
+        debugPrint('Fallback init failed for ${entry.key}: $e2');
+      }
+    }
+
+    try {
+      onboardingDone = Hive.box('settings')
+          .get('onboarding_done', defaultValue: false) as bool;
+    } catch (_) {
+      // Settings box truly unavailable — default to onboarding.
+    }
   } finally {
     FlutterNativeSplash.remove();
   }
