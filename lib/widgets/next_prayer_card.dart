@@ -14,16 +14,33 @@ class NextPrayerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<PrayerProvider>();
     final settings = context.watch<SettingsProvider>();
-    final prayers  = provider.prayerTimes;
 
-    if (prayers.isEmpty) return const SizedBox.shrink();
+    // Select only the values this card renders, packed in a record (value
+    // equality) — the provider notifies every second for the countdown
+    // ticker, but this card only needs to rebuild on prayer transitions.
+    // (currentKey, currentTime, nextKey, nextTime, isEmpty)
+    final sel = context.select<PrayerProvider,
+        (String?, DateTime?, String?, DateTime?, bool)>((p) {
+      final prayers = p.prayerTimes;
+      if (prayers.isEmpty) return (null, null, null, null, true);
+      final nextIdx = prayers.indexWhere((x) => x.isNext);
+      final current = (nextIdx > 0) ? prayers[nextIdx - 1] : null;
+      return (
+        current?.key,
+        current?.time,
+        p.nextPrayer?.key,
+        p.nextPrayer?.time,
+        false,
+      );
+    });
 
-    final nextIdx       = prayers.indexWhere((p) => p.isNext);
-    final currentPrayer = (nextIdx > 0) ? prayers[nextIdx - 1] : null;
-    final nextPrayer    = provider.nextPrayer;
-    final endTime       = nextPrayer?.time;
+    if (sel.$5) return const SizedBox.shrink();
+
+    final currentKey  = sel.$1;
+    final currentTime = sel.$2;
+    final nextKey     = sel.$3;
+    final nextTime    = sel.$4;
 
     return Row(
       children: [
@@ -31,14 +48,14 @@ class NextPrayerCard extends StatelessWidget {
         Expanded(
           child: _PrayerCard(
             label: settings.getLabel('currentPrayer'),
-            prayerName: currentPrayer != null
-                ? settings.getPrayerName(currentPrayer.key)
+            prayerName: currentKey != null
+                ? settings.getPrayerName(currentKey)
                 : '—',
-            timeStr: currentPrayer != null
-                ? formatPrayerTime(context, currentPrayer.time)
+            timeStr: currentKey != null
+                ? formatPrayerTime(context, currentTime!)
                 : '—',
-            subLine: (currentPrayer != null && endTime != null)
-                ? '${settings.getLabel('ends')} · ${formatPrayerTime(context, endTime)}'
+            subLine: (currentKey != null && nextTime != null)
+                ? '${settings.getLabel('ends')} · ${formatPrayerTime(context, nextTime)}'
                 : '',
             isWarm: true,
           ),
@@ -48,13 +65,13 @@ class NextPrayerCard extends StatelessWidget {
 
         // ── Right: next prayer ─────────────────────────────────────────────
         Expanded(
-          child: nextPrayer != null
+          child: nextKey != null
               ? _PrayerCard(
                   label: settings.getLabel('nextPrayer'),
-                  prayerName: settings.getPrayerName(nextPrayer.key),
-                  timeStr: formatPrayerTime(context, nextPrayer.time),
+                  prayerName: settings.getPrayerName(nextKey),
+                  timeStr: formatPrayerTime(context, nextTime!),
                   subLine:
-                      '${settings.getLabel('adhan')} · ${formatPrayerTime(context, nextPrayer.time)}',
+                      '${settings.getLabel('adhan')} · ${formatPrayerTime(context, nextTime)}',
                   isWarm: false,
                   showCountdown: true,
                 )
