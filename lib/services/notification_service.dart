@@ -127,17 +127,31 @@ class NotificationService {
 
   // ── Permissions ───────────────────────────────────────────────────────────
 
+  /// Requests notification permissions. Skips the dialog entirely if
+  /// permission is already granted (avoids re-prompting on every boot).
+  /// Wrapped in try/catch — requestPermissionToSendNotifications can throw
+  /// PlatformException on aggressive OEMs (same class as the Tecno
+  /// INSUFFICIENT_PERMISSIONS crash fixed in 1.5.3).
   static Future<void> requestPermission() async {
-    await AwesomeNotifications().requestPermissionToSendNotifications(
-      permissions: [
-        NotificationPermission.Alert,
-        NotificationPermission.Sound,
-        NotificationPermission.Vibration,
-        NotificationPermission.Badge,
-        NotificationPermission.CriticalAlert,
-        NotificationPermission.PreciseAlarms,
-      ],
-    );
+    try {
+      final allowed = await AwesomeNotifications().isNotificationAllowed();
+      if (allowed) return;
+      await AwesomeNotifications().requestPermissionToSendNotifications(
+        permissions: [
+          NotificationPermission.Alert,
+          NotificationPermission.Sound,
+          NotificationPermission.Vibration,
+          NotificationPermission.Badge,
+          NotificationPermission.CriticalAlert,
+          NotificationPermission.PreciseAlarms,
+        ],
+      );
+    } catch (e, stack) {
+      debugPrint('[Notif] requestPermission failed: $e');
+      FirebaseCrashlytics.instance.recordError(
+        e, stack, reason: 'notif_request_permission_failed', fatal: false,
+      );
+    }
   }
 
   /// Returns true if notifications are currently allowed. Wraps the plugin

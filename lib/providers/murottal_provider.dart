@@ -176,7 +176,13 @@ class MurottalProvider extends ChangeNotifier {
       await _player.setSpeed(_speed);
       _applyLoopMode();
       await _player.play();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[Murottal] playAyah($surah:$ayah) load failed: $e');
+      // Reset surah/ayah so a retry tap rebuilds the playlist instead of
+      // hitting the same-surah fast path and silently seeking into a
+      // playlist that never loaded.
+      _surah     = null;
+      _ayah      = null;
       _isLoading = false;
       _isPlaying = false;
       notifyListeners();
