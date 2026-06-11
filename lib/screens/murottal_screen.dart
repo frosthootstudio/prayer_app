@@ -25,11 +25,7 @@ class MurottalScreen extends StatelessWidget {
     final surahArabic = surah != null ? quran.getSurahNameArabic(surah) : '';
     final surahName   = surah != null ? QuranUtils.getSurahDisplayName(surah) : (isEn ? 'No track' : 'Belum diputar');
 
-    final pos = mp.position;
     final dur = mp.duration;
-    final progress = (dur.inMilliseconds > 0)
-        ? (pos.inMilliseconds / dur.inMilliseconds).clamp(0.0, 1.0)
-        : 0.0;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -115,35 +111,49 @@ class MurottalScreen extends StatelessWidget {
                   const SizedBox(height: 10),
 
                   // ── Progress bar ─────────────────────────────────────────
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: gold,
-                      inactiveTrackColor: gold.withValues(alpha: 0.2),
-                      thumbColor: gold,
-                      overlayColor: gold.withValues(alpha: 0.15),
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                      trackHeight: 3,
-                    ),
-                    child: Slider(
-                      value: progress,
-                      onChanged: dur.inMilliseconds > 0
-                          ? (v) => mp.seek(
-                                Duration(
-                                  milliseconds: (v * dur.inMilliseconds).round(),
-                                ),
-                              )
-                          : null,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(_fmt(pos), style: const TextStyle(fontSize: 11)),
-                        Text(_fmt(dur), style: const TextStyle(fontSize: 11)),
-                      ],
-                    ),
+                  ValueListenableBuilder<Duration>(
+                    valueListenable: mp.positionNotifier,
+                    builder: (_, pos, _) {
+                      final progress = dur.inMilliseconds > 0
+                          ? (pos.inMilliseconds / dur.inMilliseconds)
+                              .clamp(0.0, 1.0)
+                          : 0.0;
+                      return Column(
+                        children: [
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              activeTrackColor: gold,
+                              inactiveTrackColor: gold.withValues(alpha: 0.2),
+                              thumbColor: gold,
+                              overlayColor: gold.withValues(alpha: 0.15),
+                              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                              trackHeight: 3,
+                            ),
+                            child: Slider(
+                              value: progress,
+                              onChanged: dur.inMilliseconds > 0
+                                  ? (v) => mp.seek(
+                                        Duration(
+                                          milliseconds:
+                                              (v * dur.inMilliseconds).round(),
+                                        ),
+                                      )
+                                  : null,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(_fmt(pos), style: const TextStyle(fontSize: 11)),
+                                Text(_fmt(dur), style: const TextStyle(fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 12),

@@ -43,7 +43,11 @@ class MurottalProvider extends ChangeNotifier {
   int?     _ayah;
   bool     _isPlaying = false;
   bool     _isLoading = false;
-  Duration _position  = Duration.zero;
+  /// Playback position, exposed as its own notifier so the seek slider
+  /// can listen at stream frequency (~5Hz) without rebuilding every
+  /// MurottalProvider watcher via notifyListeners.
+  final ValueNotifier<Duration> positionNotifier =
+      ValueNotifier(Duration.zero);
   Duration _duration  = Duration.zero;
 
   Reciter        _reciter    = Reciter.alafasy;
@@ -58,7 +62,7 @@ class MurottalProvider extends ChangeNotifier {
   int?           get currentAyah   => _ayah;
   bool           get isPlaying     => _isPlaying;
   bool           get isLoading     => _isLoading;
-  Duration       get position      => _position;
+  Duration       get position      => positionNotifier.value;
   Duration       get duration      => _duration;
   Reciter        get reciter       => _reciter;
   MurottalRepeat get repeatMode    => _repeatMode;
@@ -98,8 +102,9 @@ class MurottalProvider extends ChangeNotifier {
 
     // Position (resets to 0 at start of each ayah in playlist)
     _player.positionStream.listen((pos) {
-      _position = pos;
-      notifyListeners();
+      positionNotifier.value = pos;
+      // No notifyListeners — only the slider cares, and it listens to
+      // positionNotifier directly.
     });
 
     // Duration (reports duration of current ayah)
@@ -165,7 +170,7 @@ class MurottalProvider extends ChangeNotifier {
     _surah     = surah;
     _ayah      = ayah;
     _isLoading = true;
-    _position  = Duration.zero;
+    positionNotifier.value = Duration.zero;
     _duration  = Duration.zero;
     notifyListeners();
 
@@ -204,12 +209,12 @@ class MurottalProvider extends ChangeNotifier {
   Future<void> seek(Duration position) => _player.seek(position);
 
   Future<void> rewind() async {
-    final newPos = _position - const Duration(seconds: 10);
+    final newPos = positionNotifier.value - const Duration(seconds: 10);
     await _player.seek(newPos < Duration.zero ? Duration.zero : newPos);
   }
 
   Future<void> forward() async {
-    final newPos = _position + const Duration(seconds: 10);
+    final newPos = positionNotifier.value + const Duration(seconds: 10);
     await _player.seek(newPos > _duration ? _duration : newPos);
   }
 
@@ -218,7 +223,7 @@ class MurottalProvider extends ChangeNotifier {
     _surah     = null;
     _ayah      = null;
     _isPlaying = false;
-    _position  = Duration.zero;
+    positionNotifier.value = Duration.zero;
     _duration  = Duration.zero;
     notifyListeners();
   }
@@ -262,6 +267,7 @@ class MurottalProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    positionNotifier.dispose();
     _player.dispose();
     super.dispose();
   }

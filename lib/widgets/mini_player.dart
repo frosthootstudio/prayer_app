@@ -21,9 +21,6 @@ class MiniPlayer extends StatelessWidget {
     final surahName = QuranUtils.getSurahDisplayName(mp.currentSurah!);
     final ayah      = mp.currentAyah ?? 1;
     final ayahCount = quran.getVerseCount(mp.currentSurah!);
-    final progress  = mp.duration.inMilliseconds > 0
-        ? (mp.position.inMilliseconds / mp.duration.inMilliseconds).clamp(0.0, 1.0)
-        : 0.0;
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -48,11 +45,20 @@ class MiniPlayer extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Progress line
-            LinearProgressIndicator(
-              value: progress,
-              minHeight: 2,
-              backgroundColor: gold.withValues(alpha: 0.15),
-              valueColor: const AlwaysStoppedAnimation(gold),
+            ValueListenableBuilder<Duration>(
+              valueListenable: mp.positionNotifier,
+              builder: (_, pos, _) {
+                final progress = mp.duration.inMilliseconds > 0
+                    ? (pos.inMilliseconds / mp.duration.inMilliseconds)
+                        .clamp(0.0, 1.0)
+                    : 0.0;
+                return LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 2,
+                  backgroundColor: gold.withValues(alpha: 0.15),
+                  valueColor: const AlwaysStoppedAnimation(gold),
+                );
+              },
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
