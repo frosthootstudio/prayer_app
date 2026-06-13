@@ -1,19 +1,30 @@
-# prayer_app
+# 🕌 Waktu Shalat
 
-**Versi saat ini: 1.0.5**
+> Aplikasi jadwal sholat lengkap & offline — dibangun oleh FrostHoot.Studio.
 
-A new Flutter project.
+[📲 Download di Playstore](https://play.google.com/store/apps/details?id=studio.frosthoot.prayer_app&pcampaignid=web_share)
 
-## Getting Started
+## Tentang
+Waktu Shalat adalah aplikasi pendamping ibadah harian dengan jadwal akurat, pengingat adzan, Al-Qur’an, dan banyak lagi — semua bekerja offline.
 
-This project is a starting point for a Flutter application.
+## ✨ Fitur Utama
+- 🕓 Jadwal sholat offline berbasis GPS, 5 metode kalkulasi (Kemenag, MWL, Egyptian, ISNA, Umm Al-Qura)
+- 🔔 Pengingat adzan (exact alarm) + suara adzan kustom + pengingat pra-adzan
+- 🧭 Arah kiblat dengan kompas live
+- 📖 Al-Qur’an 114 surah + terjemahan ID + murottal 5 qari + 5 font Arab
+- 📿 Dzikir & doa harian dengan sistem favorit
+- 📅 Kalender Hijriah + pelacak ibadah
+- 🌙 Mode Ramadan (Imsak + hitung mundur)
+- 📱 Widget layar beranda (2 ukuran)
+- 🌐 3 bahasa (ID/EN/AR-RTL) + tema terang/gelap
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Dibangun Dengan
+- Flutter
+- AI-assisted development (Claude Code)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## 📸 Screenshot
+(Taruh 3–4 screenshot terbaik di sini)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 👤 Dibuat oleh
+FrostHoot.Studio — mizula
+[LinkedIn] · [TikTok] · [Instagram]
