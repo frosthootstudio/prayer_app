@@ -374,10 +374,16 @@ class NotificationService {
 
   // ── Test notification ─────────────────────────────────────────────────────
 
-  /// Schedules a one-shot notification 10 seconds from now using [sound].
-  static Future<void> scheduleTest({
+  /// Schedules a one-shot test notification 10s from now. Returns false if
+  /// notifications aren't allowed (caller should guide the user to enable
+  /// them) — previously this scheduled silently and the user saw nothing.
+  static Future<bool> scheduleTest({
     AdzanSound sound = AdzanSound.adzan,
   }) async {
+    if (!await isAllowed()) {
+      debugPrint('[Notif] scheduleTest skipped — notifications not allowed');
+      return false;
+    }
     final fireAt = DateTime.now().add(const Duration(seconds: 10));
     try {
       await AwesomeNotifications().createNotification(
@@ -405,11 +411,13 @@ class NotificationService {
           allowWhileIdle: true,
         ),
       );
+      return true;
     } catch (e, stack) {
       debugPrint('[Notif] scheduleTest failed: $e');
       FirebaseCrashlytics.instance.recordError(
         e, stack, reason: 'notif_schedule_test_failed', fatal: false,
       );
+      return false;
     }
   }
 }

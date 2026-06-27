@@ -148,16 +148,21 @@ class SettingsScreen extends StatelessWidget {
                     label: settings.getLabel('testNotif'),
                     icon:  Icons.notifications_active_rounded,
                     onTap: () async {
-                      await NotificationService.scheduleTest(
+                      final scheduled = await NotificationService.scheduleTest(
                         sound: settings.adzanSound,
                       );
-                      if (context.mounted) {
+                      if (!context.mounted) return;
+                      if (scheduled) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(settings.getLabel('testNotifSent')),
                             duration: const Duration(seconds: 3),
                           ),
                         );
+                      } else {
+                        // Notifications disabled — open the permission fix sheet instead of
+                        // a misleading "will appear in 10s" message.
+                        _showPermissionSheet(context);
                       }
                     },
                   ),
