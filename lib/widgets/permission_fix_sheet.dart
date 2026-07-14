@@ -160,9 +160,15 @@ class _PermissionFixSheetState extends State<PermissionFixSheet> {
             },
           ),
 
-          // Row 4 – MIUI manual step (Xiaomi only, cannot be automated)
+          // Row 4 – Autostart manager (Xiaomi only) — opens MIUI autostart page
           if (widget.isXiaomi) ...[
             const SizedBox(height: 12),
+            _AutostartRow(
+              isEn: isEn,
+              onOpen: PermissionService.openAutostartSettings,
+            ),
+            const SizedBox(height: 12),
+            // Row 5 – MIUI manual step (cannot be automated)
             _MiuiLockRow(isEn: isEn),
           ],
 
@@ -288,6 +294,75 @@ class _PermissionRow extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+// ── MIUI autostart action row (opens the autostart manager) ──────────────────
+
+class _AutostartRow extends StatelessWidget {
+  final bool isEn;
+  final Future<void> Function() onOpen;
+  const _AutostartRow({required this.isEn, required this.onOpen});
+
+  @override
+  Widget build(BuildContext context) {
+    const orange = Color(0xFFD4A057);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: orange.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: orange.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.rocket_launch_outlined, color: orange, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isEn ? 'Autostart (MIUI)' : 'Autostart (MIUI)',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: context.appTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  isEn
+                      ? 'Allow the app to start automatically so adzan reminders keep firing.'
+                      : 'Izinkan app berjalan otomatis agar pengingat adzan tetap muncul.',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: context.appTextSecondary,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onOpen,
+            style: TextButton.styleFrom(
+              foregroundColor: orange,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              isEn ? 'Open' : 'Buka',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

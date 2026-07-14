@@ -1,5 +1,6 @@
 package studio.frosthoot.prayer_app
 
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -23,11 +24,6 @@ class MainActivity : AudioServiceActivity() {
         // ComponentActivity.enableEdgeToEdge() extension at compile time.
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-
-        // Notification reliability relies on awesome_notifications exact
-        // alarms + WorkManager. No custom keepalive FGS — see git log for
-        // 1.2.1+20 if MIUI/HyperOS reliability degrades and a service-based
-        // approach needs reconsidering.
     }
 
     private fun tryStart(intent: Intent): Boolean = try {
@@ -36,6 +32,15 @@ class MainActivity : AudioServiceActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // Start keepalive foreground service for MIUI/HyperOS reliability so
+        // scheduled adzan alarms keep firing when the app is backgrounded.
+        val serviceIntent = Intent(this, PrayerForegroundService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SETTINGS_CHANNEL)
             .setMethodCallHandler { call, result ->
@@ -86,8 +91,35 @@ class MainActivity : AudioServiceActivity() {
                         }
                         result.success(null)
                     }
+                    "openAutostartSettings" -> {
+                        result.success(openAutostartSettings())
+                    }
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    /**
+     * Opens the OEM autostart / background-launch manager. On Xiaomi/MIUI this
+     * is the single most important toggle for reliable notifications after the
+     * app is swiped from recents or the device reboots. Falls back through
+     * generic MIUI intents, then the app details page.
+     */
+    private fun openAutostartSettings(): Boolean {
+        val miuiIntent = Intent().apply {
+            component = ComponentName(
+                "com.miui.securitycenter",
+                "com.miui.permcenter.autostart.AutoStartManagementActivity",
+            )
+        }
+        if (tryStart(miuiIntent.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })) return true
+        val legacyIntent = Intent("miui.intent.action.OP_AUTO_START").apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        if (tryStart(legacyIntent)) return true
+        return tryStart(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
     }
 }

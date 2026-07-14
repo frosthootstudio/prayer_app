@@ -108,6 +108,16 @@ class PermissionService {
       await _channel.invokeMethod<void>('openBatterySettings');
     } catch (_) {}
   }
+
+  /// Opens the OEM autostart / background-launch manager (MIUI et al.).
+  /// This is the key toggle on Xiaomi for notifications to survive the app
+  /// being swiped from recents or a reboot. Falls back to the app details
+  /// page natively if the autostart activity is unavailable.
+  static Future<void> openAutostartSettings() async {
+    try {
+      await _channel.invokeMethod<void>('openAutostartSettings');
+    } catch (_) {}
+  }
 }
 
 enum DeviceManufacturer { xiaomi, samsung, oppo, vivo, realme, huawei, stock }

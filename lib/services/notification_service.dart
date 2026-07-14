@@ -385,6 +385,8 @@ class NotificationService {
       return false;
     }
     final fireAt = DateTime.now().add(const Duration(seconds: 10));
+    debugPrint('[Notif] scheduleTest: tz=$_localTz, fireAt=$fireAt, '
+        'now=${DateTime.now()}');
     try {
       await AwesomeNotifications().createNotification(
         content: NotificationContent(
@@ -411,6 +413,12 @@ class NotificationService {
           allowWhileIdle: true,
         ),
       );
+      final pending = await AwesomeNotifications().listScheduledNotifications();
+      debugPrint('[Notif] pending count=${pending.length}');
+      for (final n in pending) {
+        debugPrint('[Notif] pending id=${n.content?.id} '
+            'schedule=${n.schedule?.toMap()}');
+      }
       return true;
     } catch (e, stack) {
       debugPrint('[Notif] scheduleTest failed: $e');

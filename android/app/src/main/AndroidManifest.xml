@@ -12,8 +12,18 @@
 
     <!-- Exact alarm for on-time adzan notifications (Android 12+).
          SCHEDULE_EXACT_ALARM requires runtime permission on API 31+;
-         USE_EXACT_ALARM is restricted to calendar/clock apps on Play Store. -->
+         USE_EXACT_ALARM is auto-granted but restricted to alarm/clock/prayer
+         apps on the Play Store — adzan reminders qualify. Declaring both means
+         the alarm fires exactly even if the user never opens the Alarms &
+         reminders settings page. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+
+    <!-- Full-screen intent so time-critical adzan can wake the screen. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+
+    <!-- Allows the app to honour Do Not Disturb / critical-alert behaviour. -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
 
     <!-- Boot completed so notifications survive reboot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
@@ -30,6 +40,10 @@
 
     <!-- Background audio (murottal / adzan playback) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+
+    <!-- Keepalive foreground service (PrayerForegroundService) for reliable
+         notifications on MIUI/HyperOS and other aggressive OEMs. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
 
     <!-- Google Advertising ID (required for AdMob personalized ads on Android 13+).
          google_mobile_ads ^5.x stopped auto-declaring this permission, so we
@@ -98,6 +112,30 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_widget_medium_info" />
         </receiver>
+
+        <!-- awesome_notifications: reschedules exact alarms after reboot /
+             app update. Without this receiver, all pending adzan alarms are
+             lost on reboot (AlarmManager clears them). -->
+        <receiver
+            android:name="me.carda.awesome_notifications.core.broadcasters.receivers.DartBackgroundService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- Keepalive foreground service for reliable notifications on
+             MIUI/HyperOS. Separate from the audio mediaPlayback service. -->
+        <service
+            android:name=".PrayerForegroundService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Prayer notification keepalive" />
+        </service>
 
         <!-- Background audio service (murottal / just_audio_background) -->
         <service
