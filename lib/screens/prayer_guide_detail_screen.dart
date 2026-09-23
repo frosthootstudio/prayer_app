@@ -488,91 +488,88 @@ class _RecommendedSurahsCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          for (final item in surahs) ...[
-            Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.appAccent.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: context.appAccent.withValues(alpha: 0.15),
-                  width: 0.8,
+          const SizedBox(height: 14),
+          for (int i = 0; i < surahs.length; i++) ...[
+            if (i > 0)
+              Divider(
+                color: context.appDivider,
+                height: 22,
+                thickness: 0.6,
+              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: context.appAccent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        surahs[i].rakaat,
+                        style: GoogleFonts.poppins(
+                          color: context.appAccent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        surahs[i].surahName,
+                        style: GoogleFonts.poppins(
+                          color: context.appTextPrimary,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (surahs[i].arabicSurahName != null) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        surahs[i].arabicSurahName!,
+                        textDirection: TextDirection.rtl,
+                        style: GoogleFonts.amiri(
+                          color: context.appAccent,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.appAccent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          item.rakaat,
-                          style: GoogleFonts.poppins(
-                            color: context.appAccent,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                          ),
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, right: 6),
+                      child: Icon(
+                        Icons.stars_rounded,
+                        size: 15,
+                        color: const Color(0xFFD4A057),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        surahs[i].virtue,
+                        style: GoogleFonts.poppins(
+                          color: context.appTextSecondary,
+                          fontSize: 12,
+                          height: 1.45,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          item.surahName,
-                          style: GoogleFonts.poppins(
-                            color: context.appTextPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      if (item.arabicSurahName != null)
-                        Text(
-                          item.arabicSurahName!,
-                          textDirection: TextDirection.rtl,
-                          style: GoogleFonts.amiri(
-                            color: context.appAccent,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 3, right: 6),
-                        child: Icon(
-                          Icons.stars_rounded,
-                          size: 14,
-                          color: const Color(0xFFD4A057),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          item.virtue,
-                          style: GoogleFonts.poppins(
-                            color: context.appTextSecondary,
-                            fontSize: 11.5,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ],
