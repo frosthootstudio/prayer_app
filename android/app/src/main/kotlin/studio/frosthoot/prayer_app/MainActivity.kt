@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.core.view.WindowCompat
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -28,7 +29,9 @@ class MainActivity : AudioServiceActivity() {
 
     private fun tryStart(intent: Intent): Boolean = try {
         startActivity(intent); true
-    } catch (_: Exception) { false }
+    } catch (_: Exception) {
+        false
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -49,26 +52,38 @@ class MainActivity : AudioServiceActivity() {
                         val manufacturer = Build.MANUFACTURER.lowercase()
                         val launched = when {
                             manufacturer == "xiaomi" -> tryStart(Intent("miui.intent.action.APP_PERM_EDITOR").apply {
-                                setClassName("com.miui.securitycenter",
-                                    "com.miui.permcenter.permissions.PermissionsEditorActivity")
+                                setClassName(
+                                    "com.miui.securitycenter",
+                                    "com.miui.permcenter.permissions.PermissionsEditorActivity"
+                                )
                                 putExtra("extra_pkgname", packageName)
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             })
+
                             manufacturer == "oppo" -> tryStart(Intent().apply {
-                                setClassName("com.coloros.safecenter",
-                                    "com.coloros.privacypermissionsentry.PermissionTopActivity")
+                                setClassName(
+                                    "com.coloros.safecenter",
+                                    "com.coloros.privacypermissionsentry.PermissionTopActivity"
+                                )
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             })
+
                             manufacturer == "vivo" -> tryStart(Intent().apply {
-                                setClassName("com.vivo.permissionmanager",
-                                    "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")
+                                setClassName(
+                                    "com.vivo.permissionmanager",
+                                    "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+                                )
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             })
+
                             manufacturer == "huawei" || manufacturer == "honor" -> tryStart(Intent().apply {
-                                setClassName("com.huawei.systemmanager",
-                                    "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")
+                                setClassName(
+                                    "com.huawei.systemmanager",
+                                    "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+                                )
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             })
+
                             else -> false
                         }
                         if (!launched) {
@@ -80,6 +95,7 @@ class MainActivity : AudioServiceActivity() {
                         }
                         result.success(null)
                     }
+
                     "getManufacturer" -> result.success(Build.MANUFACTURER)
                     "openAlarmSettings" -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -91,9 +107,31 @@ class MainActivity : AudioServiceActivity() {
                         }
                         result.success(null)
                     }
+
                     "openAutostartSettings" -> {
                         result.success(openAutostartSettings())
                     }
+
+                    "requestReview" -> {
+                        try {
+                            val manager = ReviewManagerFactory.create(this)
+                            val request = manager.requestReviewFlow()
+                            request.addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val reviewInfo = task.result
+                                    val flow = manager.launchReviewFlow(this, reviewInfo)
+                                    flow.addOnCompleteListener {
+                                        result.success(true)
+                                    }
+                                } else {
+                                    result.success(false)
+                                }
+                            }
+                        } catch (_: Exception) {
+                            result.success(false)
+                        }
+                    }
+
                     else -> result.notImplemented()
                 }
             }

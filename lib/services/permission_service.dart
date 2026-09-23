@@ -14,7 +14,7 @@ class PermissionService {
   // Cached synchronously after [getManufacturer] is first awaited (in main.dart)
   static String? _cachedManufacturer;
 
-  // ── Status checks ──────────────────────────────────────────────────────────
+  // ── Status checks ─────────────────────────────────────────────────────────
 
   static Future<bool> hasNotification() async {
     if (!Platform.isAndroid) return true;
@@ -29,7 +29,7 @@ class PermissionService {
   static Future<bool> hasExactAlarm() async {
     if (!Platform.isAndroid) return true;
     try {
-      return Permission.scheduleExactAlarm.isGranted;
+      return await Permission.scheduleExactAlarm.isGranted;
     } catch (_) {
       return true; // not supported on this API level → no restriction
     }
@@ -45,7 +45,7 @@ class PermissionService {
     return results.every((v) => v);
   }
 
-  // ── Requests ───────────────────────────────────────────────────────────────
+  // ── Requests ──────────────────────────────────────────────────────────────
 
   static Future<void> requestNotification() async {
     if (!Platform.isAndroid) return;
@@ -67,7 +67,7 @@ class PermissionService {
     }
   }
 
-  // ── Device info ────────────────────────────────────────────────────────────
+  // ── Device info ───────────────────────────────────────────────────────────
 
   /// Fetches and caches the device manufacturer string.
   /// Call once at startup (main.dart) so [isXiaomiDevice] is synchronously available.

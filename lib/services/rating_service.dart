@@ -1,16 +1,18 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
-import 'package:in_app_review/in_app_review.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Tracks app launches and triggers the in-app rating prompt once after
 /// the 5th launch. A manual trigger is also available for the settings screen.
+/// Uses Google's official Play In-App Review via MethodChannel on Android,
+/// with direct Play Store fallback.
 class RatingService {
   static const _launchCountKey = 'app_launch_count';
   static const _ratingShownKey = 'rating_shown';
   static const _minLaunchCount = 5;
 
-  static final _inAppReview = InAppReview.instance;
+  static const _channel = MethodChannel('studio.frosthoot.prayer_app/settings');
 
   /// Call on every app open (from MainScreen.initState via a 2-second delay).
   /// Shows the system rating prompt exactly once after [_minLaunchCount] launches.
@@ -24,9 +26,13 @@ class RatingService {
     await box.put(_launchCountKey, count);
 
     if (count >= _minLaunchCount) {
-      if (await _inAppReview.isAvailable()) {
-        await _inAppReview.requestReview();
-        await box.put(_ratingShownKey, true);
+      try {
+        final success = await _channel.invokeMethod<bool>('requestReview') ?? false;
+        if (success) {
+          await box.put(_ratingShownKey, true);
+        }
+      } catch (e) {
+        debugPrint('[Rating] trackLaunchAndPrompt error: $e');
       }
     }
   }
@@ -35,10 +41,8 @@ class RatingService {
   /// listing if the in-app dialog is unavailable.
   static Future<void> requestRating() async {
     try {
-      if (await _inAppReview.isAvailable()) {
-        await _inAppReview.requestReview();
-        return;
-      }
+      final success = await _channel.invokeMethod<bool>('requestReview') ?? false;
+      if (success) return;
     } catch (e) {
       debugPrint('[Rating] requestReview failed, falling back: $e');
     }
