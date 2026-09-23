@@ -5,12 +5,9 @@ import '../providers/murottal_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/rating_service.dart';
 import '../widgets/mini_player.dart';
-import 'calendar_screen.dart';
-import 'dzikir_screen.dart';
 import 'home_screen.dart';
 import 'qibla_screen.dart';
 import 'quran_screen.dart';
-import 'settings_screen.dart';
 import 'tracking_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -44,14 +41,11 @@ class _MainScreenState extends State<MainScreen> {
               index: _selectedIndex,
               children: [
                 HomeScreen(
-                  onNavigateToTracking: () => setState(() => _selectedIndex = 4),
+                  onNavigateToTracking: () => setState(() => _selectedIndex = 3),
                 ),
-                const QiblaScreen(),
-                const CalendarScreen(),
                 const QuranScreen(),
+                const QiblaScreen(),
                 const TrackingScreen(),
-                const DzikirScreen(),
-                const SettingsScreen(),
               ],
             ),
           ),
@@ -74,34 +68,19 @@ class _MainScreenState extends State<MainScreen> {
             label: settings.getLabel('home'),
           ),
           _NavItemData(
-            icon: Icons.explore_outlined,
-            activeIcon: Icons.explore_rounded,
-            label: settings.getLabel('qibla'),
-          ),
-          _NavItemData(
-            icon: Icons.calendar_month_outlined,
-            activeIcon: Icons.calendar_month_rounded,
-            label: settings.getLabel('kalender'),
-          ),
-          _NavItemData(
             icon: Icons.menu_book_outlined,
             activeIcon: Icons.menu_book_rounded,
             label: settings.getLabel('quran'),
           ),
           _NavItemData(
+            icon: Icons.explore_outlined,
+            activeIcon: Icons.explore_rounded,
+            label: settings.getLabel('qibla'),
+          ),
+          _NavItemData(
             icon: Icons.checklist_outlined,
             activeIcon: Icons.checklist_rounded,
             label: settings.getLabel('ibadah'),
-          ),
-          _NavItemData(
-            icon: Icons.auto_stories_outlined,
-            activeIcon: Icons.auto_stories_rounded,
-            label: settings.getLabel('dzikir'),
-          ),
-          _NavItemData(
-            icon: Icons.settings_outlined,
-            activeIcon: Icons.settings_rounded,
-            label: settings.getLabel('settings'),
           ),
         ],
       ),
@@ -122,7 +101,7 @@ class _NavItemData {
   });
 }
 
-// ── Container ─────────────────────────────────────────────────────────────────
+// ── Container ────────────────────────────────────────────────────────────────
 
 class _BottomNav extends StatelessWidget {
   final int                selectedIndex;
@@ -169,7 +148,7 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-// ── Item ──────────────────────────────────────────────────────────────────────
+// ── Item ─────────────────────────────────────────────────────────────────────
 
 class _NavButton extends StatelessWidget {
   final _NavItemData data;

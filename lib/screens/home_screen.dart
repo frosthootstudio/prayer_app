@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'calendar_screen.dart';
+import 'dzikir_screen.dart';
+import 'settings_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -115,6 +118,12 @@ class _HomeScreenState extends State<HomeScreen> {
             hijriDate:     provider.hijriDate,
             gregorianDate: provider.gregorianDate,
             showCrescent:  settings.ramadanMode && RamadanService.isRamadan(),
+            onSettingsTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            },
           ),
 
           // ── Ramadan banner ─────────────────────────────────────────────────
@@ -132,6 +141,13 @@ class _HomeScreenState extends State<HomeScreen> {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: NextPrayerCard(),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: _QuickActionRow(),
           ),
 
           const SizedBox(height: 8),
@@ -757,62 +773,223 @@ class _DateHeader extends StatelessWidget {
   final String hijriDate;
   final String gregorianDate;
   final bool showCrescent;
+  final VoidCallback? onSettingsTap;
 
   const _DateHeader({
     required this.hijriDate,
     required this.gregorianDate,
     this.showCrescent = false,
+    this.onSettingsTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          if (hijriDate.isNotEmpty)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (showCrescent) ...[
-                  const Icon(
-                    Icons.nightlight_round,
-                    size: 14,
-                    color: Color(0xFFD4A057),
-                  ),
-                  const SizedBox(width: 5),
-                ],
-                Text(
-                  hijriDate,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    color: context.appTextPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    height: 1.25,
-                  ),
+          Column(
+            children: [
+              if (hijriDate.isNotEmpty)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (showCrescent) ...[
+                      const Icon(
+                        Icons.nightlight_round,
+                        size: 14,
+                        color: Color(0xFFD4A057),
+                      ),
+                      const SizedBox(width: 5),
+                    ],
+                    Text(
+                      hijriDate,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        color: context.appTextPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        height: 1.25,
+                      ),
+                    ),
+                    if (showCrescent) ...[
+                      const SizedBox(width: 5),
+                      const Icon(
+                        Icons.nightlight_round,
+                        size: 14,
+                        color: Color(0xFFD4A057),
+                      ),
+                    ],
+                  ],
                 ),
-                if (showCrescent) ...[
-                  const SizedBox(width: 5),
-                  const Icon(
-                    Icons.nightlight_round,
-                    size: 14,
-                    color: Color(0xFFD4A057),
-                  ),
-                ],
-              ],
+              Text(
+                gregorianDate,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  color: context.appTextSecondary,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w400,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+          if (onSettingsTap != null)
+            Positioned(
+              right: 0,
+              child: IconButton(
+                icon: Icon(
+                  Icons.settings_outlined,
+                  size: 22,
+                  color: context.appTextSecondary,
+                ),
+                tooltip: 'Pengaturan',
+                onPressed: onSettingsTap,
+              ),
             ),
-          Text(
-            gregorianDate,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: context.appTextSecondary,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w400,
-              height: 1.3,
-            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Quick Actions ─────────────────────────────────────────────────────────────
+
+class _QuickActionRow extends StatelessWidget {
+  const _QuickActionRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final isEn = settings.isEnglish;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      decoration: BoxDecoration(
+        color: context.appCardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.appDivider, width: 0.8),
+        boxShadow: [
+          BoxShadow(
+            color: context.appCardShadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _QuickActionItem(
+            icon: Icons.menu_book_rounded,
+            label: isEn ? 'Guide' : 'Panduan',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isEn
+                        ? 'Prayer Guide feature is being prepared!'
+                        : 'Fitur Panduan Shalat sedang disiapkan!',
+                  ),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+          ),
+          _QuickActionItem(
+            icon: Icons.auto_stories_rounded,
+            label: isEn ? '25 Prophets' : '25 Nabi',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isEn
+                        ? 'Stories of 25 Prophets being prepared!'
+                        : 'Fitur Kisah 25 Nabi sedang disiapkan!',
+                  ),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+          ),
+          _QuickActionItem(
+            icon: Icons.spa_outlined,
+            label: 'Dzikir',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DzikirScreen()),
+              );
+            },
+          ),
+          _QuickActionItem(
+            icon: Icons.calendar_month_rounded,
+            label: isEn ? 'Calendar' : 'Kalender',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CalendarScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickActionItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: context.appAccent.withValues(alpha: 0.12),
+                border: Border.all(
+                  color: context.appAccent.withValues(alpha: 0.35),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                icon,
+                color: context.appAccent,
+                size: 22,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: context.appTextPrimary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

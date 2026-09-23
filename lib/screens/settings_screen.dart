@@ -28,13 +28,15 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
     final prayers  = context.watch<PrayerProvider>();
+    final canPop   = Navigator.canPop(context);
 
-    return SafeArea(
+    final content = SafeArea(
       bottom: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Header ────────────────────────────────────────────────────────
+          if (!canPop)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
             child: Text(
@@ -277,6 +279,32 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+
+    if (canPop) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.appTextPrimary, size: 20),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            settings.getLabel('settings'),
+            style: GoogleFonts.poppins(
+              color: context.appTextPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: content,
+      );
+    }
+
+    return content;
   }
 
   void _showPermissionSheet(BuildContext context) {
