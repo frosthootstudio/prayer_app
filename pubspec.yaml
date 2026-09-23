@@ -2,7 +2,7 @@ name: prayer_app
 description: "Aplikasi waktu shalat dengan kalkulasi offline dan notifikasi adzan."
 publish_to: 'none'
 
-version: 1.6.0+34
+version: 1.7.0+35
 
 environment:
   sdk: ^3.11.0
