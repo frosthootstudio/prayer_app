@@ -49,7 +49,7 @@
 - VS Code with Claude Code installed (PRIMARY for build/test/git operations + file edits)
 - Android emulator (sdk gphone64 x86 64) for device testing
 - Waydroid for IAP/Play Store testing (with GApps + uncertified Android ID registered)
-- Default Waydroid IP for ADB: `192.168.240.112:5555`
+- Default Waydroid IP for ADB: `<local-device-ip>:5555`
 
 **How to be most helpful:**
 - Lead with answer/decision, not deep technical reasoning unless asked

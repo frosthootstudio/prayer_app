@@ -39,12 +39,23 @@ class AdService {
   // ⚠️  DO NOT click ads on dev devices once these are live — risk of
   //     AdMob "invalid traffic" account flag.
 
+  static const String _androidTestAppOpenUnitId =
+      'ca-app-pub-3940256099942544/9257395921';
+  static const String _iosTestAppOpenUnitId =
+      'ca-app-pub-3940256099942544/5575463023';
+
   static const String _androidProdAppOpenUnitId =
       'ca-app-pub-4236028330675226/7453854346';
   static const String _iosProdAppOpenUnitId =
       'ca-app-pub-3940256099942544/5575463023'; // still TEST until iOS ships
 
   String get _appOpenUnitId {
+    // Automatically serve Google official test ads in debug mode to protect
+    // production account from invalid traffic strikes during development.
+    if (kDebugMode) {
+      if (Platform.isAndroid) return _androidTestAppOpenUnitId;
+      if (Platform.isIOS) return _iosTestAppOpenUnitId;
+    }
     if (Platform.isAndroid) return _androidProdAppOpenUnitId;
     if (Platform.isIOS) return _iosProdAppOpenUnitId;
     throw UnsupportedError('AdMob only supports Android & iOS');
