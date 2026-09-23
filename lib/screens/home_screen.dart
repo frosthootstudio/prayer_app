@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'calendar_screen.dart';
 import 'dzikir_screen.dart';
 import 'prayer_guide_screen.dart';
+import 'prophet_list_screen.dart';
 import 'settings_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -893,16 +894,9 @@ class _QuickActionRow extends StatelessWidget {
             icon: Icons.auto_stories_rounded,
             label: isEn ? '25 Prophets' : '25 Nabi',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    isEn
-                        ? 'Stories of 25 Prophets being prepared!'
-                        : 'Fitur Kisah 25 Nabi sedang disiapkan!',
-                  ),
-                  duration: const Duration(seconds: 2),
-                  behavior: SnackBarBehavior.floating,
-                ),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProphetListScreen()),
               );
             },
           ),
