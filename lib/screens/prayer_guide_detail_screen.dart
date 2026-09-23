@@ -7,6 +7,7 @@ import '../models/prayer_guide_model.dart';
 import '../providers/settings_provider.dart';
 import '../utils/arabic_font_helper.dart';
 import '../utils/app_theme.dart';
+import 'prayer_recitation_screen.dart';
 
 class PrayerGuideDetailScreen extends StatelessWidget {
   final PrayerGuideItem item;
@@ -54,45 +55,153 @@ class PrayerGuideDetailScreen extends StatelessWidget {
 
           const SizedBox(height: 16),
 
+          // ── Rekomendasi Surah Pendek & Keutamaannya ───────────────────────
+          if (item.recommendedSurahs.isNotEmpty) ...[
+            _RecommendedSurahsCard(surahs: item.recommendedSurahs, isEn: isEn),
+            const SizedBox(height: 16),
+          ],
+
           // ── Special Dua (if available) ────────────────────────────────────
           if (item.specialDuaArabic != null) ...[
             _SpecialDuaCard(item: item, settings: settings, isEn: isEn),
             const SizedBox(height: 16),
           ],
 
-          // ── Steps Header ──────────────────────────────────────────────────
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 18,
-                decoration: BoxDecoration(
-                  color: context.appAccent,
-                  borderRadius: BorderRadius.circular(2),
+          // ── Tata Cara Khusus (misal Shalat Jenazah 4 takbir) ──────────────
+          if (item.specialSteps != null && item.specialSteps!.isNotEmpty) ...[
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: context.appAccent,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                isEn ? 'Step-by-Step Guide' : 'Tata Cara & Bacaan Shalat',
-                style: GoogleFonts.poppins(
-                  color: context.appTextPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                const SizedBox(width: 8),
+                Text(
+                  isEn ? 'Step-by-Step Procedure' : 'Tata Cara Pelaksanaan',
+                  style: GoogleFonts.poppins(
+                    color: context.appTextPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // ── Steps Timeline ────────────────────────────────────────────────
-          for (int i = 0; i < item.steps.length; i++)
-            _StepItem(
-              step: item.steps[i],
-              stepIndex: i + 1,
-              isLast: i == item.steps.length - 1,
-              settings: settings,
+              ],
             ),
+            const SizedBox(height: 12),
+            for (int i = 0; i < item.specialSteps!.length; i++)
+              _SpecialStepItem(
+                step: item.specialSteps![i],
+                stepIndex: i + 1,
+                settings: settings,
+              ),
+            const SizedBox(height: 16),
+          ],
+
+          // ── Banner Akses Bacaan Shalat Lengkap (Takbir s/d Salam) ─────────
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.appAccent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: context.appAccent.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: context.appAccent.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.menu_book_rounded,
+                        color: context.appAccent,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isEn
+                                ? 'Universal Prayer Recitations'
+                                : 'Bacaan & Gerakan Shalat Lengkap',
+                            style: GoogleFonts.poppins(
+                              color: context.appTextPrimary,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            isEn
+                                ? 'Full guide from Takbiratul Ihram to Salam'
+                                : 'Panduan dari Takbiratul Ihram hingga Salam',
+                            style: GoogleFonts.poppins(
+                              color: context.appTextSecondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PrayerRecitationScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.appAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          isEn
+                              ? 'Open Full Recitations'
+                              : 'Buka Panduan Bacaan Lengkap',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -156,7 +265,11 @@ class _HeaderCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.schedule_rounded, size: 14, color: context.appTextSecondary),
+              Icon(
+                Icons.schedule_rounded,
+                size: 14,
+                color: context.appTextSecondary,
+              ),
               const SizedBox(width: 5),
               Expanded(
                 child: Text(
@@ -186,11 +299,7 @@ class _HeaderCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.auto_awesome,
-                    size: 16,
-                    color: context.appAccent,
-                  ),
+                  Icon(Icons.auto_awesome, size: 16, color: context.appAccent),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -257,17 +366,28 @@ class _NiatCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.copy_rounded, size: 16, color: context.appTextSecondary),
+                icon: Icon(
+                  Icons.copy_rounded,
+                  size: 16,
+                  color: context.appTextSecondary,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 tooltip: isEn ? 'Copy' : 'Salin',
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(
-                    text: '${item.niatArabic}\n\n${item.niatLatin}\n\n${item.niatTranslation}',
-                  ));
+                  Clipboard.setData(
+                    ClipboardData(
+                      text:
+                          '${item.niatArabic}\n\n${item.niatLatin}\n\n${item.niatTranslation}',
+                    ),
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(isEn ? 'Niat copied to clipboard' : 'Niat disalin ke clipboard'),
+                      content: Text(
+                        isEn
+                            ? 'Niat copied to clipboard'
+                            : 'Niat disalin ke clipboard',
+                      ),
                       duration: const Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -316,6 +436,151 @@ class _NiatCard extends StatelessWidget {
   }
 }
 
+// ── Rekomendasi Surah Pendek & Keutamaannya ──────────────────────────────────
+
+class _RecommendedSurahsCard extends StatelessWidget {
+  final List<RecommendedSurah> surahs;
+  final bool isEn;
+
+  const _RecommendedSurahsCard({required this.surahs, required this.isEn});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.appCardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: context.appAccent.withValues(alpha: 0.3),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: context.appCardShadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.menu_book_outlined,
+                color: context.appAccent,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  isEn
+                      ? 'Recommended Surahs & Virtues'
+                      : 'Rekomendasi Surah Pendek & Keutamaannya',
+                  style: GoogleFonts.poppins(
+                    color: context.appAccent,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          for (final item in surahs) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: context.appAccent.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: context.appAccent.withValues(alpha: 0.15),
+                  width: 0.8,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.appAccent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          item.rakaat,
+                          style: GoogleFonts.poppins(
+                            color: context.appAccent,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          item.surahName,
+                          style: GoogleFonts.poppins(
+                            color: context.appTextPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      if (item.arabicSurahName != null)
+                        Text(
+                          item.arabicSurahName!,
+                          textDirection: TextDirection.rtl,
+                          style: GoogleFonts.amiri(
+                            color: context.appAccent,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 3, right: 6),
+                        child: Icon(
+                          Icons.stars_rounded,
+                          size: 14,
+                          color: const Color(0xFFD4A057),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          item.virtue,
+                          style: GoogleFonts.poppins(
+                            color: context.appTextSecondary,
+                            fontSize: 11.5,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 // ── Special Dua Card ─────────────────────────────────────────────────────────
 
 class _SpecialDuaCard extends StatelessWidget {
@@ -355,25 +620,35 @@ class _SpecialDuaCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isEn ? 'Special Prayer Dua' : 'Doa Khusus Shalat',
+                item.specialDuaTitle ??
+                    (isEn ? 'Special Prayer Dua' : 'Doa Khusus Shalat'),
                 style: GoogleFonts.poppins(
                   color: context.appAccent,
-                  fontSize: 14,
+                  fontSize: 13.5,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.copy_rounded, size: 16, color: context.appTextSecondary),
+                icon: Icon(
+                  Icons.copy_rounded,
+                  size: 16,
+                  color: context.appTextSecondary,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 tooltip: isEn ? 'Copy' : 'Salin',
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(
-                    text: '${item.specialDuaArabic}\n\n${item.specialDuaLatin}\n\n${item.specialDuaTranslation}',
-                  ));
+                  Clipboard.setData(
+                    ClipboardData(
+                      text:
+                          '${item.specialDuaArabic}\n\n${item.specialDuaLatin}\n\n${item.specialDuaTranslation}',
+                    ),
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(isEn ? 'Dua copied' : 'Doa disalin ke clipboard'),
+                      content: Text(
+                        isEn ? 'Dua copied' : 'Doa disalin ke clipboard',
+                      ),
                       duration: const Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -422,18 +697,16 @@ class _SpecialDuaCard extends StatelessWidget {
   }
 }
 
-// ── Step Item ────────────────────────────────────────────────────────────────
+// ── Special Step Item (e.g. for Janazah) ──────────────────────────────────────
 
-class _StepItem extends StatelessWidget {
+class _SpecialStepItem extends StatelessWidget {
   final PrayerGuideStep step;
   final int stepIndex;
-  final bool isLast;
   final SettingsProvider settings;
 
-  const _StepItem({
+  const _SpecialStepItem({
     required this.step,
     required this.stepIndex,
-    required this.isLast,
     required this.settings,
   });
 
@@ -519,37 +792,6 @@ class _StepItem extends StatelessWidget {
                 color: context.appTextSecondary,
                 fontSize: 11.5,
                 height: 1.4,
-              ),
-            ),
-          ],
-          if (step.notes != null && step.notes!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: context.appAccent.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 14,
-                    color: context.appAccent,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      step.notes!,
-                      style: GoogleFonts.poppins(
-                        color: context.appTextPrimary,
-                        fontSize: 11,
-                        height: 1.35,
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ),
           ],

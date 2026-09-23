@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../data/prayer_guide_data.dart';
 import '../models/prayer_guide_model.dart';
 import '../providers/settings_provider.dart';
+import '../utils/arabic_font_helper.dart';
 import '../utils/app_theme.dart';
 import 'prayer_guide_detail_screen.dart';
 
@@ -24,9 +25,11 @@ class _PrayerGuideScreenState extends State<PrayerGuideScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _searchController.addListener(() {
-      setState(() => _searchQuery = _searchController.text.trim().toLowerCase());
+      setState(
+        () => _searchQuery = _searchController.text.trim().toLowerCase(),
+      );
     });
   }
 
@@ -44,26 +47,56 @@ class _PrayerGuideScreenState extends State<PrayerGuideScreen>
 
     final fardhuList = PrayerGuideData.prayers
         .where((p) => p.category == 'fardhu')
-        .where((p) =>
-            _searchQuery.isEmpty ||
-            p.title.toLowerCase().contains(_searchQuery) ||
-            p.arabicTitle.contains(_searchQuery))
+        .where(
+          (p) =>
+              _searchQuery.isEmpty ||
+              p.title.toLowerCase().contains(_searchQuery) ||
+              p.arabicTitle.contains(_searchQuery) ||
+              p.recommendedSurahs.any(
+                (s) =>
+                    s.surahName.toLowerCase().contains(_searchQuery) ||
+                    s.virtue.toLowerCase().contains(_searchQuery),
+              ),
+        )
         .toList();
 
     final sunnahList = PrayerGuideData.prayers
         .where((p) => p.category == 'sunnah')
-        .where((p) =>
-            _searchQuery.isEmpty ||
-            p.title.toLowerCase().contains(_searchQuery) ||
-            p.arabicTitle.contains(_searchQuery))
+        .where(
+          (p) =>
+              _searchQuery.isEmpty ||
+              p.title.toLowerCase().contains(_searchQuery) ||
+              p.arabicTitle.contains(_searchQuery) ||
+              p.recommendedSurahs.any(
+                (s) =>
+                    s.surahName.toLowerCase().contains(_searchQuery) ||
+                    s.virtue.toLowerCase().contains(_searchQuery),
+              ),
+        )
+        .toList();
+
+    final recitationSteps = PrayerGuideData.commonSteps
+        .where(
+          (s) =>
+              _searchQuery.isEmpty ||
+              s.title.toLowerCase().contains(_searchQuery) ||
+              (s.latin != null &&
+                  s.latin!.toLowerCase().contains(_searchQuery)) ||
+              (s.translation != null &&
+                  s.translation!.toLowerCase().contains(_searchQuery)) ||
+              (s.notes != null &&
+                  s.notes!.toLowerCase().contains(_searchQuery)),
+        )
         .toList();
 
     final rulesList = PrayerGuideData.rules
-        .where((r) =>
-            _searchQuery.isEmpty ||
-            r.title.toLowerCase().contains(_searchQuery) ||
-            r.description.toLowerCase().contains(_searchQuery) ||
-            r.points.any((pt) => pt.toLowerCase().contains(_searchQuery)))
+        .where(
+          (r) =>
+              _searchQuery.isEmpty ||
+              r.title.toLowerCase().contains(_searchQuery) ||
+              r.description.toLowerCase().contains(_searchQuery) ||
+              r.points.any((pt) => pt.toLowerCase().contains(_searchQuery)),
+        )
         .toList();
 
     return Scaffold(
@@ -109,11 +142,11 @@ class _PrayerGuideScreenState extends State<PrayerGuideScreen>
                 ),
                 decoration: InputDecoration(
                   hintText: isEn
-                      ? 'Search prayer (Subuh, Tahajud...)'
-                      : 'Cari shalat (Subuh, Tahajud, Witir...)',
+                      ? 'Search prayer, surah, or step...'
+                      : 'Cari shalat, surah pendek, bacaan...',
                   hintStyle: GoogleFonts.poppins(
                     color: context.appTextSecondary,
-                    fontSize: 12.5,
+                    fontSize: 12,
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
@@ -151,6 +184,8 @@ class _PrayerGuideScreenState extends State<PrayerGuideScreen>
               ),
               child: TabBar(
                 controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
                 indicator: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: context.appAccent.withValues(alpha: 0.18),
@@ -159,16 +194,17 @@ class _PrayerGuideScreenState extends State<PrayerGuideScreen>
                 labelColor: context.appAccent,
                 unselectedLabelColor: context.appTextSecondary,
                 labelStyle: GoogleFonts.poppins(
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.w600,
                 ),
                 unselectedLabelStyle: GoogleFonts.poppins(
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.w500,
                 ),
                 tabs: [
                   Tab(text: isEn ? 'Obligatory' : 'Wajib'),
                   Tab(text: isEn ? 'Sunnah' : 'Sunnah'),
+                  Tab(text: isEn ? 'Recitations' : 'Bacaan Shalat'),
                   Tab(text: isEn ? 'Rules' : 'Rukun & Syarat'),
                 ],
               ),
@@ -184,6 +220,11 @@ class _PrayerGuideScreenState extends State<PrayerGuideScreen>
               children: [
                 _PrayerListView(items: fardhuList, isEn: isEn),
                 _PrayerListView(items: sunnahList, isEn: isEn),
+                _RecitationListView(
+                  steps: recitationSteps,
+                  settings: settings,
+                  isEn: isEn,
+                ),
                 _RuleListView(rules: rulesList),
               ],
             ),
@@ -209,7 +250,11 @@ class _PrayerListView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.search_off_rounded, size: 48, color: context.appTextSecondary),
+            Icon(
+              Icons.search_off_rounded,
+              size: 48,
+              color: context.appTextSecondary,
+            ),
             const SizedBox(height: 8),
             Text(
               isEn ? 'No prayer found' : 'Shalat tidak ditemukan',
@@ -273,44 +318,22 @@ class _PrayerCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                // Icon / rakaat indicator
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: context.appAccent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: context.appAccent.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.menu_book_rounded,
-                      color: context.appAccent,
-                      size: 22,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Name & brief time
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Text(
-                            prayer.title,
-                            style: GoogleFonts.poppins(
-                              color: context.appTextPrimary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Text(
+                              prayer.title,
+                              style: GoogleFonts.poppins(
+                                color: context.appTextPrimary,
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                          const Spacer(),
                           Text(
                             prayer.arabicTitle,
                             textDirection: TextDirection.rtl,
@@ -331,14 +354,14 @@ class _PrayerCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: context.appAccent.withValues(alpha: 0.08),
+                              color: context.appAccent.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               prayer.rakaatNote,
                               style: GoogleFonts.poppins(
                                 color: context.appAccent,
-                                fontSize: 10,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -357,10 +380,39 @@ class _PrayerCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      if (prayer.recommendedSurahs.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.menu_book_outlined,
+                              size: 13,
+                              color: context.appAccent,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                prayer.recommendedSurahs
+                                    .map(
+                                      (s) =>
+                                          s.surahName.replaceAll('Surah ', ''),
+                                    )
+                                    .join(', '),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  color: context.appTextSecondary,
+                                  fontSize: 10.5,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
-
                 const SizedBox(width: 8),
                 Icon(
                   Icons.chevron_right_rounded,
@@ -376,7 +428,147 @@ class _PrayerCard extends StatelessWidget {
   }
 }
 
-// ── Rule List View ───────────────────────────────────────────────────────────
+// ── Recitation List View (Tab 3) ─────────────────────────────────────────────
+
+class _RecitationListView extends StatelessWidget {
+  final List<PrayerGuideStep> steps;
+  final SettingsProvider settings;
+  final bool isEn;
+
+  const _RecitationListView({
+    required this.steps,
+    required this.settings,
+    required this.isEn,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (steps.isEmpty) {
+      return Center(
+        child: Text(
+          isEn ? 'No step found' : 'Bacaan tidak ditemukan',
+          style: GoogleFonts.poppins(
+            color: context.appTextSecondary,
+            fontSize: 13,
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      itemCount: steps.length,
+      itemBuilder: (context, index) {
+        final step = steps[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.appCardBg,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: context.appDivider, width: 0.8),
+            boxShadow: [
+              BoxShadow(
+                color: context.appCardShadow,
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                step.title,
+                style: GoogleFonts.poppins(
+                  color: context.appTextPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (step.arabic != null && step.arabic!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    step.arabic!,
+                    textDirection: TextDirection.rtl,
+                    style: ArabicFontHelper.getStyle(
+                      settings.arabicFont,
+                      fontSize: 19,
+                      color: context.appTextPrimary,
+                      height: 1.85,
+                    ),
+                  ),
+                ),
+              ],
+              if (step.latin != null && step.latin!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  step.latin!,
+                  style: GoogleFonts.poppins(
+                    color: context.appAccent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+              if (step.translation != null && step.translation!.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  step.translation!,
+                  style: GoogleFonts.poppins(
+                    color: context.appTextSecondary,
+                    fontSize: 11.5,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+              if (step.notes != null && step.notes!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.appAccent.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 14,
+                        color: context.appAccent,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          step.notes!,
+                          style: GoogleFonts.poppins(
+                            color: context.appTextPrimary,
+                            fontSize: 11,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Rule List View (Tab 4) ───────────────────────────────────────────────────
 
 class _RuleListView extends StatelessWidget {
   final List<PrayerRuleItem> rules;
@@ -385,6 +577,18 @@ class _RuleListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (rules.isEmpty) {
+      return Center(
+        child: Text(
+          'Tidak ditemukan',
+          style: GoogleFonts.poppins(
+            color: context.appTextSecondary,
+            fontSize: 13,
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       itemCount: rules.length,
@@ -408,25 +612,13 @@ class _RuleListView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.verified_outlined,
-                    color: context.appAccent,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      rule.title,
-                      style: GoogleFonts.poppins(
-                        color: context.appTextPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+              Text(
+                rule.title,
+                style: GoogleFonts.poppins(
+                  color: context.appAccent,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -434,12 +626,12 @@ class _RuleListView extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   color: context.appTextSecondary,
                   fontSize: 12,
-                  height: 1.35,
+                  height: 1.4,
                 ),
               ),
               const SizedBox(height: 10),
-              ...rule.points.map(
-                (point) => Padding(
+              for (final pt in rule.points)
+                Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -447,25 +639,24 @@ class _RuleListView extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 4, right: 8),
                         child: Icon(
-                          Icons.check_circle_outline_rounded,
-                          size: 14,
+                          Icons.circle,
+                          size: 6,
                           color: context.appAccent,
                         ),
                       ),
                       Expanded(
                         child: Text(
-                          point,
+                          pt,
                           style: GoogleFonts.poppins(
                             color: context.appTextPrimary,
                             fontSize: 12,
-                            height: 1.35,
+                            height: 1.4,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
             ],
           ),
         );

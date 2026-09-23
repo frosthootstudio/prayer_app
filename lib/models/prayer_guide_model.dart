@@ -14,6 +14,20 @@ class PrayerGuideStep {
   });
 }
 
+class RecommendedSurah {
+  final String rakaat;
+  final String surahName;
+  final String? arabicSurahName;
+  final String virtue;
+
+  const RecommendedSurah({
+    required this.rakaat,
+    required this.surahName,
+    this.arabicSurahName,
+    required this.virtue,
+  });
+}
+
 class PrayerGuideItem {
   final String id;
   final String title;
@@ -27,10 +41,12 @@ class PrayerGuideItem {
   final String niatArabic;
   final String niatLatin;
   final String niatTranslation;
-  final List<PrayerGuideStep> steps;
+  final List<RecommendedSurah> recommendedSurahs;
+  final List<PrayerGuideStep>? specialSteps; // For prayers with unique steps like Janazah
   final String? specialDuaArabic;
   final String? specialDuaLatin;
   final String? specialDuaTranslation;
+  final String? specialDuaTitle;
 
   const PrayerGuideItem({
     required this.id,
@@ -45,10 +61,12 @@ class PrayerGuideItem {
     required this.niatArabic,
     required this.niatLatin,
     required this.niatTranslation,
-    required this.steps,
+    this.recommendedSurahs = const [],
+    this.specialSteps,
     this.specialDuaArabic,
     this.specialDuaLatin,
     this.specialDuaTranslation,
+    this.specialDuaTitle,
   });
 }
 

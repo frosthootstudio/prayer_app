@@ -7,52 +7,71 @@ abstract final class PrayerGuideData {
       arabic: 'اللهُ أَكْبَرُ',
       latin: 'Allāhu Akbar',
       translation: 'Allah Maha Besar.',
-      notes: 'Mengangkat kedua tangan sejajar telinga (laki-laki) atau dada (perempuan) bersamaan dengan berniat di dalam hati.',
+      notes:
+          'Mengangkat kedua tangan sejajar telinga (laki-laki) atau dada (perempuan) bersamaan dengan berniat di dalam hati.',
     ),
     PrayerGuideStep(
       title: '2. Membaca Doa Iftitah (Sunnah)',
-      arabic: 'وَجَّهْتُ وَجْهِيَ لِلَّذِي فَطَرَ السَّمَاوَاتِ وَالْأَرْضَ حَنِيفًا مُسْلِمًا وَمَا أَنَا مِنَ الْمُشْرِكِينَ. إِنَّ صَلَاتِي وَنُسُكِي وَمَحْيَايَ وَمَمَاتِي لِلَّهِ رَبِّ الْعَالَمِينَ. لَا شَرِيكَ لَهُ وَبِذَٰلِكَ أُمِرْتُ وَأَنَا مِنَ الْمُسْلِمِينَ',
-      latin: 'Wajjahtu wajhiya lilladzī fatharas-samāwāti wal-ardha hanīfam muslimaw wa mā ana minal-musyrikīn. Inna shalātī wa nusukī wa mahyāya wa mamātī lillāhi Rabbil-\'ālamīn. Lā syarīka lahū wa bidzālika umirtu wa ana minal-muslimīn.',
-      translation: 'Aku hadapkan wajahku kepada Dzat yang menciptakan langit dan bumi dengan penuh kepatuhan dan kepasrahan, dan aku bukanlah termasuk orang-orang yang musyrik. Sesungguhnya shalatku, ibadahku, hidupku dan matiku hanyalah untuk Allah Tuhan semesta alam. Tidak ada sekutu bagi-Nya dan demikian itulah aku diperintahkan dan aku termasuk orang-orang yang berserah diri.',
+      arabic:
+          'وَجَّهْتُ وَجْهِيَ لِلَّذِي فَطَرَ السَّمَاوَاتِ وَالْأَرْضَ حَنِيفًا مُسْلِمًا وَمَا أَنَا مِنَ الْمُشْرِكِينَ. إِنَّ صَلَاتِي وَنُسُكِي وَمَحْيَايَ وَمَمَاتِي لِلَّهِ رَبِّ الْعَالَمِينَ. لَا شَرِيكَ لَهُ وَبِذَٰلِكَ أُمِرْتُ وَأَنَا مِنَ الْمُسْلِمِينَ',
+      latin:
+          'Wajjahtu wajhiya lilladzī fatharas-samāwāti wal-ardha hanīfam muslimaw wa mā ana minal-musyrikīn. Inna shalātī wa nusukī wa mahyāya wa mamātī lillāhi Rabbil-\'ālamīn. Lā syarīka lahū wa bidzālika umirtu wa ana minal-muslimīn.',
+      translation:
+          'Aku hadapkan wajahku kepada Dzat yang menciptakan langit dan bumi dengan penuh kepatuhan dan kepasrahan, dan aku bukanlah termasuk orang-orang yang musyrik. Sesungguhnya shalatku, ibadahku, hidupku dan matiku hanyalah untuk Allah Tuhan semesta alam. Tidak ada sekutu bagi-Nya dan demikian itulah aku diperintahkan dan aku termasuk orang-orang yang berserah diri.',
     ),
     PrayerGuideStep(
       title: '3. Membaca Surah Al-Fatihah (Rukun)',
-      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ ۝ الرَّحْمَٰنِ الرَّحِيمِ ۝ مَالِكِ يَوْمِ الدِّينِ ۝ إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ۝ اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ ۝ صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ',
-      latin: 'Bismillāhir-rahmānir-rahīm. Al-hamdu lillāhi Rabbil-\'ālamīn. Ar-Rahmānir-Rahīm. Māliki yawmid-dīn. Iyyāka na\'budu wa iyyāka nasta\'īn. Ihdinas-sirāthal-mustaqīm. Sirāthal-ladzīna an\'amta \'alayhim ghayril-maghdhūbi \'alayhim waladh-dhāllīn. Āmīn.',
-      translation: 'Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang. Segala puji bagi Allah Tuhan semesta alam. Maha Pengasih lagi Maha Penyayang. Pemilik hari pembalasan. Hanya kepada Engkaulah kami menyembah dan hanya kepada Engkaulah kami memohon pertolongan. Tunjukilah kami jalan yang lurus. Yaitu jalan orang-orang yang telah Engkau beri nikmat, bukan jalan mereka yang dimurkai dan bukan pula jalan mereka yang sesat. Aamiin.',
+      arabic:
+          'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ ۝ الرَّحْمَٰنِ الرَّحِيمِ ۝ مَالِكِ يَوْمِ الدِّينِ ۝ إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ۝ اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ ۝ صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ',
+      latin:
+          'Bismillāhir-rahmānir-rahīm. Al-hamdu lillāhi Rabbil-\'ālamīn. Ar-Rahmānir-Rahīm. Māliki yawmid-dīn. Iyyāka na\'budu wa iyyāka nasta\'īn. Ihdinas-sirāthal-mustaqīm. Sirāthal-ladzīna an\'amta \'alayhim ghayril-maghdhūbi \'alayhim waladh-dhāllīn. Āmīn.',
+      translation:
+          'Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang. Segala puji bagi Allah Tuhan semesta alam. Maha Pengasih lagi Maha Penyayang. Pemilik hari pembalasan. Hanya kepada Engkaulah kami menyembah dan hanya kepada Engkaulah kami memohon pertolongan. Tunjukilah kami jalan yang lurus. Yaitu jalan orang-orang yang telah Engkau beri nikmat, bukan jalan mereka yang dimurkai dan bukan pula jalan mereka yang sesat. Aamiin.',
     ),
     PrayerGuideStep(
       title: '4. Membaca Surah Pendek Al-Qur\'an',
-      arabic: 'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
-      latin: 'Qul huwallāhu ahad. Allāhus-samad. Lam yalid wa lam yūlad. Wa lam yakul-lahū kufuwan ahad.',
-      translation: 'Katakanlah: Dialah Allah, Yang Maha Esa. Allah adalah Tuhan yang bergantung kepada-Nya segala sesuatu. Dia tiada beranak dan tiada pula diperanakkan. Dan tidak ada seorang pun yang setara dengan Dia.',
-      notes: 'Dibaca pada rakaat ke-1 dan ke-2 setelah Al-Fatihah.',
+      arabic:
+          'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+      latin:
+          'Qul huwallāhu ahad. Allāhus-samad. Lam yalid wa lam yūlad. Wa lam yakul-lahū kufuwan ahad.',
+      translation:
+          'Katakanlah: Dialah Allah, Yang Maha Esa. Allah adalah Tuhan yang bergantung kepada-Nya segala sesuatu. Dia tiada beranak dan tiada pula diperanakkan. Dan tidak ada seorang pun yang setara dengan Dia.',
+      notes:
+          'Dibaca pada rakaat ke-1 dan ke-2 setelah Al-Fatihah sesuai rekomendasi sunnah masing-masing shalat.',
     ),
     PrayerGuideStep(
       title: '5. Ruku\' & Thuma\'ninah',
       arabic: 'سُبْحَانَ رَبِّيَ الْعَظِيمِ وَبِحَمْدِهِ',
       latin: 'Subhāna Rabbiyal-\'Azhīmi wa bihamdih. (3x)',
       translation: 'Maha Suci Tuhanku Yang Maha Agung dan dengan memuji-Nya.',
-      notes: 'Punggung lurus sejajar, tangan memegang lutut, bersikap tenang sejenak (thuma\'ninah).',
+      notes:
+          'Punggung lurus sejajar, tangan memegang lutut, bersikap tenang sejenak (thuma\'ninah).',
     ),
     PrayerGuideStep(
       title: '6. I\'tidal & Thuma\'ninah',
-      arabic: 'سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ\nرَبَّنَا لَكَ الْحَمْدُ مِلْءَ السَّمَاوَاتِ وَمِلْءَ الْأَرْضِ وَمِلْءَ مَا شِئْتَ مِنْ شَيْءٍ بَعْدُ',
-      latin: 'Sami\'allāhu liman hamidah.\nRabbanā lakal-hamdu mil\'us-samāwāti wa mil\'ul-ardhi wa mil\'u mā syi\'ta min syay\'in ba\'du.',
-      translation: 'Allah mendengar orang yang memuji-Nya. Wahai Tuhan kami, bagi-Mu segala puji sepenuh langit dan sepenuh bumi, serta sepenuh apa saja yang Engkau kehendaki setelah itu.',
+      arabic:
+          'سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ\nرَبَّنَا لَكَ الْحَمْدُ مِلْءَ السَّمَاوَاتِ وَمِلْءَ الْأَرْضِ وَمِلْءَ مَا شِئْتَ مِنْ شَيْءٍ بَعْدُ',
+      latin:
+          'Sami\'allāhu liman hamidah.\nRabbanā lakal-hamdu mil\'us-samāwāti wa mil\'ul-ardhi wa mil\'u mā syi\'ta min syay\'in ba\'du.',
+      translation:
+          'Allah mendengar orang yang memuji-Nya. Wahai Tuhan kami, bagi-Mu segala puji sepenuh langit dan sepenuh bumi, serta sepenuh apa saja yang Engkau kehendaki setelah itu.',
     ),
     PrayerGuideStep(
       title: '7. Sujud Pertama & Thuma\'ninah',
       arabic: 'سُبْحَانَ رَبِّيَ الْأَعْلَىٰ وَبِحَمْدِهِ',
       latin: 'Subhāna Rabbiyal-A\'lā wa bihamdih. (3x)',
       translation: 'Maha Suci Tuhanku Yang Maha Tinggi dan dengan memuji-Nya.',
-      notes: '7 anggota tubuh menempel di lantai: dahi + hidung, kedua telapak tangan, kedua lutut, dan ujung jari jemari kedua kaki.',
+      notes:
+          '7 anggota tubuh menempel di lantai: dahi + hidung, kedua telapak tangan, kedua lutut, dan ujung jari jemari kedua kaki.',
     ),
     PrayerGuideStep(
       title: '8. Duduk di Antara Dua Sujud (Iftirasy)',
-      arabic: 'رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَاجْبُرْنِي وَارْفَعْنِي وَارْزُقْنِي وَاهْدِنِي وَعَافِنِي وَاعْفُ عَنِّي',
-      latin: 'Rabbighfir lī, warhamnī, wajburnī, warfa\'nī, warzuqnī, wahdinī, wa \'āfinī, wa\'fu \'annī.',
-      translation: 'Ya Tuhanku ampunilah aku, sayangilah aku, cukupkanlah kekuranganku, tinggikanlah derajatku, berilah aku rezeki, berilah aku petunjuk, berilah aku kesehatan dan maafkanlah kesalahanku.',
+      arabic:
+          'رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَاجْبُرْنِي وَارْفَعْنِي وَارْزُقْنِي وَاهْدِنِي وَعَافِنِي وَاعْفُ عَنِّي',
+      latin:
+          'Rabbighfir lī, warhamnī, wajburnī, warfa\'nī, warzuqnī, wahdinī, wa \'āfinī, wa\'fu \'annī.',
+      translation:
+          'Ya Tuhanku ampunilah aku, sayangilah aku, cukupkanlah kekuranganku, tinggikanlah derajatku, berilah aku rezeki, berilah aku petunjuk, berilah aku kesehatan dan maafkanlah kesalahanku.',
     ),
     PrayerGuideStep(
       title: '9. Sujud Kedua & Thuma\'ninah',
@@ -62,23 +81,31 @@ abstract final class PrayerGuideData {
     ),
     PrayerGuideStep(
       title: '10. Tasyahud Awal (Duduk Iftirasy)',
-      arabic: 'التَّحِيَّاتُ الْمُبَارَكَاتُ الصَّلَوَاتُ الطَّيِّبَاتُ لِلَّهِ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَىٰ عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ. اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ',
-      latin: 'At-tahiyyātul-mubārakātush-shalawātuth-thayyibātu lillāh. As-salāmu \'alayka ayyuhan-Nabiyyu wa rahmatullāhi wa barakātuh. As-salāmu \'alaynā wa \'alā \'ibādillāhish-shālihīn. Asyhadu allā ilāha illallāh, wa asyhadu anna Muhammadar Rasūlullāh. Allāhumma shalli \'alā Muhammad.',
-      translation: 'Segala kehormatan, keberkahan, rahmat dan kebaikan adalah milik Allah. Semoga keselamatan, rahmat Allah dan berkah-Nya tercurah kepadamu wahai Nabi. Semoga keselamatan tercurah kepada kami dan hamba-hamba Allah yang shalih. Aku bersaksi tidak ada Tuhan selain Allah dan aku bersaksi bahwa Muhammad adalah utusan Allah. Ya Allah, limpahkanlah shalawat kepada Nabi Muhammad.',
-      notes: 'Dibaca pada rakaat ke-2 untuk shalat yang berjumlah 3 atau 4 rakaat.',
+      arabic:
+          'التَّحِيَّاتُ الْمُبَارَكَاتُ الصَّلَوَاتُ الطَّيِّبَاتُ لِلَّهِ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَىٰ عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ. اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ',
+      latin:
+          'At-tahiyyātul-mubārakātush-shalawātuth-thayyibātu lillāh. As-salāmu \'alayka ayyuhan-Nabiyyu wa rahmatullāhi wa barakātuh. As-salāmu \'alaynā wa \'alā \'ibādillāhish-shālihīn. Asyhadu allā ilāha illallāh, wa asyhadu anna Muhammadar Rasūlullāh. Allāhumma shalli \'alā Muhammad.',
+      translation:
+          'Segala kehormatan, keberkahan, rahmat dan kebaikan adalah milik Allah. Semoga keselamatan, rahmat Allah dan berkah-Nya tercurah kepadamu wahai Nabi. Semoga keselamatan tercurah kepada kami dan hamba-hamba Allah yang shalih. Aku bersaksi tidak ada Tuhan selain Allah dan aku bersaksi bahwa Muhammad adalah utusan Allah. Ya Allah, limpahkanlah shalawat kepada Nabi Muhammad.',
+      notes:
+          'Dibaca pada rakaat ke-2 untuk shalat yang berjumlah 3 atau 4 rakaat.',
     ),
     PrayerGuideStep(
       title: '11. Tasyahud Akhir (Duduk Tawarruk)',
-      arabic: 'التَّحِيَّاتُ الْمُبَارَكَاتُ الصَّلَوَاتُ الطَّيِّبَاتُ لِلَّهِ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَىٰ عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ. اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، وَبَارِكْ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، فِي الْعَالَمِينَ إِنَّكَ حَمِيدٌ مَجِيدٌ',
-      latin: 'At-tahiyyātul-mubārakātush-shalawātuth-thayyibātu lillāh. As-salāmu \'alayka ayyuhan-Nabiyyu wa rahmatullāhi wa barakātuh. As-salāmu \'alaynā wa \'alā \'ibādillāhish-shālihīn. Asyhadu allā ilāha illallāh, wa asyhadu anna Muhammadar Rasūlullāh. Allāhumma shalli \'alā Muhammad wa \'alā āli Muhammad, kamā shallayta \'alā Ibrāhīm wa \'alā āli Ibrāhīm, wa bārik \'alā Muhammad wa \'alā āli Muhammad, kamā bārakta \'alā Ibrāhīm wa \'alā āli Ibrāhīm, fil-\'ālamīna innaka Hamīdum Majīd.',
-      translation: 'Segala kehormatan, keberkahan, rahmat dan kebaikan adalah milik Allah. Semoga keselamatan, rahmat Allah dan berkah-Nya tercurah kepadamu wahai Nabi. Semoga keselamatan tercurah kepada kami dan hamba-hamba Allah yang shalih. Aku bersaksi tiada Tuhan selain Allah dan aku bersaksi bahwa Muhammad utusan Allah. Ya Allah limpahkanlah shalawat atas Nabi Muhammad dan keluarganya sebagaimana Engkau limpahkan kepada Nabi Ibrahim dan keluarganya, dan berkahilah Nabi Muhammad dan keluarganya sebagaimana Engkau berkahi Nabi Ibrahim dan keluarganya, di seluruh alam semesta, sesungguhnya Engkau Maha Terpuji lagi Maha Mulia.',
+      arabic:
+          'التَّحِيَّاتُ الْمُبَارَكَاتُ الصَّلَوَاتُ الطَّيِّبَاتُ لِلَّهِ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَىٰ عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ. اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، وَبَارِكْ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، فِي الْعَالَمِينَ إِنَّكَ حَمِيدٌ مَجِيدٌ',
+      latin:
+          'At-tahiyyātul-mubārakātush-shalawātuth-thayyibātu lillāh. As-salāmu \'alayka ayyuhan-Nabiyyu wa rahmatullāhi wa barakātuh. As-salāmu \'alaynā wa \'alā \'ibādillāhish-shālihīn. Asyhadu allā ilāha illallāh, wa asyhadu anna Muhammadar Rasūlullāh. Allāhumma shalli \'alā Muhammad wa \'alā āli Muhammad, kamā shallayta \'alā Ibrāhīm wa \'alā āli Ibrāhīm, wa bārik \'alā Muhammad wa \'alā āli Muhammad, kamā bārakta \'alā Ibrāhīm wa \'alā āli Ibrāhīm, fil-\'ālamīna innaka Hamīdum Majīd.',
+      translation:
+          'Segala kehormatan, keberkahan, rahmat dan kebaikan adalah milik Allah. Semoga keselamatan, rahmat Allah dan berkah-Nya tercurah kepadamu wahai Nabi. Semoga keselamatan tercurah kepada kami dan hamba-hamba Allah yang shalih. Aku bersaksi tiada Tuhan selain Allah dan aku bersaksi bahwa Muhammad utusan Allah. Ya Allah limpahkanlah shalawat atas Nabi Muhammad dan keluarganya sebagaimana Engkau limpahkan kepada Nabi Ibrahim dan keluarganya, dan berkahilah Nabi Muhammad dan keluarganya sebagaimana Engkau berkahi Nabi Ibrahim dan keluarganya, di seluruh alam semesta, sesungguhnya Engkau Maha Terpuji lagi Maha Mulia.',
     ),
     PrayerGuideStep(
       title: '12. Salam (Rukun)',
       arabic: 'السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ',
       latin: 'As-salāmu \'alaykum wa rahmatullāh.',
       translation: 'Semoga keselamatan dan rahmat Allah tercurah kepadamu.',
-      notes: 'Menoleh ke kanan hingga pipi kanan terlihat dari belakang (rukun), kemudian menoleh ke kiri (sunnah).',
+      notes:
+          'Menoleh ke kanan hingga pipi kanan terlihat dari belakang (rukun), kemudian menoleh ke kiri (sunnah).',
     ),
   ];
 
@@ -92,15 +119,46 @@ abstract final class PrayerGuideData {
       rakaat: 2,
       rakaatNote: '2 Rakaat (Jahar)',
       time: 'Terbit fajar shadiq hingga sesaat sebelum terbit matahari',
-      description: 'Shalat fardhu dua rakaat yang dikerjakan pada permulaan fajar shadiq. Membaca bacaan shalat dengan suara terang (jahar) pada kedua rakaat.',
-      virtue: 'Barang siapa yang shalat Subuh berjamaah, maka ia seolah-olah telah shalat semalam suntuk (HR. Muslim).',
-      niatArabic: 'أُصَلِّي فَرْضَ الصُّبْحِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī fardhash-shubhi rak\'atayni mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat fardhu Subuh dua rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
-      specialDuaArabic: 'اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ، وَعَافِنِي فِيمَنْ عَافَيْتَ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيْتَ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ، وَقِنِي شَرَّ مَا قَضَيْتَ، فَإِنَّكَ تَقْضِي وَلَا يُقْضَىٰ عَلَيْكَ، وَإِنَّهُ لَا يَذِلُّ مَنْ وَالَيْتَ، وَلَا يَعِزُّ مَنْ عَادَيْتَ، تَبَارَكْتَ رَبَّنَا وَتَعَالَيْتَ',
-      specialDuaLatin: 'Allāhummahdinī fī man hadayt, wa \'āfinī fī man \'āfayt, wa tawallanī fī man tawallayt, wa bārik lī fī mā a\'thayt, wa qinī syarra mā qadhayt, fa innaka taqdhī wa lā yuqdhā \'alayk, wa innahū lā yadzillu maw wālayt, wa lā ya\'izzu man \'ādayt, tabārakta Rabbanā wa ta\'ālayt.',
-      specialDuaTranslation: 'Ya Allah, berilah aku petunjuk sebagaimana orang yang telah Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang telah Engkau beri kesehatan, peliharalah aku sebagaimana orang yang telah Engkau pelihara, berkahilah apa yang telah Engkau berikan kepadaku, dan lindungilah aku dari keburukan yang telah Engkau tetapkan. Sesungguhnya Engkaulah yang menetapkan dan tiada yang berkuasa atas-Mu. Sesungguhnya tidak akan terhina orang yang Engkau cintai, dan tidak akan mulia orang yang Engkau musuhi. Maha Berkah Engkau wahai Tuhan kami dan Maha Tinggi Engkau. (Doa Qunut Subuh Mazhab Syafi\'i).',
+      description:
+          'Shalat fardhu dua rakaat yang dikerjakan pada permulaan fajar shadiq dengan bacaan bersuara terang (jahar) pada kedua rakaat.',
+      virtue:
+          'Barang siapa yang shalat Subuh berjamaah, maka ia seolah-olah telah shalat semalam suntuk (HR. Muslim).',
+      niatArabic:
+          'أُصَلِّي فَرْضَ الصُّبْحِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī fardhash-shubhi rak\'atayni mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat fardhu Subuh dua rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1 (Hari Jum\'at)',
+          surahName: 'Surah As-Sajdah',
+          arabicSurahName: 'سُورَةُ السَّجْدَةِ',
+          virtue:
+              'Nabi SAW melanggengkan membaca Surah As-Sajdah pada rakaat pertama Subuh di hari Jum\'at (HR. Bukhari & Muslim). Mengingatkan proses penciptaan manusia dan anjuran sujud tilawah.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2 (Hari Jum\'at)',
+          surahName: 'Surah Al-Insan',
+          arabicSurahName: 'سُورَةُ الْإِنْسَانِ',
+          virtue:
+              'Nabi SAW membaca Surah Al-Insan pada rakaat kedua Subuh Jum\'at (HR. Bukhari & Muslim). Berisi gambaran dahsyatnya hari kiamat dan kenikmatan abadi penghuni surga.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Hari Biasa / Ringkas',
+          surahName: 'Surah Al-Falaq & An-Nas (atau Surah Qaf / Al-Waqi\'ah)',
+          arabicSurahName: 'المُعَوِّذَتَانِ',
+          virtue:
+              'Dua surah perlindungan terbaik (Al-Mu\'awwidzatain) yang diperintahkan Nabi SAW untuk dibaca saat fajar menjelang terbit matahari (HR. Abu Dawud).',
+        ),
+      ],
+      specialDuaArabic:
+          'اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ، وَعَافِنِي فِيمَنْ عَافَيْتَ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيْتَ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ، وَقِنِي شَرَّ مَا قَضَيْتَ، فَإِنَّكَ تَقْضِي وَلَا يُقْضَىٰ عَلَيْكَ، وَإِنَّهُ لَا يَذِلُّ مَنْ وَالَيْتَ، وَلَا يَعِزُّ مَنْ عَادَيْتَ، تَبَارَكْتَ رَبَّنَا وَتَعَالَيْتَ',
+      specialDuaLatin:
+          'Allāhummahdinī fī man hadayt, wa \'āfinī fī man \'āfayt, wa tawallanī fī man tawallayt, wa bārik lī fī mā a\'thayt, wa qinī syarra mā qadhayt, fa innaka taqdhī wa lā yuqdhā \'alayk, wa innahū lā yadzillu maw wālayt, wa lā ya\'izzu man \'ādayt, tabārakta Rabbanā wa ta\'ālayt.',
+      specialDuaTranslation:
+          'Ya Allah, berilah aku petunjuk sebagaimana orang yang telah Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang telah Engkau beri kesehatan, peliharalah aku sebagaimana orang yang telah Engkau pelihara, berkahilah apa yang telah Engkau berikan kepadaku, dan lindungilah aku dari keburukan yang telah Engkau tetapkan. Sesungguhnya Engkaulah yang menetapkan dan tiada yang berkuasa atas-Mu. Sesungguhnya tidak akan terhina orang yang Engkau cintai, dan tidak akan mulia orang yang Engkau musuhi. Maha Berkah Engkau wahai Tuhan kami dan Maha Tinggi Engkau. (Doa Qunut Subuh Mazhab Syafi\'i).',
+      specialDuaTitle: 'Doa Qunut Subuh (Sunnah Ab\'adh)',
     ),
     PrayerGuideItem(
       id: 'dzuhur',
@@ -109,13 +167,34 @@ abstract final class PrayerGuideData {
       category: 'fardhu',
       rakaat: 4,
       rakaatNote: '4 Rakaat (Sirr)',
-      time: 'Mulai tergelincir matahari (zawal) ke barat hingga bayangan sama panjang dengan bendanya',
-      description: 'Shalat fardhu empat rakaat dengan bacaan yang dilirihkan (sirr). Terdapat tasyahud awal pada rakaat kedua.',
-      virtue: 'Saat pintu-pintu langit dibuka dan amal kebaikan dinaikkan kepada Allah Ta\'ala (HR. Tirmidzi).',
-      niatArabic: 'أُصَلِّي فَرْضَ الظُّهْرِ أَرْبَعَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī fardhazh-zhuhri arba\'a raka\'ātin mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat fardhu Dzuhur empat rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
+      time:
+          'Mulai tergelincir matahari (zawal) ke barat hingga bayangan sama panjang dengan bendanya',
+      description:
+          'Shalat fardhu empat rakaat dengan bacaan yang dilirihkan (sirr). Terdapat tasyahud awal pada rakaat kedua.',
+      virtue:
+          'Saat pintu-pintu langit dibuka dan amal kebaikan dinaikkan kepada Allah Ta\'ala (HR. Tirmidzi).',
+      niatArabic:
+          'أُصَلِّي فَرْضَ الظُّهْرِ أَرْبَعَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī fardhazh-zhuhri arba\'a raka\'ātin mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat fardhu Dzuhur empat rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1',
+          surahName: 'Surah Al-A\'la / Ath-Thariq',
+          arabicSurahName: 'سُورَةُ الْأَعْلَى',
+          virtue:
+              'Disunnahkan membaca surah pertengahan (Awsath Al-Mufashshal). Menghidupkan kekhusyukan hati di tengah kesibukan aktivitas siang hari.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2',
+          surahName: 'Surah Al-Lail / Al-Insyiqaq',
+          arabicSurahName: 'سُورَةُ اللَّيْلِ',
+          virtue:
+              'Mengingatkan perenungan tentang keseimbangan amal perbuatan manusia di dunia dan balasannya di akhirat.',
+        ),
+      ],
     ),
     PrayerGuideItem(
       id: 'ashar',
@@ -124,13 +203,27 @@ abstract final class PrayerGuideData {
       category: 'fardhu',
       rakaat: 4,
       rakaatNote: '4 Rakaat (Sirr)',
-      time: 'Ketika panjang bayangan melebihi bendanya hingga menjelang matahari terbenam',
-      description: 'Shalat wustha (pertengahan) empat rakaat dengan bacaan sirr. Sangat ditekankan dalam Al-Qur\'an untuk senantiasa dijaga tepat waktu.',
-      virtue: 'Barang siapa yang meninggalkan shalat Ashar, maka terhapuslah amal perbuatannya (HR. Bukhari).',
-      niatArabic: 'أُصَلِّي فَرْضَ الْعَصْرِ أَرْبَعَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī fardhal-\'ashri arba\'a raka\'ātin mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat fardhu Ashar empat rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
+      time:
+          'Ketika panjang bayangan melebihi bendanya hingga menjelang matahari terbenam',
+      description:
+          'Shalat wustha (pertengahan) empat rakaat dengan bacaan sirr. Sangat ditekankan dalam Al-Qur\'an untuk senantiasa dijaga tepat waktu.',
+      virtue:
+          'Barang siapa yang meninggalkan shalat Ashar, maka terhapuslah amal perbuatannya (HR. Bukhari).',
+      niatArabic:
+          'أُصَلِّي فَرْضَ الْعَصْرِ أَرْبَعَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī fardhal-\'ashri arba\'a raka\'ātin mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat fardhu Ashar empat rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1 & 2',
+          surahName: 'Surah Al-Ashr, At-Takatsur, atau Az-Zalzalah',
+          arabicSurahName: 'سُورَةُ الْعَصْرِ',
+          virtue:
+              'Sunnah Nabi SAW meringankan bacaan shalat Ashar (panjangnya separuh shalat Dzuhur) agar tidak memberatkan kaum muslimin menjelang senja (HR. Muslim). Surah Al-Ashr menegaskan pentingnya menjaga waktu agar terhindar dari kerugian.',
+        ),
+      ],
     ),
     PrayerGuideItem(
       id: 'maghrib',
@@ -139,13 +232,34 @@ abstract final class PrayerGuideData {
       category: 'fardhu',
       rakaat: 3,
       rakaatNote: '3 Rakaat (Jahar 2 rakaat awal)',
-      time: 'Mulai terbenamnya seluruh piringan matahari hingga hilangnya mega merah (syafaq)',
-      description: 'Shalat fardhu tiga rakaat. Bacaan jahar di rakaat 1-2, tasyahud awal di rakaat ke-2, dan rakaat ke-3 dibaca secara sirr.',
-      virtue: 'Umatku senantiasa berada dalam kebaikan selama tidak mengakhirkan shalat Maghrib sampai bintang-bintang bermunculan (HR. Abu Dawud).',
-      niatArabic: 'أُصَلِّي فَرْضَ الْمَغْرِبِ ثَلَاثَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī fardhal-maghribi tsalātsa raka\'ātin mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat fardhu Maghrib tiga rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
+      time:
+          'Mulai terbenamnya seluruh piringan matahari hingga hilangnya mega merah (syafaq)',
+      description:
+          'Shalat fardhu tiga rakaat. Bacaan jahar di rakaat 1-2, tasyahud awal di rakaat ke-2, dan rakaat ke-3 dibaca secara sirr.',
+      virtue:
+          'Umatku senantiasa berada dalam kebaikan selama tidak mengakhirkan shalat Maghrib sampai bintang-bintang bermunculan (HR. Abu Dawud).',
+      niatArabic:
+          'أُصَلِّي فَرْضَ الْمَغْرِبِ ثَلَاثَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī fardhal-maghribi tsalātsa raka\'ātin mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat fardhu Maghrib tiga rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1',
+          surahName: 'Surah Al-Kafirun (atau At-Tin)',
+          arabicSurahName: 'سُورَةُ الْكَافِرُونَ',
+          virtue:
+              'Waktu Maghrib pendek. Nabi SAW sering membaca surah pendek seperti Al-Kafirun yang membebaskan diri dari kemusyrikan dan bernilai seperempat Al-Qur\'an (HR. Tirmidzi & Muslim).',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2',
+          surahName: 'Surah Al-Ikhlas (atau Al-Falaq)',
+          arabicSurahName: 'سُورَةُ الْإِخْلَاصِ',
+          virtue:
+              'Menegaskan kemurnian tauhid. Pahala membaca Surah Al-Ikhlas setara dengan membaca sepertiga Al-Qur\'an (HR. Bukhari).',
+        ),
+      ],
     ),
     PrayerGuideItem(
       id: 'isya',
@@ -154,13 +268,34 @@ abstract final class PrayerGuideData {
       category: 'fardhu',
       rakaat: 4,
       rakaatNote: '4 Rakaat (Jahar 2 rakaat awal)',
-      time: 'Mulai hilangnya mega merah di ufuk barat hingga pertengahan malam / sebelum fajar shadiq',
-      description: 'Shalat fardhu empat rakaat penutup hari. Bacaan jahar pada rakaat 1 dan 2, dilanjutkan sirr pada rakaat 3 dan 4.',
-      virtue: 'Barang siapa shalat Isya berjamaah, maka seakan-akan ia telah shalat separuh malam (HR. Muslim).',
-      niatArabic: 'أُصَلِّي فَرْضَ الْعِشَاءِ أَرْبَعَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī fardhal-\'isyā\'i arba\'a raka\'ātin mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat fardhu Isya empat rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
+      time:
+          'Mulai hilangnya mega merah di ufuk barat hingga pertengahan malam / sebelum fajar shadiq',
+      description:
+          'Shalat fardhu empat rakaat penutup hari. Bacaan jahar pada rakaat 1 dan 2, dilanjutkan sirr pada rakaat 3 dan 4.',
+      virtue:
+          'Barang siapa shalat Isya berjamaah, maka seakan-akan ia telah shalat separuh malam (HR. Muslim).',
+      niatArabic:
+          'أُصَلِّي فَرْضَ الْعِشَاءِ أَرْبَعَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī fardhal-\'isyā\'i arba\'a raka\'ātin mustaqbilal-qiblati adā\'an lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat fardhu Isya empat rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1',
+          surahName: 'Surah Asy-Syams / Al-A\'la',
+          arabicSurahName: 'سُورَةُ الشَّمْسِ',
+          virtue:
+              'Nabi SAW berpesan khusus kepada Mu\'adz bin Jabal agar membaca Asy-Syams dan Al-A\'la saat shalat Isya agar tidak memberatkan makmum yang lelah bekerja seharian (HR. Bukhari & Muslim).',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2',
+          surahName: 'Surah Al-Lail / Al-Buruj',
+          arabicSurahName: 'سُورَةُ اللَّيْلِ',
+          virtue:
+              'Membimbing perenungan tentang ketetapan takdir Allah dan perlindungan bagi orang-orang yang beriman.',
+        ),
+      ],
     ),
     PrayerGuideItem(
       id: 'jumat',
@@ -170,12 +305,32 @@ abstract final class PrayerGuideData {
       rakaat: 2,
       rakaatNote: '2 Rakaat (Didahului 2 Khutbah)',
       time: 'Waktu shalat Dzuhur pada hari Jum\'at',
-      description: 'Shalat fardhu \'ain bagi setiap muslim laki-laki merdeka dan mukim. Dilakukan berjamaah 2 rakaat secara jahar setelah mendengarkan dua khutbah.',
-      virtue: 'Hari terbaik terbitnya matahari adalah hari Jum\'at; padanya Adam diciptakan, dimasukkan ke surga, dan dikeluarkan darinya (HR. Muslim).',
-      niatArabic: 'أُصَلِّي فَرْضَ الْجُمُعَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ مَأْمُومًا لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī fardhal-jumu\'ati rak\'atayni mustaqbilal-qiblati ma\'mūman lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat fardhu Jum\'at dua rakaat menghadap kiblat sebagai makmum karena Allah Ta\'ala.',
-      steps: commonSteps,
+      description:
+          'Shalat fardhu \'ain bagi setiap muslim laki-laki merdeka dan mukim. Dilakukan berjamaah 2 rakaat secara jahar setelah mendengarkan dua khutbah.',
+      virtue:
+          'Hari terbaik terbitnya matahari adalah hari Jum\'at; padanya Adam diciptakan, dimasukkan ke surga, dan dikeluarkan darinya (HR. Muslim).',
+      niatArabic:
+          'أُصَلِّي فَرْضَ الْجُمُعَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ مَأْمُومًا لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī fardhal-jumu\'ati rak\'atayni mustaqbilal-qiblati ma\'mūman lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat fardhu Jum\'at dua rakaat menghadap kiblat sebagai makmum karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Pilihan Utama: Rakaat 1 & 2',
+          surahName: 'Surah Al-Jumu\'ah & Al-Munafiqun',
+          arabicSurahName: 'الْجُمُعَةِ وَالْمُنَافِقُونَ',
+          virtue:
+              'Sunnah yang senantiasa dijaga Rasulullah SAW saat shalat Jum\'at (HR. Muslim). Mengingatkan panggilan ibadah Jum\'at dan mewaspadai bahaya kemunafikan.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Pilihan Kedua: Rakaat 1 & 2',
+          surahName: 'Surah Al-A\'la & Al-Ghasyiyah',
+          arabicSurahName: 'الْأَعْلَىٰ وَالْغَاشِيَةِ',
+          virtue:
+              'Sunnah Nabi SAW ketika mengimami shalat Jum\'at dan shalat hari raya (HR. Muslim). Menyucikan nama Allah dan menghayati peristiwa hari pembalasan.',
+        ),
+      ],
     ),
 
     // ── Sunnah ───────────────────────────────────────────────────────────────
@@ -186,16 +341,41 @@ abstract final class PrayerGuideData {
       category: 'sunnah',
       rakaat: 2,
       rakaatNote: 'Minimal 2 Rakaat (Kelipatan 2)',
-      time: 'Malam hari setelah tidur, paling utama di sepertiga malam terakhir (sekitar pukul 02:00 - menjelang Subuh)',
-      description: 'Shalat sunnah muakkad yang dikerjakan pada malam hari setelah terbangun dari tidur. Dikerjakan dengan salam setiap 2 rakaat.',
-      virtue: 'Dan pada sebagian malam, lakukanlah shalat tahajud sebagai ibadah tambahan bagimu; mudah-mudahan Tuhanmu mengangkatmu ke tempat yang terpuji (QS. Al-Isra\': 79).',
-      niatArabic: 'أُصَلِّي سُنَّةَ التَّهَجُّدِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī sunnatat-tahajjudi rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat sunnah Tahajud dua rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
-      specialDuaArabic: 'اللَّهُمَّ لَكَ الْحَمْدُ أَنْتَ نُورُ السَّمَاوَاتِ وَالْأَرْضِ وَمَنْ فِيهِنَّ، وَلَكَ الْحَمْدُ أَنْتَ قَيِّمُ السَّمَاوَاتِ وَالْأَرْضِ وَمَنْ فِيهِنَّ، أَنْتَ الْحَقُّ وَوَعْدُكَ الْحَقُّ وَلِقَاؤُكَ حَقٌّ وَالْجَنَّةُ حَقٌّ وَالنَّارُ حَقٌّ وَالنَّبِيُّونَ حَقٌّ وَمُحَمَّدٌ حَقٌّ وَالسَّاعَةُ حَقٌّ',
-      specialDuaLatin: 'Allāhumma lakal-hamdu Anta nūrus-samāwāti wal-ardhi wa man fīhinna, wa lakal-hamdu Anta qayyimus-samāwāti wal-ardhi wa man fīhinna, Antal-haqqu wa wa\'dukal-haqq, wa liqā\'uka haqq, wal-jannatu haqq, wan-nāru haqq, wan-nabiyyūna haqq, wa Muhammadun haqq, was-sā\'atu haqq.',
-      specialDuaTranslation: 'Ya Allah, bagi-Mu segala puji, Engkaulah cahaya langit dan bumi serta apa yang ada di dalamnya. Bagi-Mu segala puji, Engkaulah penegak langit dan bumi serta apa yang ada di dalamnya. Engkaulah yang hak (benar), janji-Mu benar, pertemuan dengan-Mu benar, surga-Mu benar, neraka-Mu benar, para nabi-Mu benar, Nabi Muhammad benar, dan hari kiamat itu benar.',
+      time:
+          'Malam hari setelah tidur, paling utama di sepertiga malam terakhir (sekitar pukul 02:00 - menjelang Subuh)',
+      description:
+          'Shalat sunnah muakkad yang dikerjakan pada malam hari setelah terbangun dari tidur. Dikerjakan dengan salam setiap 2 rakaat.',
+      virtue:
+          'Dan pada sebagian malam, lakukanlah shalat tahajud sebagai ibadah tambahan bagimu; mudah-mudahan Tuhanmu mengangkatmu ke tempat yang terpuji (QS. Al-Isra\': 79).',
+      niatArabic:
+          'أُصَلِّي سُنَّةَ التَّهَجُّدِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī sunnatat-tahajjudi rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat sunnah Tahajud dua rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1',
+          surahName: 'Surah Al-Kafirun (atau Surah Panjang Juz 1-3)',
+          arabicSurahName: 'سُورَةُ الْكَافِرُونَ',
+          virtue:
+              'Memurnikan tauhid dan melepaskan diri dari segala kemusyrikan di sepertiga malam terakhir ketika rahmat Allah melimpah.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2',
+          surahName: 'Surah Al-Ikhlas (atau Akhir Surah Ali Imran)',
+          arabicSurahName: 'سُورَةُ الْإِخْلَاصِ',
+          virtue:
+              'Rasulullah SAW senantiasa merenungkan kebesaran Allah di malam hari dengan membaca Al-Ikhlas atau ayat-ayat penciptaan langit dan bumi (HR. Bukhari).',
+        ),
+      ],
+      specialDuaArabic:
+          'اللَّهُمَّ لَكَ الْحَمْدُ أَنْتَ نُورُ السَّمَاوَاتِ وَالْأَرْضِ وَمَنْ فِيهِنَّ، وَلَكَ الْحَمْدُ أَنْتَ قَيِّمُ السَّمَاوَاتِ وَالْأَرْضِ وَمَنْ فِيهِنَّ، أَنْتَ الْحَقُّ وَوَعْدُكَ الْحَقُّ وَلِقَاؤُكَ حَقٌّ وَالْجَنَّةُ حَقٌّ وَالنَّارُ حَقٌّ وَالنَّبِيُّونَ حَقٌّ وَمُحَمَّدٌ حَقٌّ وَالسَّاعَةُ حَقٌّ',
+      specialDuaLatin:
+          'Allāhumma lakal-hamdu Anta nūrus-samāwāti wal-ardhi wa man fīhinna, wa lakal-hamdu Anta qayyimus-samāwāti wal-ardhi wa man fīhinna, Antal-haqqu wa wa\'dukal-haqq, wa liqā\'uka haqq, wal-jannatu haqq, wan-nāru haqq, wan-nabiyyūna haqq, wa Muhammadun haqq, was-sā\'atu haqq.',
+      specialDuaTranslation:
+          'Ya Allah, bagi-Mu segala puji, Engkaulah cahaya langit dan bumi serta apa yang ada di dalamnya. Bagi-Mu segala puji, Engkaulah penegak langit dan bumi serta apa yang ada di dalamnya. Engkaulah yang hak (benar), janji-Mu benar, pertemuan dengan-Mu benar, surga-Mu benar, neraka-Mu benar, para nabi-Mu benar, Nabi Muhammad benar, dan hari kiamat itu benar.',
+      specialDuaTitle: 'Doa Shalat Tahajud',
     ),
     PrayerGuideItem(
       id: 'dhuha',
@@ -204,16 +384,48 @@ abstract final class PrayerGuideData {
       category: 'sunnah',
       rakaat: 2,
       rakaatNote: '2 hingga 8 Rakaat (Kelipatan 2)',
-      time: 'Mulai 15-20 menit setelah matahari terbit (isyraq) hingga menjelang waktu Dzuhur',
-      description: 'Shalat sunnah yang dikerjakan pada pagi hari saat matahari mulai naik setinggi tombak. Dikerjakan 2 rakaat salam.',
-      virtue: 'Menggantikan sedekah seluruh 360 persendian tubuh manusia setiap paginya dan melapangkan rezeki (HR. Muslim).',
-      niatArabic: 'أُصَلِّي سُنَّةَ الضُّحَىٰ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī sunnatadh-dhuhā rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat sunnah Dhuha dua rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
-      specialDuaArabic: 'اللَّهُمَّ إِنَّ الضُّحَاءَ ضُحَاؤُكَ، وَالْبَهَاءَ بَهَاؤُكَ، وَالْجَمَالَ جَمَالُكَ، وَالْقُوَّةَ قُوَّتُكَ، وَالْقُدْرَةَ قُدْرَتُكَ، وَالْعِصْمَةَ عِصْمَتُكَ. اللَّهُمَّ إِنْ كَانَ رِزْقِي فِي السَّمَاءِ فَأَنْزِلْهُ، وَإِنْ كَانَ فِي الْأَرْضِ فَأَخْرِجْهُ، وَإِنْ كَانَ بَعِيدًا فَقَرِّبْهُ، بِحَقِّ ضُحَائِكَ وَبَهَائِكَ وَجَمَالِكَ وَقُوَّتِكَ وَقُدْرَتِكَ آتِنِي مَا آتَيْتَ عِبَادَكَ الصَّالِحِينَ',
-      specialDuaLatin: 'Allāhumma innadh-dhuha\'a dhuhā\'uk, wal-bahā\'a bahā\'uk, wal-jamāla jamāluk, wal-quwwata quwwatuk, wal-qudrata qudratuk, wal-\'ishmata \'ishmatuk. Allāhumma in kāna rizqī fis-samā\'i fa anzilh, wa in kāna fil-ardhi fa akhrijh, wa in kāna ba\'īdan fa qarribh, bi haqqi dhuhā\'ika wa bahā\'ika wa jamālika wa quwwatika wa qudratika ātinī mā ātayta \'ibādakash-shālihīn.',
-      specialDuaTranslation: 'Ya Allah, sesungguhnya waktu dhuha adalah waktu dhuha-Mu, keagungan adalah keagungan-Mu, keindahan adalah keindahan-Mu, kekuatan adalah kekuatan-Mu, kekuasaan adalah kekuasaan-Mu, dan penjagaan adalah penjagaan-Mu. Ya Allah, jika rezekiku masih di atas langit maka turunkanlah, jika di dalam bumi maka keluarkanlah, jika masih jauh dekatkanlah. Berkat kemuliaan dhuha-Mu, keagungan-Mu, keindahan-Mu, limpahkanlah kepadaku apa yang telah Engkau limpahkan kepada hamba-hamba-Mu yang shalih.',
+      time:
+          'Mulai 15-20 menit setelah matahari terbit (isyraq) hingga menjelang waktu Dzuhur',
+      description:
+          'Shalat sunnah yang dikerjakan pada pagi hari saat matahari mulai naik setinggi tombak. Dikerjakan 2 rakaat salam.',
+      virtue:
+          'Menggantikan sedekah seluruh 360 persendian tubuh manusia setiap paginya dan melapangkan rezeki (HR. Muslim).',
+      niatArabic:
+          'أُصَلِّي سُنَّةَ الضُّحَىٰ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī sunnatadh-dhuhā rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat sunnah Dhuha dua rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1 (Pilihan 1)',
+          surahName: 'Surah Asy-Syams',
+          arabicSurahName: 'سُورَةُ الشَّمْسِ',
+          virtue:
+              'Bersumpah demi cahaya matahari pagi dan mengajak jiwa untuk senantiasa menyucikan diri sebelum beraktivitas mencari nafkah.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2 (Pilihan 1)',
+          surahName: 'Surah Adh-Dhuha',
+          arabicSurahName: 'سُورَةُ الضُّحَىٰ',
+          virtue:
+              'Berisi jaminan Allah bahwa Dia tidak pernah meninggalkan hamba-Nya dan akan melimpahkan karunia rezeki serta ketenangan hati (HR. Ad-Dailami).',
+        ),
+        RecommendedSurah(
+          rakaat: 'Alternatif Ringkas',
+          surahName: 'Surah Al-Kafirun & Al-Ikhlas',
+          arabicSurahName: 'الْكَافِرُونَ وَالْإِخْلَاصِ',
+          virtue:
+              'Bagi yang belum hafal surah Asy-Syams, membaca Al-Kafirun dan Al-Ikhlas bernilai seperempat dan sepertiga Al-Qur\'an.',
+        ),
+      ],
+      specialDuaArabic:
+          'اللَّهُمَّ إِنَّ الضُّحَاءَ ضُحَاؤُكَ، وَالْبَهَاءَ بَهَاؤُكَ، وَالْجَمَالَ جَمَالُكَ، وَالْقُوَّةَ قُوَّتُكَ، وَالْقُدْرَةَ قُدْرَتُكَ، وَالْعِصْمَةَ عِصْمَتُكَ. اللَّهُمَّ إِنْ كَانَ رِزْقِي فِي السَّمَاءِ فَأَنْزِلْهُ، وَإِنْ كَانَ فِي الْأَرْضِ فَأَخْرِجْهُ، وَإِنْ كَانَ بَعِيدًا فَقَرِّبْهُ، بِحَقِّ ضُحَائِكَ وَبَهَائِكَ وَجَمَالِكَ وَقُوَّتِكَ وَقُدْرَتِكَ آتِنِي مَا آتَيْتَ عِبَادَكَ الصَّالِحِينَ',
+      specialDuaLatin:
+          'Allāhumma innadh-dhuha\'a dhuhā\'uk, wal-bahā\'a bahā\'uk, wal-jamāla jamāluk, wal-quwwata quwwatuk, wal-qudrata qudratuk, wal-\'ishmata \'ishmatuk. Allāhumma in kāna rizqī fis-samā\'i fa anzilh, wa in kāna fil-ardhi fa akhrijh, wa in kāna ba\'īdan fa qarribh, bi haqqi dhuhā\'ika wa bahā\'ika wa jamālika wa quwwatika wa qudratika ātinī mā ātayta \'ibādakash-shālihīn.',
+      specialDuaTranslation:
+          'Ya Allah, sesungguhnya waktu dhuha adalah waktu dhuha-Mu, keagungan adalah keagungan-Mu, keindahan adalah keindahan-Mu, kekuatan adalah kekuatan-Mu, kekuasaan adalah kekuasaan-Mu, dan penjagaan adalah penjagaan-Mu. Ya Allah, jika rezekiku masih di atas langit maka turunkanlah, jika di dalam bumi maka keluarkanlah, jika masih jauh dekatkanlah. Berkat kemuliaan dhuha-Mu, keagungan-Mu, keindahan-Mu, limpahkanlah kepadaku apa yang telah Engkau limpahkan kepada hamba-hamba-Mu yang shalih.',
+      specialDuaTitle: 'Doa Shalat Dhuha',
     ),
     PrayerGuideItem(
       id: 'witir',
@@ -223,27 +435,39 @@ abstract final class PrayerGuideData {
       rakaat: 3,
       rakaatNote: '1, 3, 5 Rakaat (Ganjil)',
       time: 'Setelah shalat Isya hingga menjelang terbit fajar shadiq Subuh',
-      description: 'Shalat sunnah bilangan ganjil yang menjadi penutup shalat malam. Paling umum dikerjakan 3 rakaat (2 rakaat salam + 1 rakaat salam).',
-      virtue: 'Sesungguhnya Allah itu Witir (Esa) dan mencintai yang ganjil, maka lakukanlah shalat witir wahai ahli Al-Qur\'an (HR. Tirmidzi).',
-      niatArabic: 'أُصَلِّي سُنَّةَ الْوِتْرِ ثَلَاثَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī sunnatal-witri tsalātsa raka\'ātin mustaqbilal-qiblati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat sunnah Witir tiga rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
-    ),
-    PrayerGuideItem(
-      id: 'tarawih',
-      title: 'Shalat Tarawih',
-      arabicTitle: 'صَلَاةُ التَّرَاوِيحِ',
-      category: 'sunnah',
-      rakaat: 8,
-      rakaatNote: '8 atau 20 Rakaat (+ Witir)',
-      time: 'Malam hari di bulan suci Ramadhan setelah shalat Isya',
-      description: 'Shalat sunnah malam khusus di bulan Ramadhan. Dikerjakan dengan salam tiap 2 rakaat (atau 4 rakaat), lalu ditutup dengan shalat witir.',
-      virtue: 'Barang siapa shalat malam Ramadhan (Tarawih) karena iman dan mengharap pahala, diampuni dosa-dosanya yang telah lalu (HR. Bukhari & Muslim).',
-      niatArabic: 'أُصَلِّي سُنَّةَ التَّرَاوِيحِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī sunnatat-tarāwīhi rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat sunnah Tarawih dua rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
+      description:
+          'Shalat sunnah bilangan ganjil yang menjadi penutup shalat malam. Paling umum dikerjakan 3 rakaat (2 rakaat salam + 1 rakaat salam).',
+      virtue:
+          'Sesungguhnya Allah itu Witir (Esa) dan mencintai yang ganjil, maka lakukanlah shalat witir wahai ahli Al-Qur\'an (HR. Tirmidzi).',
+      niatArabic:
+          'أُصَلِّي سُنَّةَ الْوِتْرِ ثَلَاثَ رَكَعَاتٍ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī sunnatal-witri tsalātsa raka\'ātin mustaqbilal-qiblati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat sunnah Witir tiga rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1',
+          surahName: 'Surah Al-A\'la',
+          arabicSurahName: 'سُورَةُ الْأَعْلَى',
+          virtue:
+              'Sunnah Nabi SAW pada shalat witir (HR. Abu Dawud, An-Nasa\'i, Ibnu Majah). Menyucikan nama Allah Yang Maha Tinggi.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2',
+          surahName: 'Surah Al-Kafirun',
+          arabicSurahName: 'سُورَةُ الْكَافِرُونَ',
+          virtue:
+              'Menegaskan keimanan tauhid dan menolak segala bentuk kekafiran (HR. Abu Dawud).',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 3 (Penutup)',
+          surahName: 'Surah Al-Ikhlas, Al-Falaq, & An-Nas',
+          arabicSurahName: 'الإِخْلَاصِ وَالْمُعَوِّذَتَيْنِ',
+          virtue:
+              'Menutup malam hari dengan ketauhidan murni dan benteng perlindungan diri dari segala godaan setan serta kejahatan makhluk (HR. Tirmidzi).',
+        ),
+      ],
     ),
     PrayerGuideItem(
       id: 'rawatib',
@@ -253,12 +477,60 @@ abstract final class PrayerGuideData {
       rakaat: 2,
       rakaatNote: '2 Rakaat (Qabliyah / Ba\'diyah)',
       time: 'Sebelum (Qabliyah) atau sesudah (Ba\'diyah) shalat fardhu 5 waktu',
-      description: 'Shalat sunnah yang mengiringi shalat fardhu. Yang muakkad berjumlah 10-12 rakaat: 2 rakaat sebelum Subuh, 2 sebelum Dzuhur, 2 setelah Dzuhur, 2 setelah Maghrib, dan 2 setelah Isya.',
-      virtue: 'Barang siapa menjaga 12 rakaat shalat sunnah rawatib dalam sehari semalam, Allah bangunkan baginya sebuah rumah di surga (HR. Muslim).',
-      niatArabic: 'أُصَلِّي سُنَّةَ الظُّهْرِ رَكْعَتَيْنِ قَبْلِيَّةً مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī sunnatazh-zhuhri rak\'atayni qabliyyatan mustaqbilal-qiblati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat sunnah sebelum Dzuhur dua rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
+      description:
+          'Shalat sunnah yang mengiringi shalat fardhu. Yang muakkad berjumlah 10-12 rakaat: 2 rakaat sebelum Subuh, 2 sebelum Dzuhur, 2 setelah Dzuhur, 2 setelah Maghrib, dan 2 setelah Isya.',
+      virtue:
+          'Barang siapa menjaga 12 rakaat shalat sunnah rawatib dalam sehari semalam, Allah bangunkan baginya sebuah rumah di surga (HR. Muslim).',
+      niatArabic:
+          'أُصَلِّي سُنَّةَ الظُّهْرِ رَكْعَتَيْنِ قَبْلِيَّةً مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī sunnatazh-zhuhri rak\'atayni qabliyyatan mustaqbilal-qiblati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat sunnah sebelum Dzuhur dua rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1 (Qabliyah Subuh & Ba\'diyah Maghrib)',
+          surahName: 'Surah Al-Kafirun',
+          arabicSurahName: 'سُورَةُ الْكَافِرُونَ',
+          virtue:
+              'Nabi SAW melanggengkan Al-Kafirun pada dua rakaat fajar sebelum Subuh (yang nilainya lebih baik dari dunia dan seisinya) dan setelah Maghrib (HR. Muslim).',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2 (Qabliyah Subuh & Ba\'diyah Maghrib)',
+          surahName: 'Surah Al-Ikhlas',
+          arabicSurahName: 'سُورَةُ الْإِخْلَاصِ',
+          virtue:
+              'Mempertegas keikhlasan ibadah dan ketauhidan kepada Allah SWT sebagai pembuka fajar dan penutup senja (HR. Muslim).',
+        ),
+      ],
+    ),
+    PrayerGuideItem(
+      id: 'tarawih',
+      title: 'Shalat Tarawih',
+      arabicTitle: 'صَلَاةُ التَّرَاوِيحِ',
+      category: 'sunnah',
+      rakaat: 8,
+      rakaatNote: '8 atau 20 Rakaat (+ Witir)',
+      time: 'Malam hari di bulan suci Ramadhan setelah shalat Isya',
+      description:
+          'Shalat sunnah malam khusus di bulan Ramadhan. Dikerjakan dengan salam tiap 2 rakaat (atau 4 rakaat), lalu ditutup dengan shalat witir.',
+      virtue:
+          'Barang siapa shalat malam Ramadhan (Tarawih) karena iman dan mengharap pahala, diampuni dosa-dosanya yang telah lalu (HR. Bukhari & Muslim).',
+      niatArabic:
+          'أُصَلِّي سُنَّةَ التَّرَاوِيحِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī sunnatat-tarāwīhi rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat sunnah Tarawih dua rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1 s/d Selesai',
+          surahName: 'Surah-surah Juz 30 (At-Takatsur s/d An-Nas)',
+          arabicSurahName: 'جُزْءُ عَمَّ',
+          virtue:
+              'Dianjurkan membaca surah-surah pendek juz 30 agar bacaan tartil, makmum dapat menyimak dengan khusyuk, dan menghidupkan malam Ramadhan dengan tadabbur makna ayat.',
+        ),
+      ],
     ),
     PrayerGuideItem(
       id: 'istikharah',
@@ -267,16 +539,41 @@ abstract final class PrayerGuideData {
       category: 'sunnah',
       rakaat: 2,
       rakaatNote: '2 Rakaat',
-      time: 'Kapan saja di luar waktu terlarang shalat, diutamakan di malam hari',
-      description: 'Shalat sunnah dua rakaat yang dikerjakan saat seorang muslim menghadapi keraguan atau pilihan penting dalam hidup untuk memohon ketetapan terbaik dari Allah.',
-      virtue: 'Rasulullah SAW mengajarkan istikharah kepada kami dalam segala urusan sebagaimana beliau mengajarkan surah Al-Qur\'an (HR. Bukhari).',
-      niatArabic: 'أُصَلِّي سُنَّةَ الِاسْتِخَارَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī sunnatal-istikhārati rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat sunnah Istikharah dua rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
-      specialDuaArabic: 'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ الْغُيُوبِ',
-      specialDuaLatin: 'Allāhumma innī astakhīruka bi \'ilmika, wa astaqdiruka bi qudratika, wa as\'aluka min fadhlikal-\'azhīm, fa innaka taqdiru wa lā aqdir, wa ta\'lamu wa lā a\'lam, wa Anta \'Allāmul-ghuyūb.',
-      specialDuaTranslation: 'Ya Allah, sesungguhnya aku memohon pilihan yang tepat kepada-Mu dengan ilmu-Mu, memohon kekuatan kepada-Mu dengan kekuasaan-Mu, dan memohon dari karunia-Mu yang agung. Karena sesungguhnya Engkaulah yang Maha Kuasa sedang aku tidak berkuasa, Engkau Maha Mengetahui sedang aku tidak mengetahui, dan Engkaulah Maha Mengetahui hal-hal yang gaib.',
+      time:
+          'Kapan saja di luar waktu terlarang shalat, diutamakan di malam hari',
+      description:
+          'Shalat sunnah dua rakaat yang dikerjakan saat seorang muslim menghadapi keraguan atau pilihan penting dalam hidup untuk memohon ketetapan terbaik dari Allah.',
+      virtue:
+          'Rasulullah SAW mengajarkan istikharah kepada kami dalam segala urusan sebagaimana beliau mengajarkan surah Al-Qur\'an (HR. Bukhari).',
+      niatArabic:
+          'أُصَلِّي سُنَّةَ الِاسْتِخَارَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī sunnatal-istikhārati rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat sunnah Istikharah dua rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1',
+          surahName: 'Surah Al-Kafirun',
+          arabicSurahName: 'سُورَةُ الْكَافِرُونَ',
+          virtue:
+              'Para ulama empat mazhab menganjurkan Al-Kafirun untuk menanggalkan hawa nafsu dan kecenderungan pribadi sebelum memohon petunjuk pilihan dari Allah.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2',
+          surahName: 'Surah Al-Ikhlas',
+          arabicSurahName: 'سُورَةُ الْإِخْلَاصِ',
+          virtue:
+              'Menyerahkan keputusan sepenuhnya hanya kepada Allah SWT Yang Maha Mengetahui masa depan dan hal-hal yang gaib.',
+        ),
+      ],
+      specialDuaArabic:
+          'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ الْغُيُوبِ',
+      specialDuaLatin:
+          'Allāhumma innī astakhīruka bi \'ilmika, wa astaqdiruka bi qudratika, wa as\'aluka min fadhlikal-\'azhīm, fa innaka taqdiru wa lā aqdir, wa ta\'lamu wa lā a\'lam, wa Anta \'Allāmul-ghuyūb.',
+      specialDuaTranslation:
+          'Ya Allah, sesungguhnya aku memohon pilihan yang tepat kepada-Mu dengan ilmu-Mu, memohon kekuatan kepada-Mu dengan kekuasaan-Mu, dan memohon dari karunia-Mu yang agung. Karena sesungguhnya Engkaulah yang Maha Kuasa sedang aku tidak berkuasa, Engkau Maha Mengetahui sedang aku tidak mengetahui, dan Engkaulah Maha Mengetahui hal-hal yang gaib.',
+      specialDuaTitle: 'Doa Shalat Istikharah',
     ),
     PrayerGuideItem(
       id: 'hajat',
@@ -285,13 +582,34 @@ abstract final class PrayerGuideData {
       category: 'sunnah',
       rakaat: 2,
       rakaatNote: '2 hingga 12 Rakaat',
-      time: 'Kapan saja kecuali waktu makruh, paling mustajab sepertiga malam terakhir',
-      description: 'Shalat sunnah yang dikerjakan seorang muslim saat memiliki keinginan, harapan, atau hajat penting kepada Allah SWT agar dikabulkan.',
-      virtue: 'Barang siapa berwudhu dengan sempurna lalu shalat dua rakaat, niscaya Allah mengabulkan apa yang dimintanya cepat atau lambat (HR. Ahmad).',
-      niatArabic: 'أُصَلِّي سُنَّةَ الْحَاجَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī sunnatal-hājati rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat sunnah Hajat dua rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
+      time:
+          'Kapan saja kecuali waktu makruh, paling mustajab sepertiga malam terakhir',
+      description:
+          'Shalat sunnah yang dikerjakan seorang muslim saat memiliki keinginan, harapan, atau hajat penting kepada Allah SWT agar dikabulkan.',
+      virtue:
+          'Barang siapa berwudhu dengan sempurna lalu shalat dua rakaat, niscaya Allah mengabulkan apa yang dimintanya cepat atau lambat (HR. Ahmad).',
+      niatArabic:
+          'أُصَلِّي سُنَّةَ الْحَاجَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī sunnatal-hājati rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat sunnah Hajat dua rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1',
+          surahName: 'Ayat Kursi (Al-Baqarah: 255) atau Al-Kafirun',
+          arabicSurahName: 'آيَةُ الْكُرْسِيِّ',
+          virtue:
+              'Ayat teragung dalam Al-Qur\'an yang mengagungkan kekuasaan Allah atas langit dan bumi, mempercepat terijabahnya hajat dan doa.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2',
+          surahName: 'Surah Al-Ikhlas',
+          arabicSurahName: 'سُورَةُ الْإِخْلَاصِ',
+          virtue:
+              'Mengharap hajat hanya bertumpu kepada Allah As-Samad (Tempat seluruh makhluk bergantung).',
+        ),
+      ],
     ),
     PrayerGuideItem(
       id: 'taubat',
@@ -301,12 +619,32 @@ abstract final class PrayerGuideData {
       rakaat: 2,
       rakaatNote: '2 Rakaat',
       time: 'Kapan saja saat timbul penyesalan atas maksiat/dosa',
-      description: 'Shalat sunnah dua rakaat yang dikerjakan dengan sungguh-sungguh untuk memohon ampunan Allah atas kesalahan dan maksiat yang telah dilakukan.',
-      virtue: 'Tidaklah seorang hamba melakukan suatu dosa, lalu berwudhu dengan baik, berdiri mengerjakan shalat dua rakaat, kemudian memohon ampun kepada Allah, melainkan Allah pasti mengampuninya (HR. Tirmidzi).',
-      niatArabic: 'أُصَلِّي سُنَّةَ التَّوْبَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī sunnatat-tawbati rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat sunnah Taubat dua rakaat menghadap kiblat karena Allah Ta\'ala.',
-      steps: commonSteps,
+      description:
+          'Shalat sunnah dua rakaat yang dikerjakan dengan sungguh-sungguh untuk memohon ampunan Allah atas kesalahan dan maksiat yang telah dilakukan.',
+      virtue:
+          'Tidaklah seorang hamba melakukan suatu dosa, lalu berwudhu dengan baik, berdiri mengerjakan shalat dua rakaat, kemudian memohon ampun kepada Allah, melainkan Allah pasti mengampuninya (HR. Tirmidzi).',
+      niatArabic:
+          'أُصَلِّي سُنَّةَ التَّوْبَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī sunnatat-tawbati rak\'atayni mustaqbilal-qiblati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat sunnah Taubat dua rakaat menghadap kiblat karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Rakaat 1',
+          surahName: 'Surah Al-Kafirun',
+          arabicSurahName: 'سُورَةُ الْكَافِرُونَ',
+          virtue:
+              'Menjadi ikrar pemutusan total dari kemaksiatan, dosa, dan keburukan masa lalu.',
+        ),
+        RecommendedSurah(
+          rakaat: 'Rakaat 2',
+          surahName: 'Surah Al-Ikhlas (atau Surah Ali Imran: 135-136)',
+          arabicSurahName: 'سُورَةُ الْإِخْلَاصِ',
+          virtue:
+              'Mengakui keagungan ampunan Allah SWT Yang Maha Pengampun dan Maha Menerima Taubat hamba-Nya.',
+        ),
+      ],
     ),
     PrayerGuideItem(
       id: 'jenazah',
@@ -316,35 +654,61 @@ abstract final class PrayerGuideData {
       rakaat: 0,
       rakaatNote: '4 Takbir (Berdiri, tanpa ruku\' & sujud)',
       time: 'Setelah jenazah dimandikan dan dikafani',
-      description: 'Shalat fardhu kifayah untuk mendoakan jenazah muslim. Dikerjakan berdiri tegak dengan empat kali takbir tanpa ada ruku\', sujud, maupun duduk.',
-      virtue: 'Barang siapa menyalatkan jenazah maka baginya pahala satu qirath (sebesar gunung Uhud) (HR. Bukhari).',
-      niatArabic: 'أُصَلِّي عَلَىٰ هَٰذَا الْمَيِّتِ أَرْبَعَ تَكْبِيرَاتٍ فَرْضَ الْكِفَايَةِ لِلَّهِ تَعَالَى',
-      niatLatin: 'Ushallī \'alā hādzal-mayyiti arba\'a takbīrātin fardhal-kifāyati lillāhi Ta\'ālā.',
-      niatTranslation: 'Aku berniat shalat atas jenazah ini empat takbir fardhu kifayah karena Allah Ta\'ala.',
-      steps: [
+      description:
+          'Shalat fardhu kifayah untuk mendoakan jenazah muslim. Dikerjakan berdiri tegak dengan empat kali takbir tanpa ada ruku\', sujud, maupun duduk.',
+      virtue:
+          'Barang siapa menyalatkan jenazah maka baginya pahala satu qirath (sebesar gunung Uhud) (HR. Bukhari).',
+      niatArabic:
+          'أُصَلِّي عَلَىٰ هَٰذَا الْمَيِّتِ أَرْبَعَ تَكْبِيرَاتٍ فَرْضَ الْكِفَايَةِ لِلَّهِ تَعَالَى',
+      niatLatin:
+          'Ushallī \'alā hādzal-mayyiti arba\'a takbīrātin fardhal-kifāyati lillāhi Ta\'ālā.',
+      niatTranslation:
+          'Aku berniat shalat atas jenazah ini empat takbir fardhu kifayah karena Allah Ta\'ala.',
+      recommendedSurahs: [
+        RecommendedSurah(
+          rakaat: 'Setelah Takbir Pertama',
+          surahName: 'Surah Al-Fatihah (Rukun Wajib)',
+          arabicSurahName: 'سُورَةُ الْفَاتِحَةِ',
+          virtue:
+              'Pada shalat jenazah tidak ada ruku\' dan sujud, sehingga tidak membaca surah pendek melainkan wajib membaca Ummul Kitab (Al-Fatihah) setelah takbir pertama (HR. Bukhari).',
+        ),
+      ],
+      specialSteps: [
         PrayerGuideStep(
           title: 'Takbir Pertama: Membaca Surah Al-Fatihah',
-          arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ... (Surah Al-Fatihah)',
-          latin: 'Bismillāhir-rahmānir-rahīm... (membaca surah Al-Fatihah secara lengkap).',
-          translation: 'Membaca surah pembuka Al-Fatihah setelah takbiratul ihram pertama.',
+          arabic:
+              'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ... (Surah Al-Fatihah)',
+          latin:
+              'Bismillāhir-rahmānir-rahīm... (membaca surah Al-Fatihah secara lengkap).',
+          translation:
+              'Membaca surah pembuka Al-Fatihah setelah takbiratul ihram pertama.',
         ),
         PrayerGuideStep(
           title: 'Takbir Kedua: Membaca Shalawat Nabi',
-          arabic: 'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ',
-          latin: 'Allāhumma shalli \'alā Muhammad wa \'alā āli Muhammad, kamā shallayta \'alā Ibrāhīm wa \'alā āli Ibrāhīm, innaka Hamīdum Majīd.',
-          translation: 'Ya Allah, limpahkanlah rahmat kepada Nabi Muhammad dan keluarganya sebagaimana Engkau limpahkan kepada Nabi Ibrahim dan keluarganya, sesungguhnya Engkau Maha Terpuji lagi Maha Mulia.',
+          arabic:
+              'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ',
+          latin:
+              'Allāhumma shalli \'alā Muhammad wa \'alā āli Muhammad, kamā shallayta \'alā Ibrāhīm wa \'alā āli Ibrāhīm, innaka Hamīdum Majīd.',
+          translation:
+              'Ya Allah, limpahkanlah rahmat kepada Nabi Muhammad dan keluarganya sebagaimana Engkau limpahkan kepada Nabi Ibrahim dan keluarganya, sesungguhnya Engkau Maha Terpuji lagi Maha Mulia.',
         ),
         PrayerGuideStep(
           title: 'Takbir Ketiga: Mendoakan Jenazah',
-          arabic: 'اللَّهُمَّ اغْفِرْ لَهُ وَارْحَمْهُ وَعَافِهِ وَاعْفُ عَنْهُ وَأَكْرِمْ نُزُلَهُ وَوَسِّعْ مَدْخَلَهُ',
-          latin: 'Allāhummaghfir lahū warhamhu wa \'āfihī wa\'fu \'anhu wa akrim nuzulahū wa wassi\' madkhalah.',
-          translation: 'Ya Allah ampunilah dia, rahmatilah dia, berilah keselamatan kepadanya, maafkanlah kesalahannya, muliakanlah tempat persinggahannya, dan lapangkanlah kuburnya. (Catatan: lafal lahū diganti lahā untuk jenazah perempuan).',
+          arabic:
+              'اللَّهُمَّ اغْفِرْ لَهُ وَارْحَمْهُ وَعَافِهِ وَاعْفُ عَنْهُ وَأَكْرِمْ نُزُلَهُ وَوَسِّعْ مَدْخَلَهُ',
+          latin:
+              'Allāhummaghfir lahū warhamhu wa \'āfihī wa\'fu \'anhu wa akrim nuzulahū wa wassi\' madkhalah.',
+          translation:
+              'Ya Allah ampunilah dia, rahmatilah dia, berilah keselamatan kepadanya, maafkanlah kesalahannya, muliakanlah tempat persinggahannya, dan lapangkanlah kuburnya. (Catatan: lafal lahū diganti lahā untuk jenazah perempuan).',
         ),
         PrayerGuideStep(
           title: 'Takbir Keempat: Doa untuk Keluarga & Kaum Muslimin',
-          arabic: 'اللَّهُمَّ لَا تَحْرِمْنَا أَجْرَهُ وَلَا تَفْتِنَّا بَعْدَهُ وَاغْفِرْ لَنَا وَلَهُ',
-          latin: 'Allāhumma lā tahrimnā ajrahū wa lā taftinnā ba\'dahū waghfir lanā wa lah.',
-          translation: 'Ya Allah janganlah Engkau halangi kami dari pahalanya dan janganlah Engkau timbulkan fitnah bagi kami sepeninggalnya, serta ampunilah kami dan dia.',
+          arabic:
+              'اللَّهُمَّ لَا تَحْرِمْنَا أَجْرَهُ وَلَا تَفْتِنَّا بَعْدَهُ وَاغْفِرْ لَنَا وَلَهُ',
+          latin:
+              'Allāhumma lā tahrimnā ajrahū wa lā taftinnā ba\'dahū waghfir lanā wa lah.',
+          translation:
+              'Ya Allah janganlah Engkau halangi kami dari pahalanya dan janganlah Engkau timbulkan fitnah bagi kami sepeninggalnya, serta ampunilah kami dan dia.',
         ),
         PrayerGuideStep(
           title: 'Salam Sempurna',
@@ -359,7 +723,8 @@ abstract final class PrayerGuideData {
   static const List<PrayerRuleItem> rules = [
     PrayerRuleItem(
       title: 'Syarat Sah Shalat',
-      description: 'Hal-hal yang harus terpenuhi sebelum memulai ibadah shalat agar shalatnya sah secara syariat:',
+      description:
+          'Hal-hal yang harus terpenuhi sebelum memulai ibadah shalat agar shalatnya sah secara syariat:',
       points: [
         'Suci dari hadats kecil (berwudhu) dan hadats besar (mandi wajib).',
         'Suci badan, pakaian, dan tempat shalat dari najis.',
@@ -370,7 +735,8 @@ abstract final class PrayerGuideData {
     ),
     PrayerRuleItem(
       title: '13 Rukun Shalat (Mazhab Syafi\'i)',
-      description: 'Bagian inti shalat yang wajib dikerjakan dan tidak boleh ditinggalkan secara sengaja maupun lupa:',
+      description:
+          'Bagian inti shalat yang wajib dikerjakan dan tidak boleh ditinggalkan secara sengaja maupun lupa:',
       points: [
         '1. Niat di dalam hati bersamaan dengan takbiratul ihram.',
         '2. Berdiri bagi yang mampu pada shalat fardhu.',
@@ -389,7 +755,8 @@ abstract final class PrayerGuideData {
     ),
     PrayerRuleItem(
       title: 'Hal-Hal yang Membatalkan Shalat',
-      description: 'Perkara yang menyebabkan shalat menjadi batal dan wajib diulangi dari awal:',
+      description:
+          'Perkara yang menyebabkan shalat menjadi batal dan wajib diulangi dari awal:',
       points: [
         'Terkena hadats kecil (kentut, buang air) atau hadats besar.',
         'Terkena najis yang tidak dimaafkan pada badan atau pakaian.',
