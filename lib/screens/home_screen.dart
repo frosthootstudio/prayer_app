@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'calendar_screen.dart';
 import 'dzikir_screen.dart';
+import 'prayer_guide_screen.dart';
 import 'settings_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -885,17 +886,7 @@ class _QuickActionRow extends StatelessWidget {
             icon: Icons.menu_book_rounded,
             label: isEn ? 'Guide' : 'Panduan',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    isEn
-                        ? 'Prayer Guide feature is being prepared!'
-                        : 'Fitur Panduan Shalat sedang disiapkan!',
-                  ),
-                  duration: const Duration(seconds: 2),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PrayerGuideScreen()));
             },
           ),
           _QuickActionItem(
