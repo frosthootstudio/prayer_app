@@ -20,7 +20,7 @@ dependencies:
 
   # Location
   geolocator: ^14.0.2
-  geocoding: ^4.0.0
+  geocoding: ^5.0.0
 
   # Notifications
 
@@ -34,20 +34,20 @@ dependencies:
   # Date formatting
   intl: ^0.20.2
   google_fonts: ^8.1.0
-  awesome_notifications: ^0.11.0
+  awesome_notifications: ^0.12.1
   flutter_compass: ^0.8.1
-  smooth_page_indicator: ^2.0.1
+  smooth_page_indicator: ^3.0.0
   flutter_native_splash: ^2.4.7
 
-  home_widget: ^0.9.4
-  workmanager: ^0.9.0
+  home_widget: ^0.10.0
+  workmanager: ^0.10.10
 
   # Hijri calendar & calendar widget
   hijri: ^3.0.1
   table_calendar: ^3.1.3
   quran: ^1.4.1
   http: ^1.2.0
-  permission_handler: ^12.0.0
+  permission_handler: ^13.0.2
   just_audio: ^0.10.5
   just_audio_background: ^0.0.1-beta.17
   audio_service: ^0.18.18
@@ -67,7 +67,7 @@ dependencies:
   firebase_crashlytics: ^5.2.2
 
   # AdMob — App Open Ad only (no banners, native, interstitial, rewarded)
-  google_mobile_ads: ^8.0.0
+  google_mobile_ads: ^9.1.0
 
   # In-App Purchase — one-time premium unlock (no subscription)
   in_app_purchase: ^3.2.0

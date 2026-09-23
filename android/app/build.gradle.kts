@@ -19,7 +19,7 @@ plugins {
 
 android {
     namespace = "studio.frosthoot.prayer_app"
-    compileSdk = 36
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -75,3 +75,4 @@ dependencies {
     // Official Google Play In-App Review
     implementation("com.google.android.play:review-ktx:2.0.2")
 }
+

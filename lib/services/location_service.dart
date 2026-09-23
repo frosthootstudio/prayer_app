@@ -2,6 +2,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
+  final _geocoding = Geocoding();
+
   /// Checks permission and returns the current [Position].
   /// Returns null if permission is denied or location service is off.
   Future<Position?> getCurrentPosition() async {
@@ -31,7 +33,8 @@ class LocationService {
   /// Falls back to "lat, lng" string on any error.
   Future<String> getCityName(double lat, double lng) async {
     try {
-      final placemarks = await placemarkFromCoordinates(lat, lng)
+      final placemarks = await _geocoding
+          .placemarkFromCoordinates(lat, lng)
           .timeout(const Duration(seconds: 10));
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;

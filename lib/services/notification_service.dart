@@ -190,7 +190,6 @@ class NotificationService {
           notificationLayout: NotificationLayout.Default,
           category:           NotificationCategory.Reminder,
           wakeUpScreen:       true,
-          criticalAlert:      true,
           autoDismissible:    false,
         ),
         schedule: NotificationCalendar(
@@ -249,7 +248,6 @@ class NotificationService {
           notificationLayout: NotificationLayout.Default,
           category:           NotificationCategory.Reminder,
           wakeUpScreen:       true,
-          criticalAlert:      true,
           autoDismissible:    true,
         ),
         schedule: NotificationCalendar(
@@ -429,3 +427,4 @@ class NotificationService {
     }
   }
 }
+

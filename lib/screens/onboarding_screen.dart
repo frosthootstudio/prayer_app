@@ -58,7 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               accuracy: LocationAccuracy.low,
             ),
           ).timeout(const Duration(seconds: 15));
-          final marks = await placemarkFromCoordinates(
+          final marks = await Geocoding().placemarkFromCoordinates(
             pos.latitude, pos.longitude,
           );
           city = marks.first.locality ??
@@ -860,3 +860,4 @@ class _NotifPage extends StatelessWidget {
     );
   }
 }
+
