@@ -499,46 +499,46 @@ class _RecommendedSurahsCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.appAccent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    surahs[i].rakaat,
+                    style: GoogleFonts.poppins(
+                      color: context.appAccent,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: context.appAccent.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        surahs[i].rakaat,
-                        style: GoogleFonts.poppins(
-                          color: context.appAccent,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         surahs[i].surahName,
                         style: GoogleFonts.poppins(
                           color: context.appTextPrimary,
-                          fontSize: 13.5,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                     if (surahs[i].arabicSurahName != null) ...[
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       Text(
                         surahs[i].arabicSurahName!,
                         textDirection: TextDirection.rtl,
                         style: GoogleFonts.amiri(
                           color: context.appAccent,
-                          fontSize: 15,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
