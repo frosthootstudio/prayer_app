@@ -12,11 +12,7 @@ class CalendarScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProxyProvider<SettingsProvider, CalendarProvider>(
-      create: (ctx) => CalendarProvider(ctx.read<SettingsProvider>()),
-      update: (_, settings, previous) => previous ?? CalendarProvider(settings),
-      child: const _CalendarBody(),
-    );
+    return const _CalendarBody();
   }
 }
 

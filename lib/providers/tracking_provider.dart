@@ -154,4 +154,40 @@ class TrackingProvider extends ChangeNotifier {
       return getCompletionCount(dateStr);
     });
   }
+
+  /// Returns the current consecutive days streak where at least [minTasks]
+  /// were completed. If today is not yet done, checks yesterday so an active
+  /// streak isn't prematurely broken during the day.
+  int getDailyStreak({int minTasks = 1}) {
+    final now = DateTime.now();
+    int streak = 0;
+    final todayStr = DateFormat('yyyy-MM-dd').format(now);
+    final countToday = getCompletionCount(todayStr);
+
+    var checkDate = now;
+    if (countToday < minTasks) {
+      checkDate = now.subtract(const Duration(days: 1));
+    }
+
+    while (true) {
+      final dateStr = DateFormat('yyyy-MM-dd').format(checkDate);
+      if (getCompletionCount(dateStr) >= minTasks) {
+        streak++;
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      } else {
+        break;
+      }
+      if (streak >= 365) break;
+    }
+    return streak;
+  }
+
+  /// Weekly completion percentage (0.0 to 1.0)
+  double get weeklyCompletionRate {
+    final stats = getWeeklyStats();
+    final totalPossible = totalTasks * 7;
+    if (totalPossible == 0) return 0.0;
+    final sum = stats.fold<int>(0, (prev, elem) => prev + elem);
+    return (sum / totalPossible).clamp(0.0, 1.0);
+  }
 }

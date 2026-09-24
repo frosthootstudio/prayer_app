@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../services/notification_service.dart';
 import '../services/prayer_calculation_service.dart';
 
 enum AdzanSound {
@@ -47,6 +48,7 @@ class SettingsProvider extends ChangeNotifier {
   String         arabicFont         = 'scheherazade';
   double         arabicFontSize     = 24.0;
   bool           ramadanMode        = true;
+  bool           sunnahFastingReminder = false;
 
   late Box _box;
 
@@ -76,6 +78,7 @@ class SettingsProvider extends ChangeNotifier {
     arabicFont        = _box.get('arabicFont',        defaultValue: 'scheherazade') as String;
     arabicFontSize    = (_box.get('arabicFontSize',  defaultValue: 24.0)   as double).clamp(16.0, 40.0);
     ramadanMode       = _box.get('ramadanMode',       defaultValue: true)  as bool;
+    sunnahFastingReminder = _box.get('sunnahFastingReminder', defaultValue: false) as bool;
   }
 
   // ── Human-readable labels ─────────────────────────────────────────────────
@@ -270,6 +273,9 @@ class SettingsProvider extends ChangeNotifier {
     // Ramadan
     'ramadanMode':        'Mode Ramadan',
     'ramadanModeDesc':    'Banner & fitur Ramadan otomatis aktif',
+    // Sunnah Fasting
+    'sunnahFastingReminder':     'Pengingat Puasa Sunnah',
+    'sunnahFastingReminderDesc': 'Notifikasi malam hari sebelum puasa Senin, Kamis & Ayyamul Bidh',
   };
 
   static const _labelsEn = <String, String>{
@@ -417,6 +423,9 @@ class SettingsProvider extends ChangeNotifier {
     // Ramadan
     'ramadanMode':        'Ramadan Mode',
     'ramadanModeDesc':    'Auto-enable Ramadan banner & features',
+    // Sunnah Fasting
+    'sunnahFastingReminder':     'Sunnah Fasting Reminder',
+    'sunnahFastingReminderDesc': 'Evening notification before Monday, Thursday & Ayyamul Bidh fasts',
   };
 
   static const _labelsAr = <String, String>{
@@ -522,6 +531,9 @@ class SettingsProvider extends ChangeNotifier {
     'arabicFontSize':     'حجم الخط العربي',
     'ramadanMode':        'وضع رمضان',
     'ramadanModeDesc':    'تفعيل تلقائي لبانر ومميزات رمضان',
+    // Sunnah Fasting
+    'sunnahFastingReminder':     'تذكير صيام التطوع',
+    'sunnahFastingReminderDesc': 'إشعار مسائي قبل صيام الإثنين والخميس وأيام البيض',
     'sunRiseShort':       'الشروق',
     'ibadahPerfect':      'ما شاء الله، يوم مثالي! 🎉',
     'ibadahAlmost':       'تقريبًا، أكمل! 🌟',
@@ -639,6 +651,17 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setRamadanMode(bool v) async {
     ramadanMode = v;
     await _box.put('ramadanMode', v);
+    notifyListeners();
+  }
+
+  Future<void> setSunnahFastingReminder(bool v) async {
+    sunnahFastingReminder = v;
+    await _box.put('sunnahFastingReminder', v);
+    if (v) {
+      await NotificationService.scheduleSunnahFasting(isEnglish: isEnglish);
+    } else {
+      await NotificationService.cancelSunnahFasting();
+    }
     notifyListeners();
   }
 

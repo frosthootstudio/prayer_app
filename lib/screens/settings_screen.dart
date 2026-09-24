@@ -153,6 +153,14 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ],
                   const _CardDivider(),
+                  _ToggleRow(
+                    label: settings.getLabel('sunnahFastingReminder'),
+                    subtitle: settings.getLabel('sunnahFastingReminderDesc'),
+                    value: settings.sunnahFastingReminder,
+                    onChanged: (v) =>
+                        context.read<SettingsProvider>().setSunnahFastingReminder(v),
+                  ),
+                  const _CardDivider(),
                   _ActionRow(
                     label: settings.getLabel('testNotif'),
                     icon:  Icons.notifications_active_rounded,
@@ -752,10 +760,12 @@ class _SupportRow extends StatelessWidget {
 
 class _ToggleRow extends StatelessWidget {
   final String label;
+  final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
   const _ToggleRow({
     required this.label,
+    this.subtitle,
     required this.value,
     required this.onChanged,
   });
@@ -763,17 +773,33 @@ class _ToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              label,
-              style: GoogleFonts.poppins(
-                color: context.appTextPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    color: context.appTextPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: GoogleFonts.poppins(
+                      color: context.appTextSecondary,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           Switch(

@@ -51,7 +51,12 @@ class TrackingScreen extends StatelessWidget {
 
           // ── Summary card ─────────────────────────────────────────────────
           SliverToBoxAdapter(
-            child: _SummaryCard(count: count, total: tracking.effectiveTotalTasks, language: lang),
+            child: _SummaryCard(
+              count: count,
+              total: tracking.effectiveTotalTasks,
+              language: lang,
+              streak: tracking.getDailyStreak(),
+            ),
           ),
 
           // ── Task list ─────────────────────────────────────────────────────
@@ -85,6 +90,7 @@ class TrackingScreen extends StatelessWidget {
             child: _WeeklyStatsCard(
               stats: tracking.getWeeklyStats(),
               language: lang,
+              completionRate: tracking.weeklyCompletionRate,
             ),
           ),
 
@@ -101,8 +107,14 @@ class _SummaryCard extends StatelessWidget {
   final int         count;
   final int         total;
   final AppLanguage language;
+  final int         streak;
 
-  const _SummaryCard({required this.count, required this.total, required this.language});
+  const _SummaryCard({
+    required this.count,
+    required this.total,
+    required this.language,
+    required this.streak,
+  });
 
   static String _t(AppLanguage l, {required String ar, required String en, required String id}) =>
       l == AppLanguage.ar ? ar : l == AppLanguage.en ? en : id;
@@ -139,6 +151,39 @@ class _SummaryCard extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                if (streak > 0) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF97316).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFFF97316).withValues(alpha: 0.35),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('🔥', style: TextStyle(fontSize: 10.5)),
+                        const SizedBox(width: 3),
+                        Text(
+                          _t(language,
+                            ar: '$streak يوم',
+                            en: '$streak day streak',
+                            id: '$streak hari streak',
+                          ),
+                          style: GoogleFonts.poppins(
+                            color: const Color(0xFFF97316),
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const Spacer(),
                 Text(
                   '$count/$total',
@@ -380,19 +425,29 @@ class _TaskRow extends StatelessWidget {
 class _WeeklyStatsCard extends StatelessWidget {
   final List<int>   stats; // 7 values, index 6 = today
   final AppLanguage language;
+  final double      completionRate;
 
-  const _WeeklyStatsCard({required this.stats, required this.language});
+  const _WeeklyStatsCard({
+    required this.stats,
+    required this.language,
+    required this.completionRate,
+  });
+
+  static String _t(AppLanguage l, {required String ar, required String en, required String id}) =>
+      l == AppLanguage.ar ? ar : l == AppLanguage.en ? en : id;
 
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
+    final pctInt = (completionRate * 100).round();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: context.appCardBg,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: context.appDivider),
           boxShadow: [
             BoxShadow(
@@ -402,18 +457,54 @@ class _WeeklyStatsCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(7, (i) {
-            final day     = now.subtract(Duration(days: 6 - i));
-            final isToday = i == 6;
-            return _DayCircle(
-              letter:  _dayLetter(day.weekday, language),
-              count:   stats[i],
-              isToday: isToday,
-              accentColor: context.appAccent,
-            );
-          }),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.insights_rounded, size: 16, color: context.appAccent),
+                const SizedBox(width: 6),
+                Text(
+                  _t(language, ar: 'إحصائيات ٧ أيام', en: 'Weekly Stats (7 Days)', id: 'Statistik 7 Hari Terakhir'),
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: context.appTextPrimary,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: context.appAccent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '$pctInt%',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: context.appAccent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(7, (i) {
+                final day     = now.subtract(Duration(days: 6 - i));
+                final isToday = i == 6;
+                return _DayCircle(
+                  letter:  _dayLetter(day.weekday, language),
+                  count:   stats[i],
+                  isToday: isToday,
+                  accentColor: context.appAccent,
+                );
+              }),
+            ),
+          ],
         ),
       ),
     );

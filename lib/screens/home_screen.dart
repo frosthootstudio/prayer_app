@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../models/prayer_model.dart';
+import '../providers/calendar_provider.dart';
 import '../providers/prayer_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
@@ -137,6 +138,12 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _RamadanBanner(isEnglish: settings.isEnglish),
             ),
           ],
+
+          // ── Sunnah Fasting banner ──────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+            child: _SunnahFastingBanner(isEnglish: settings.isEnglish),
+          ),
 
           const SizedBox(height: 10),
 
@@ -1175,6 +1182,95 @@ class _RamadanBanner extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Sunnah Fasting banner ───────────────────────────────────────────────────
+
+class _SunnahFastingBanner extends StatelessWidget {
+  final bool isEnglish;
+  const _SunnahFastingBanner({required this.isEnglish});
+
+  @override
+  Widget build(BuildContext context) {
+    if (RamadanService.isRamadan()) return const SizedBox.shrink();
+
+    final cal = context.watch<CalendarProvider>();
+    final now = DateTime.now();
+    final todayFast = cal.getSunnahFastTitle(now, isEnglish: isEnglish);
+    final tomorrowFast = cal.getSunnahFastTitle(now.add(const Duration(days: 1)), isEnglish: isEnglish);
+
+    if (todayFast == null && tomorrowFast == null) return const SizedBox.shrink();
+
+    final isToday = todayFast != null;
+    final title = isToday
+        ? (isEnglish ? '✨ Today: $todayFast' : '✨ Hari ini: $todayFast')
+        : (isEnglish ? '🌙 Tomorrow: $tomorrowFast' : '🌙 Besok: $tomorrowFast');
+    final subtitle = isToday
+        ? (isEnglish ? 'May Allah accept your fasting today.' : 'Selamat menunaikan ibadah puasa sunnah.')
+        : (isEnglish ? 'Remember to set your intention & sahur tonight.' : 'Jangan lupa niat dan persiapkan sahur nanti malam.');
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: context.appCardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: context.appAccent.withValues(alpha: 0.35),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: context.appCardShadow,
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: context.appAccent.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isToday ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+              color: context.appAccent,
+              size: 17,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    color: context.appTextPrimary,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.poppins(
+                    color: context.appTextSecondary,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -21,6 +21,7 @@ import 'package:workmanager/workmanager.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
 import 'models/prayer_tracking_model.dart';
+import 'providers/calendar_provider.dart';
 import 'providers/dzikir_provider.dart';
 import 'services/prayer_calculation_service.dart';
 import 'providers/murottal_provider.dart';
@@ -288,6 +289,10 @@ Future<void> main() async {
         ChangeNotifierProvider.value(value: quranProvider),
         ChangeNotifierProvider.value(value: murottalProvider),
         ChangeNotifierProvider(create: (_) => PrayerProvider(settingsProvider)),
+        ChangeNotifierProxyProvider<SettingsProvider, CalendarProvider>(
+          create: (ctx) => CalendarProvider(ctx.read<SettingsProvider>()),
+          update: (_, settings, previous) => previous ?? CalendarProvider(settings),
+        ),
       ],
       child: PrayerApp(onboardingDone: onboardingDone),
     ),

@@ -1,7 +1,7 @@
 # 🕌 Waktu Shalat — Project Context & Evolution Master Doc
 > **Dokumen Master Progres Aplikasi & Konteks AI (Obsidian-Ready)**  
 > **Terakhir Diperbarui:** 25 September 2026  
-> **Versi Terkini:** `v1.7.1 (Build 40)`  
+> **Versi Terkini:** `v1.7.2 (Build 41)`  
 > **Package ID:** `studio.frosthoot.prayer_app`  
 > **Repository:** `frosthootstudio/prayer_app`
 
@@ -27,7 +27,26 @@
 
 ## 🗺️ Roadmap & Riwayat Progres Lengkap (Changelog Evolusi)
 
-### 🚀 v1.7.1 (Build 40) — *Current Release*
+### 🚀 v1.7.2 (Build 41) — *Current Release*
+- **Pengingat Puasa Sunnah (Senin - Kamis & Ayyamul Bidh):**
+  - Notifikasi otomatis H-1 malam hari (pukul 20:00) untuk puasa Senin, Kamis, dan tanggal 13, 14, 15 Hijriah.
+  - Channel notifikasi khusus (`sunnah_fasting_v1`) dan toggle pengaturan di halaman Settings.
+  - Banner dinamis di Beranda (Home Screen) yang memberi info hangat saat hari ini atau besok merupakan hari puasa sunnah.
+- **Peningkatan Ibadah Tracker:**
+  - Perhitungan dan visualisasi **Streak Hari Berturut-turut** (Badge 🔥) pada ringkasan harian.
+  - Header statistik 7 hari terakhir dengan persentase kepatuhan mingguan (*weekly completion rate*).
+- **Global CalendarProvider:**
+  - Pengangkatan `CalendarProvider` ke root `MultiProvider` agar status kalender dan puasa sunnah sinkron di seluruh layar aplikasi.
+
+### 📌 Roadmap Mendatang (Next Milestones)
+- **v1.7.3 (Pure Offline Audio & Edukasi Al-Qur'an):**
+  - Download & cache audio murottal per surah ke storage lokal agar dapat didengarkan 100% tanpa internet.
+  - Integrasi Tafsir Ringkas Kemenag RI per ayat (dapat di-expand/collapse).
+- **v1.7.4 (Keberlanjutan & Keamanan Data):**
+  - Fitur backup & restore data lokal (export/import catatan ibadah dan bookmark ke file JSON).
+  - Rebranding halaman Dukungan Developer murni sebagai Infaq/Wakaf operasional sukarela (tanpa paywall).
+
+### 🚀 v1.7.1 (Build 40)
 - **Rasionalisasi & Kurasi Font Arab:**
   - Memangkas font redundant (`Amiri` biasa dan `Lateef`).
   - Menyederhanakan pilihan font menjadi 3 opsi kurasi terbaik:
@@ -40,17 +59,6 @@
   - Getaran halus (*light impact*) pada setiap ketukan hitungan dzikir.
   - Getaran konfirmasi (*medium impact*) saat menyelesaikan target dzikir (misal 33x atau 100x).
   - Getaran seleksi (*selection click*) saat mereset hitungan.
-
-### 📌 Roadmap Mendatang (Next Milestones)
-- **v1.7.2 (Rutinitas & Pengingat Ibadah):**
-  - Pengingat puasa sunnah (Notifikasi H-1 untuk Senin - Kamis dan Ayyamul Bidh tanggal 13, 14, 15 Hijriah).
-  - Visualisasi streak dan grafik statistik mingguan pada modul Tracking Ibadah.
-- **v1.7.3 (Pure Offline Audio & Edukasi Al-Qur'an):**
-  - Download & cache audio murottal per surah ke storage lokal agar dapat didengarkan 100% tanpa internet.
-  - Integrasi Tafsir Ringkas Kemenag RI per ayat (dapat di-expand/collapse).
-- **v1.7.4 (Keberlanjutan & Keamanan Data):**
-  - Fitur backup & restore data lokal (export/import catatan ibadah dan bookmark ke file JSON).
-  - Rebranding halaman Dukungan Developer murni sebagai Infaq/Wakaf operasional sukarela (tanpa paywall).
 
 ### 🚀 v1.7.0 (Build 39)
 - **Hapus Iklan Total:** Semua dependensi dan alur penayangan `AdService` dinonaktifkan secara total. Aplikasi bersih 100%.
@@ -114,7 +122,7 @@ lib/
 Salin teks di bawah ini ke AI baru (ChatGPT, Claude, atau Gemini) jika ingin memulai sesi baru:
 
 ```markdown
-Halo! Aku sedang mengembangkan aplikasi Flutter bernama "Waktu Shalat" (ID: studio.frosthoot.prayer_app) yang saat ini berada di versi 1.7.1+40.
+Halo! Aku sedang mengembangkan aplikasi Flutter bernama "Waktu Shalat" (ID: studio.frosthoot.prayer_app) yang saat ini berada di versi 1.7.2+41.
 Berikut adalah file PROJECT_CONTEXT.md yang merangkum arsitektur, riwayat fitur, struktur kode, dan aturan desain aplikasi ini:
 
 [Tempelkan isi file PROJECT_CONTEXT.md di sini]

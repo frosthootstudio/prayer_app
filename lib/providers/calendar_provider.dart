@@ -178,4 +178,41 @@ class CalendarProvider extends ChangeNotifier {
     if (reasons.isEmpty) return null;
     return reasons.join('\n');
   }
+
+  /// Returns the name of any Sunnah fast for the given [date], or null if none.
+  String? getSunnahFastTitle(DateTime date, {bool isEnglish = false}) {
+    final h   = hijriFor(date);
+    final day = date.weekday;
+
+    // Disallowed fasting days (Eid al-Fitr, Eid al-Adha + Tashriq)
+    if ((h.hMonth == 10 && h.hDay == 1) ||
+        (h.hMonth == 12 && h.hDay >= 10 && h.hDay <= 13)) {
+      return null;
+    }
+    // Ramadan is obligatory (Fardhu), not Sunnah
+    if (h.hMonth == 9) return null;
+
+    if (h.hDay == 13 || h.hDay == 14 || h.hDay == 15) {
+      return isEnglish ? 'Ayyamul Bidh Fast' : 'Puasa Ayyamul Bidh';
+    }
+    if (day == DateTime.monday) {
+      return isEnglish ? 'Monday Sunnah Fast' : 'Puasa Sunnah Senin';
+    }
+    if (day == DateTime.thursday) {
+      return isEnglish ? 'Thursday Sunnah Fast' : 'Puasa Sunnah Kamis';
+    }
+    if (h.hMonth == 12 && h.hDay == 9) {
+      return isEnglish ? 'Day of Arafah Fast' : 'Puasa Hari Arafah';
+    }
+    if (h.hMonth == 1 && h.hDay == 10) {
+      return isEnglish ? 'Ashura Fast' : 'Puasa Asyura';
+    }
+    if (h.hMonth == 1 && h.hDay == 9) {
+      return isEnglish ? "Tasu'a Fast" : "Puasa Tasu'a";
+    }
+    if (h.hMonth == 10 && h.hDay >= 2 && h.hDay <= 7) {
+      return isEnglish ? 'Shawwal Sunnah Fast' : 'Puasa Sunnah Syawal';
+    }
+    return null;
+  }
 }

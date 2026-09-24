@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../models/prayer_model.dart';
 import '../providers/settings_provider.dart';
+import 'package:hijri/hijri_calendar.dart';
 import 'ramadan_service.dart';
 
 class NotificationService {
@@ -26,6 +27,9 @@ class NotificationService {
 
   static const _qadarChannelKey  = 'lailatul_qadar_v1';
   static const _qadarChannelName = 'Lailatul Qadar';
+
+  static const _fastingChannelKey  = 'sunnah_fasting_v1';
+  static const _fastingChannelName = 'Pengingat Puasa Sunnah';
 
   // ── Stable notification IDs ────────────────────────────────────────────────
   static const _ids = <String, int>{
@@ -105,10 +109,23 @@ class NotificationService {
       locked:              false,
     );
 
+    // Sunnah fasting reminder
+    final fastingChannel = NotificationChannel(
+      channelKey:          _fastingChannelKey,
+      channelName:         _fastingChannelName,
+      channelDescription:  'Pengingat malam hari sebelum puasa sunnah (Senin, Kamis, Ayyamul Bidh)',
+      defaultColor:        const Color(0xFFD4A057),
+      importance:          NotificationImportance.High,
+      defaultRingtoneType: DefaultRingtoneType.Ringtone,
+      enableVibration:     true,
+      playSound:           true,
+      locked:              false,
+    );
+
     try {
       await AwesomeNotifications().initialize(
         'resource://drawable/ic_notification',
-        [...adzanChannels, preChannel, qadarChannel],
+        [...adzanChannels, preChannel, qadarChannel, fastingChannel],
         debug: false,
       );
       _localTz = await AwesomeNotifications().getLocalTimeZoneIdentifier();
@@ -367,6 +384,115 @@ class NotificationService {
   static Future<void> cancelLailatulQadar() async {
     for (final day in const [21, 23, 25, 27, 29]) {
       await AwesomeNotifications().cancel(day);
+    }
+  }
+
+  // ── Sunnah Fasting notifications ──────────────────────────────────────────
+
+  static const _fastingMondayId   = 71;
+  static const _fastingThursdayId = 72;
+
+  /// Schedules repeating weekly notifications at 20:00 on Sunday (for Monday fast)
+  /// and Wednesday (for Thursday fast), plus upcoming Ayyamul Bidh fasts.
+  static Future<void> scheduleSunnahFasting({bool isEnglish = false}) async {
+    try {
+      // 1. Sunday 20:00 for Monday Fast
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id:                 _fastingMondayId,
+          channelKey:         _fastingChannelKey,
+          title:              isEnglish ? '🌙 Monday Sunnah Fast Tomorrow' : '🌙 Besok Puasa Sunnah Senin',
+          body:               isEnglish ? 'Remember to set your intention and prepare for sahur.' : 'Jangan lupa niat dan persiapkan sahur nanti malam.',
+          notificationLayout: NotificationLayout.Default,
+          category:           NotificationCategory.Reminder,
+          wakeUpScreen:       true,
+          autoDismissible:    false,
+        ),
+        schedule: NotificationCalendar(
+          weekday:        DateTime.sunday, // 7
+          hour:           20,
+          minute:         0,
+          second:         0,
+          millisecond:    0,
+          timeZone:       _localTz,
+          repeats:        true,
+          preciseAlarm:   true,
+          allowWhileIdle: true,
+        ),
+      );
+
+      // 2. Wednesday 20:00 for Thursday Fast
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id:                 _fastingThursdayId,
+          channelKey:         _fastingChannelKey,
+          title:              isEnglish ? '🌙 Thursday Sunnah Fast Tomorrow' : '🌙 Besok Puasa Sunnah Kamis',
+          body:               isEnglish ? 'Remember to set your intention and prepare for sahur.' : 'Jangan lupa niat dan persiapkan sahur nanti malam.',
+          notificationLayout: NotificationLayout.Default,
+          category:           NotificationCategory.Reminder,
+          wakeUpScreen:       true,
+          autoDismissible:    false,
+        ),
+        schedule: NotificationCalendar(
+          weekday:        DateTime.wednesday, // 3
+          hour:           20,
+          minute:         0,
+          second:         0,
+          millisecond:    0,
+          timeZone:       _localTz,
+          repeats:        true,
+          preciseAlarm:   true,
+          allowWhileIdle: true,
+        ),
+      );
+
+      // 3. Ayyamul Bidh (13th, 14th, 15th Hijri)
+      final now = DateTime.now();
+      final hNow = HijriCalendar.fromDate(now);
+      for (int day = 13; day <= 15; day++) {
+        final gregDate = HijriCalendar().hijriToGregorian(hNow.hYear, hNow.hMonth, day);
+        final eveDate = gregDate.subtract(const Duration(days: 1));
+        final fireAt = DateTime(eveDate.year, eveDate.month, eveDate.day, 20, 0, 0);
+        if (fireAt.isAfter(now)) {
+          final id = 70 + day; // 83, 84, 85
+          await AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id:                 id,
+              channelKey:         _fastingChannelKey,
+              title:              isEnglish ? '🌕 Ayyamul Bidh Fast Tomorrow (Day $day)' : '🌕 Besok Puasa Ayyamul Bidh (Hari ke-$day)',
+              body:               isEnglish ? 'Sunnah fast of the White Days. Prepare for sahur!' : 'Puasa sunnah pertengahan bulan hijriah. Siapkan sahur!',
+              notificationLayout: NotificationLayout.Default,
+              category:           NotificationCategory.Reminder,
+              wakeUpScreen:       true,
+              autoDismissible:    false,
+            ),
+            schedule: NotificationCalendar(
+              year:           fireAt.year,
+              month:          fireAt.month,
+              day:            fireAt.day,
+              hour:           20,
+              minute:         0,
+              second:         0,
+              millisecond:    0,
+              timeZone:       _localTz,
+              repeats:        false,
+              preciseAlarm:   true,
+              allowWhileIdle: true,
+            ),
+          );
+        }
+      }
+    } catch (e, stack) {
+      debugPrint('[Notif] scheduleSunnahFasting failed: $e');
+      FirebaseCrashlytics.instance.recordError(
+        e, stack, reason: 'notif_schedule_fasting_failed', fatal: false,
+      );
+    }
+  }
+
+  static Future<void> cancelSunnahFasting() async {
+    for (final id in const [_fastingMondayId, _fastingThursdayId, 83, 84, 85]) {
+      await AwesomeNotifications().cancel(id);
     }
   }
 
