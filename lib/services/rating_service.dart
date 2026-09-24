@@ -52,26 +52,32 @@ class RatingService {
     await _openPlayStoreListing();
   }
 
-  static Future<void> _openPlayStoreListing() async {
-    const package = 'studio.frosthoot.prayer_app';
-    // Prefer the Play Store app via market:// , fall back to https:// for
-    // devices without the Play Store app.
-    final marketUri = Uri.parse('market://details?id=$package');
-    final webUri = Uri.parse(
-      'https://play.google.com/store/apps/details?id=$package',
-    );
+      static Future<void> _openPlayStoreListing() async {
+    const pkg = 'studio.frosthoot.prayer_app';
+    final marketUri = Uri.parse('market://details?id=$pkg');
+    final webUri = Uri.parse('https://play.google.com/store/apps/details?id=$pkg');
+
+    // 1. Try direct market:// intent
     try {
-      if (await canLaunchUrl(marketUri)) {
-        await launchUrl(marketUri, mode: LaunchMode.externalApplication);
-        return;
-      }
+      final launchedMarket = await launchUrl(marketUri, mode: LaunchMode.externalApplication);
+      if (launchedMarket) return;
     } catch (e) {
-      debugPrint('[Rating] market:// launch failed: $e');
+      debugPrint('[Rating] market:// direct launch failed: $e');
     }
+
+    // 2. Fallback to HTTPS Play Store URL
     try {
-      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      final launchedWeb = await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      if (launchedWeb) return;
     } catch (e) {
-      debugPrint('[Rating] https Play Store launch failed: $e');
+      debugPrint('[Rating] https launch failed: $e');
+    }
+
+    // 3. Fallback platform default
+    try {
+      await launchUrl(webUri, mode: LaunchMode.platformDefault);
+    } catch (e) {
+      debugPrint('[Rating] platformDefault launch failed: $e');
     }
   }
 }

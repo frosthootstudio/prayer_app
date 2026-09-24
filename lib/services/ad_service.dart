@@ -222,10 +222,14 @@ class AdService {
   ///
   /// All Hive access is wrapped in try/catch so a not-yet-open box (edge
   /// case if init failed) never crashes the host code path.
+  static const bool _adsEnabled = false;
+
   String? _checkGuards({
     required List<DateTime> prayerTimesToday,
     required bool isPremium,
   }) {
+    if (!_adsEnabled) return 'ads disabled';
+
     // 1. Premium bypass — supporters never see ads.
     if (isPremium) return 'user is premium';
 

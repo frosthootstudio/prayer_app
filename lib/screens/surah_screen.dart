@@ -117,12 +117,16 @@ class _SurahScreenState extends State<SurahScreen> {
           final sp   = ctx.watch<SettingsProvider>();
           final isEn = sp.isEnglish;
           const gold = Color(0xFFD4A057);
-          return Padding(
-            padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.viewPaddingOf(ctx).bottom + 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(ctx).height * 0.75,
+            ),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.viewPaddingOf(ctx).bottom + 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 // Handle
                 Center(
                   child: Container(
@@ -237,7 +241,8 @@ class _SurahScreenState extends State<SurahScreen> {
                 const SizedBox(height: 4),
               ],
             ),
-          );
+          ),
+        );
         },
       ),
     );

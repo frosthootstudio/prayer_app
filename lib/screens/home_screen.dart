@@ -107,8 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return SafeArea(
       bottom: false,
-      child: Column(
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
           // ── Permission warning banner ───────────────────────────────────────
           if (_showPermBanner)
             NotifWarningBanner(
@@ -165,10 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
           // Wrapped in SingleChildScrollView so content gracefully scrolls on
           // short screens (e.g. when Ramadan card + Sun info are both visible).
           // Without this, the inner Column overflows the Expanded constraint.
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
                 children: [
                   // Swipeable schedule: page 0 = today, page 1 = tomorrow.
                   // PageView needs a fixed height when nested inside a
@@ -269,8 +269,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -253,6 +253,25 @@ class PrayerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await _refreshAll();
   }
 
+  /// Sets location manually to a chosen city with known coordinates.
+  /// Saves to Hive and immediately recalculates prayer times.
+  Future<void> setManualLocation({
+    required String cityName,
+    required double latitude,
+    required double longitude,
+  }) async {
+    _lastLat = latitude;
+    _lastLng = longitude;
+    this.cityName = cityName;
+
+    await _box.put('lastLat', latitude);
+    await _box.put('lastLng', longitude);
+    await _box.put('lastCity', cityName);
+
+    await _settings.setAutoLocation(false);
+    await _recalculate();
+  }
+
   /// Toggle adzan notification on/off for [key] (e.g. 'fajr').
   /// Persists to Hive; respects master notif setting.
   Future<void> toggleNotification(String key) async {

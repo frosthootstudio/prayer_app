@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../utils/arabic_font_helper.dart';
+import '../data/indonesian_cities_data.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -61,6 +62,12 @@ class SettingsScreen extends StatelessWidget {
                   _InfoRow(
                     label: settings.getLabel('city'),
                     value: prayers.cityName.isNotEmpty ? prayers.cityName : '—',
+                  ),
+                  const _CardDivider(),
+                  _ActionRow(
+                    label: settings.isEnglish ? 'Choose City Manually' : 'Pilih Kota / Daerah Manual',
+                    icon: Icons.location_city_rounded,
+                    onTap: () => _showManualCityPicker(context),
                   ),
                   const _CardDivider(),
                   _ActionRow(
@@ -305,6 +312,18 @@ class SettingsScreen extends StatelessWidget {
     }
 
     return content;
+  }
+
+  void _showManualCityPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.appSheetBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => const _ManualCityPickerSheet(),
+    );
   }
 
   void _showPermissionSheet(BuildContext context) {
@@ -1327,24 +1346,29 @@ class _ArabicFontPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final maxH = MediaQuery.sizeOf(context).height * 0.70;
     return _SheetWrapper(
       title: settings.getLabel('arabicFont'),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final font in ArabicFontHelper.availableFonts)
-              _FontOptionCard(
-                font: font,
-                isSelected: settings.arabicFont == font['key'],
-                isEn: settings.isEnglish,
-                onTap: () {
-                  context.read<SettingsProvider>().setArabicFont(font['key']!);
-                  Navigator.pop(context);
-                },
-              ),
-          ],
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxH),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final font in ArabicFontHelper.availableFonts)
+                _FontOptionCard(
+                  font: font,
+                  isSelected: settings.arabicFont == font['key'],
+                  isEn: settings.isEnglish,
+                  onTap: () {
+                    context.read<SettingsProvider>().setArabicFont(font['key']!);
+                    Navigator.pop(context);
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -1445,6 +1469,187 @@ class _FontOptionCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+// ── Manual City Picker Sheet ──────────────────────────────────────────
+
+class _ManualCityPickerSheet extends StatefulWidget {
+  const _ManualCityPickerSheet();
+
+  @override
+  State<_ManualCityPickerSheet> createState() => _ManualCityPickerSheetState();
+}
+
+class _ManualCityPickerSheetState extends State<_ManualCityPickerSheet> {
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final prayers = context.watch<PrayerProvider>();
+    final isEn = settings.isEnglish;
+    final maxH = MediaQuery.sizeOf(context).height * 0.85;
+
+    final filtered = IndonesianCitiesData.cities.where((c) {
+      if (_query.trim().isEmpty) return true;
+      final q = _query.toLowerCase();
+      return c.name.toLowerCase().contains(q) ||
+          c.province.toLowerCase().contains(q);
+    }).toList();
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxH),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: context.appSheetHandle,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            isEn ? 'Select City / Regency' : 'Pilih Kota / Kabupaten',
+            style: GoogleFonts.poppins(
+              color: context.appTextPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Search box
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              controller: _searchCtrl,
+              onChanged: (v) => setState(() => _query = v),
+              style: GoogleFonts.poppins(
+                color: context.appTextPrimary,
+                fontSize: 14,
+              ),
+              decoration: InputDecoration(
+                hintText: isEn ? 'Search city or province...' : 'Cari kota atau provinsi...',
+                hintStyle: GoogleFonts.poppins(
+                  color: context.appTextSecondary,
+                  fontSize: 13,
+                ),
+                prefixIcon: Icon(Icons.search_rounded, color: context.appAccent, size: 20),
+                suffixIcon: _query.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() => _query = '');
+                        },
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                filled: true,
+                fillColor: context.appCardBg,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.appDivider),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.appDivider),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.appAccent, width: 1.5),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // List of cities
+          Expanded(
+            child: filtered.isEmpty
+                ? Center(
+                    child: Text(
+                      isEn ? 'No cities found' : 'Kota tidak ditemukan',
+                      style: GoogleFonts.poppins(
+                        color: context.appTextSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    itemCount: filtered.length,
+                    itemBuilder: (ctx, i) {
+                      final item = filtered[i];
+                      final isSelected = prayers.cityName.contains(item.name) ||
+                          item.name.contains(prayers.cityName);
+
+                      return ListTile(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        leading: Icon(
+                          Icons.location_on_outlined,
+                          color: isSelected ? context.appAccent : context.appTextSecondary,
+                          size: 20,
+                        ),
+                        title: Text(
+                          item.name,
+                          style: GoogleFonts.poppins(
+                            color: isSelected ? context.appAccent : context.appTextPrimary,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          item.province,
+                          style: GoogleFonts.poppins(
+                            color: context.appTextSecondary,
+                            fontSize: 11.5,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? Icon(Icons.check_circle_rounded, color: context.appAccent, size: 20)
+                            : null,
+                        onTap: () async {
+                          await ctx.read<PrayerProvider>().setManualLocation(
+                                cityName: item.name,
+                                latitude: item.latitude,
+                                longitude: item.longitude,
+                              );
+                          if (ctx.mounted) {
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isEn
+                                      ? 'Location set to ${item.name}'
+                                      : 'Lokasi diatur ke ${item.name}',
+                                ),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
+                      );
+                    },
+                  ),
+          ),
+          SizedBox(height: MediaQuery.viewPaddingOf(context).bottom + 8),
+        ],
       ),
     );
   }
