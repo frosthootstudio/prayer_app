@@ -73,6 +73,19 @@ class QuranProvider extends ChangeNotifier {
         .toList();
   }
 
+  void reload() {
+    _showTranslation = _prefsBox.get(_kShowTranslation, defaultValue: true) as bool;
+    _showTranslit    = _prefsBox.get(_kShowTranslit,    defaultValue: true) as bool;
+    _lastReadSurah   = _prefsBox.get(_kLastSurah) as int?;
+    _lastReadAyah    = _prefsBox.get(_kLastAyah)  as int?;
+    _bookmarks = _bookmarksBox.values
+        .cast<String>()
+        .map(QuranBookmark.fromKey)
+        .whereType<QuranBookmark>()
+        .toList();
+    notifyListeners();
+  }
+
   // ── Reading preferences ───────────────────────────────────────────────────
 
   Future<void> toggleTranslation() async {

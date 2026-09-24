@@ -2,7 +2,7 @@ name: prayer_app
 description: "Aplikasi waktu shalat dengan kalkulasi offline dan notifikasi adzan."
 publish_to: 'none'
 
-version: 1.7.3+42
+version: 1.7.4+43
 
 environment:
   sdk: ^3.11.0
@@ -71,6 +71,7 @@ dependencies:
 
   # In-App Purchase — one-time premium unlock (no subscription)
   in_app_purchase: ^3.2.0
+  file_picker: ^13.1.0
 
 # geolocator_linux 0.2.4 caps package_info_plus at ^9 but we need ^10 (share_plus
 # 13 requires win32 ^6 which package_info_plus 9 cannot satisfy). geolocator_linux

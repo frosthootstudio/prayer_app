@@ -1,7 +1,7 @@
 # 🕌 Waktu Shalat — Project Context & Evolution Master Doc
 > **Dokumen Master Progres Aplikasi & Konteks AI (Obsidian-Ready)**  
 > **Terakhir Diperbarui:** 25 September 2026  
-> **Versi Terkini:** `v1.7.3 (Build 42)`  
+> **Versi Terkini:** `v1.7.4 (Build 43)`  
 > **Package ID:** `studio.frosthoot.prayer_app`  
 > **Repository:** `frosthootstudio/prayer_app`
 
@@ -21,13 +21,25 @@
 - **Penyimpanan Lokal (Database):** `Hive` & `hive_flutter` (box tersanitasi)
 - **Kalkulasi Waktu & Kiblat:** `adhan: ^2.0.0` & `flutter_compass: ^0.8.1`
 - **Audio & Murottal:** `just_audio` / native playback dengan auto-cache & isolasi posisi pemutaran, plus offline storage cache di application documents directory
+- **Cadangan & Berbagi:** `file_picker` & `share_plus` (Ekspor/Impor JSON mandiri)
 - **Android Target:** AGP 9.2+, Gradle 9.4.1+, Java 17 bytecode, Android 15 ready
 
 ---
 
 ## 🗺️ Roadmap & Riwayat Progres Lengkap (Changelog Evolusi)
 
-### 🚀 v1.7.3 (Build 42) — *Current Release*
+### 🚀 v1.7.4 (Build 43) — *Current Release*
+- **Fitur Backup & Restore Data Lokal (Export/Import JSON):**
+  - Ekspor seluruh data pribadi pengguna: rekam checklist ibadah harian (`IbadahTracking`), bookmark surah & ayat Al-Qur'an, preferensi bacaan/ayat terakhir, dzikir favorit, serta pengaturan aplikasi ke format file JSON terstruktur.
+  - Berbagi file cadangan secara instan via lembar Share bawaan sistem (dapat disimpan ke Google Drive, WhatsApp, File Manager, Email, dsb).
+  - Impor dan pemulihan data dari file JSON cadangan menggunakan `FilePicker` bawaan sistem dengan verifikasi validitas file dan dialog konfirmasi sebelum data diterapkan.
+  - Sinkronisasi otomatis reaktif: setelah dipulihkan, seluruh provider (`TrackingProvider`, `QuranProvider`, `SettingsProvider`) langsung memuat ulang data tanpa perlu restart aplikasi.
+- **Rebranding Halaman Dukungan Developer (Infaq Operasional Sukarela):**
+  - Meredefinisi pesan dukungan menjadi *"Infaq Sukarela & Amal Jariyah"* untuk keberlanjutan pemeliharaan server dan pengembangan aplikasi.
+  - Menghilangkan kesan paywall komersial lama ("Hilangkan Iklan"), menegaskan bahwa aplikasi Waktu Shalat **100% gratis dan bebas iklan selamanya** untuk seluruh umat Muslim.
+  - Memperbarui ikon dan copywriting menjadi lebih hangat, santun, dan bernuansa islami (`volunteer_activism_rounded`).
+
+### 🚀 v1.7.3 (Build 42)
 - **Murottal Offline Storage & Cache:**
   - Kemampuan mengunduh surah audio per qari langsung ke penyimpanan lokal perangkat (`path_provider` + `http`).
   - Pemutaran audio otomatis mendeteksi file lokal sehingga dapat diputar 100% tanpa sambungan internet (`offline playback`).
@@ -39,11 +51,6 @@
   - Caching lokal Hive (`quran_tafsir_cache` dengan TTL 365 hari) sehingga sekali dibuka langsung tersimpan dan dapat dibaca offline kapan saja.
   - Bottom sheet modal Tafsir yang indah, tipografi nyaman dibaca, pratinjau ayat arab & terjemahan, serta tombol salin tafsir sekali sentuh.
   - Tombol akses cepat Tafsir di setiap baris ayat (`_AyahTile`) dan menu aksi sentuh lama.
-
-### 📌 Roadmap Mendatang (Next Milestones)
-- **v1.7.4 (Keberlanjutan & Keamanan Data):**
-  - Fitur backup & restore data lokal (export/import catatan ibadah dan bookmark ke file JSON).
-  - Rebranding halaman Dukungan Developer murni sebagai Infaq/Wakaf operasional sukarela (tanpa paywall).
 
 ### 🚀 v1.7.2 (Build 41)
 - **Pengingat Puasa Sunnah (Senin - Kamis & Ayyamul Bidh):**

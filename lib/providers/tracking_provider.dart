@@ -78,6 +78,11 @@ class TrackingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void reload() {
+    _loadToday();
+    notifyListeners();
+  }
+
   /// Reloads today's data silently if the calendar day has rolled over.
   /// Safe to call inside getters — does NOT call notifyListeners().
   void _ensureToday() {

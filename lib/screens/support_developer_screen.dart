@@ -190,7 +190,7 @@ class _PaywallView extends StatelessWidget {
                   color: accent.withValues(alpha: 0.12),
                 ),
                 child: Icon(
-                  Icons.favorite_border_rounded,
+                  Icons.volunteer_activism_rounded,
                   size: 64,
                   color: accent,
                 ),

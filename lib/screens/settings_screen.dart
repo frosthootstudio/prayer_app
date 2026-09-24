@@ -17,6 +17,7 @@ import '../services/rating_service.dart';
 import '../services/prayer_calculation_service.dart';
 import '../utils/app_theme.dart';
 import '../widgets/permission_fix_sheet.dart';
+import '../services/backup_restore_service.dart';
 import 'diagnostic_screen.dart';
 import 'support_developer_screen.dart';
 
@@ -261,10 +262,27 @@ class SettingsScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
+                // ── CADANGAN & PEMULIHAN / BACKUP & RESTORE ──────────────────
+                _SectionHeader(settings.getLabel('backupRestore')),
+                _SettingCard(children: [
+                  _ActionRow(
+                    label: settings.getLabel('exportBackup'),
+                    icon: Icons.upload_file_rounded,
+                    onTap: () => BackupRestoreService.exportBackup(context),
+                  ),
+                  const _CardDivider(),
+                  _ActionRow(
+                    label: settings.getLabel('importBackup'),
+                    icon: Icons.download_for_offline_rounded,
+                    onTap: () => BackupRestoreService.importBackup(context),
+                  ),
+                ]),
+
+                const SizedBox(height: 20),
+
                 // ── DUKUNGAN / SUPPORT ───────────────────────────────────────
-                // Donation-style "remove ads + support developer" entry.
+                // Voluntary infaq / operational support entry.
                 // Tap opens full-screen paywall (SupportDeveloperScreen).
-                // Premium state hides CTA-style and shows status-style instead.
                 _SectionHeader(settings.getLabel('support')),
                 _SettingCard(children: [
                   _SupportRow(settings: settings),
@@ -694,8 +712,8 @@ class _SupportRow extends StatelessWidget {
       builder: (_, isPremium, _) {
         final accent = context.appAccent;
         final icon = isPremium
-            ? Icons.favorite_rounded
-            : Icons.favorite_border_rounded;
+            ? Icons.volunteer_activism_rounded
+            : Icons.volunteer_activism_outlined;
         final title = isPremium
             ? settings.getLabel('supportStatusActive')
             : settings.getLabel('supportTitle');
