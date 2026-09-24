@@ -104,6 +104,32 @@ class MurottalScreen extends StatelessWidget {
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
+                        if (surah != null && mp.isSurahDownloaded(surah)) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.offline_pin_rounded, size: 14, color: Colors.green),
+                                const SizedBox(width: 5),
+                                Text(
+                                  isEn ? 'Offline · Downloaded' : 'Offline · Tersimpan',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -306,9 +332,16 @@ class MurottalScreen extends StatelessWidget {
                             fontWeight: isActive ? FontWeight.bold : null,
                           ),
                         ),
-                        trailing: isActive
-                            ? const Icon(Icons.graphic_eq_rounded, color: gold, size: 16)
-                            : null,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isActive) ...[
+                              const Icon(Icons.graphic_eq_rounded, color: gold, size: 16),
+                              const SizedBox(width: 4),
+                            ],
+                            _SurahDownloadButton(surah: s, mp: mp, isEn: isEn),
+                          ],
+                        ),
                         onTap: () => mp.playSurahFromStart(s),
                       );
                     },
@@ -475,6 +508,96 @@ class _SpeedButton extends StatelessWidget {
             color: mp.speed != 1.0 ? gold : null,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Surah download button ─────────────────────────────────────────────────────
+
+class _SurahDownloadButton extends StatelessWidget {
+  const _SurahDownloadButton({
+    required this.surah,
+    required this.mp,
+    required this.isEn,
+  });
+
+  final int surah;
+  final MurottalProvider mp;
+  final bool isEn;
+
+  @override
+  Widget build(BuildContext context) {
+    const gold = Color(0xFFD4A057);
+    final isDownloading = mp.isDownloading(surah);
+    final isDownloaded  = mp.isSurahDownloaded(surah);
+    final progress      = mp.getDownloadProgress(surah);
+
+    if (isDownloading) {
+      return SizedBox(
+        width: 28,
+        height: 28,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: CircularProgressIndicator(
+            value: progress > 0 ? progress : null,
+            strokeWidth: 2.2,
+            color: gold,
+          ),
+        ),
+      );
+    }
+
+    if (isDownloaded) {
+      return IconButton(
+        icon: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+        tooltip: isEn ? 'Downloaded (Tap to delete)' : 'Tersimpan offline (Ketuk untuk hapus)',
+        onPressed: () => _confirmDelete(context),
+      );
+    }
+
+    return IconButton(
+      icon: Icon(
+        Icons.arrow_circle_down_rounded,
+        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+        size: 20,
+      ),
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+      tooltip: isEn ? 'Download Surah for offline playback' : 'Unduh Surah untuk putar offline',
+      onPressed: () => mp.downloadSurah(surah),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    final surahName = QuranUtils.getSurahDisplayName(surah);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(isEn ? 'Delete Offline Audio?' : 'Hapus Audio Offline?'),
+        content: Text(
+          isEn
+              ? 'Remove downloaded audio for $surahName (${mp.reciter.displayName}) from local storage?'
+              : 'Hapus file audio $surahName (${mp.reciter.displayName}) dari penyimpanan perangkat?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(isEn ? 'Cancel' : 'Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              mp.deleteDownloadedSurah(surah);
+              Navigator.pop(ctx);
+            },
+            child: Text(
+              isEn ? 'Delete' : 'Hapus',
+              style: const TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
       ),
     );
   }

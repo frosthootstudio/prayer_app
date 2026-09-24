@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:quran/quran.dart' as quran;
 
 // ── Reciter ───────────────────────────────────────────────────────────────────
@@ -37,6 +41,12 @@ class MurottalProvider extends ChangeNotifier {
 
   late Box _box;
 
+  // ── Offline download cache state ──────────────────────────────────────────
+  Directory? _cacheBaseDir;
+  final Set<int> _downloadedSurahs = {};
+  final Set<int> _downloadingSurahs = {};
+  final Map<int, double> _downloadProgress = {};
+
   // ── Current playback state ────────────────────────────────────────────────
 
   int?     _surah;
@@ -68,6 +78,10 @@ class MurottalProvider extends ChangeNotifier {
   MurottalRepeat get repeatMode    => _repeatMode;
   double         get speed         => _speed;
 
+  bool isSurahDownloaded(int surah) => _downloadedSurahs.contains(surah);
+  bool isDownloading(int surah)     => _downloadingSurahs.contains(surah);
+  double getDownloadProgress(int surah) => _downloadProgress[surah] ?? 0.0;
+
   bool isPlayingAyah(int surah, int ayah) =>
       _surah == surah && _ayah == ayah && (_isPlaying || _isLoading);
 
@@ -83,6 +97,14 @@ class MurottalProvider extends ChangeNotifier {
     _box = await Hive.openBox('murottal_prefs');
     final ri = _box.get(_kReciter, defaultValue: 0) as int;
     _reciter = Reciter.values[ri.clamp(0, Reciter.values.length - 1)];
+
+    try {
+      final appDocDir = await getApplicationDocumentsDirectory();
+      _cacheBaseDir = Directory('${appDocDir.path}/murottal');
+      await _refreshDownloadedSurahs();
+    } catch (e) {
+      debugPrint('[Murottal] cacheBaseDir init error: $e');
+    }
 
     // Track which ayah is playing via playlist index
     _player.currentIndexStream.listen((index) {
@@ -103,8 +125,6 @@ class MurottalProvider extends ChangeNotifier {
     // Position (resets to 0 at start of each ayah in playlist)
     _player.positionStream.listen((pos) {
       positionNotifier.value = pos;
-      // No notifyListeners — only the slider cares, and it listens to
-      // positionNotifier directly.
     });
 
     // Duration (reports duration of current ayah)
@@ -116,15 +136,104 @@ class MurottalProvider extends ChangeNotifier {
     });
   }
 
+  // ── Offline storage sync & actions ────────────────────────────────────────
+
+  Future<void> _refreshDownloadedSurahs() async {
+    _downloadedSurahs.clear();
+    if (_cacheBaseDir != null && _cacheBaseDir!.existsSync()) {
+      final reciterDir = Directory('${_cacheBaseDir!.path}/${_reciter.name}');
+      if (reciterDir.existsSync()) {
+        try {
+          for (final entity in reciterDir.listSync()) {
+            if (entity is Directory) {
+              final segments = entity.uri.pathSegments.where((s) => s.isNotEmpty);
+              if (segments.isNotEmpty) {
+                final surahNum = int.tryParse(segments.last);
+                if (surahNum != null) {
+                  final count = quran.getVerseCount(surahNum);
+                  final mp3s = entity
+                      .listSync()
+                      .whereType<File>()
+                      .where((f) => f.path.endsWith('.mp3') && f.lengthSync() > 0);
+                  if (mp3s.length >= count) {
+                    _downloadedSurahs.add(surahNum);
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          debugPrint('[Murottal] _refreshDownloadedSurahs error: $e');
+        }
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<void> downloadSurah(int surah) async {
+    if (_downloadingSurahs.contains(surah) || _cacheBaseDir == null) return;
+    _downloadingSurahs.add(surah);
+    _downloadProgress[surah] = 0.0;
+    notifyListeners();
+
+    try {
+      final surahDir = Directory('${_cacheBaseDir!.path}/${_reciter.name}/$surah');
+      if (!surahDir.existsSync()) {
+        await surahDir.create(recursive: true);
+      }
+      final count = quran.getVerseCount(surah);
+      for (int ayah = 1; ayah <= count; ayah++) {
+        final file = File('${surahDir.path}/$ayah.mp3');
+        if (!file.existsSync() || file.lengthSync() == 0) {
+          final url = _reciter.audioUrl(surah, ayah);
+          final res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 30));
+          if (res.statusCode == 200) {
+            await file.writeAsBytes(res.bodyBytes);
+          }
+        }
+        _downloadProgress[surah] = ayah / count;
+        notifyListeners();
+      }
+      _downloadedSurahs.add(surah);
+    } catch (e) {
+      debugPrint('[Murottal] downloadSurah($surah) error: $e');
+    } finally {
+      _downloadingSurahs.remove(surah);
+      _downloadProgress.remove(surah);
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteDownloadedSurah(int surah) async {
+    if (_cacheBaseDir == null) return;
+    try {
+      final surahDir = Directory('${_cacheBaseDir!.path}/${_reciter.name}/$surah');
+      if (surahDir.existsSync()) {
+        await surahDir.delete(recursive: true);
+      }
+      _downloadedSurahs.remove(surah);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('[Murottal] deleteDownloadedSurah error: $e');
+    }
+  }
+
   // ── Playlist builder ──────────────────────────────────────────────────────
 
   List<AudioSource> _buildSources(int surah) {
     final count     = quran.getVerseCount(surah);
     final surahName = quran.getSurahName(surah);
+    final surahDir  = _cacheBaseDir != null
+        ? Directory('${_cacheBaseDir!.path}/${_reciter.name}/$surah')
+        : null;
+
     return List.generate(count, (i) {
       final ayah = i + 1;
+      final localFile = surahDir != null ? File('${surahDir.path}/$ayah.mp3') : null;
+      final isLocal = localFile != null && localFile.existsSync() && localFile.lengthSync() > 0;
+
       return AudioSource.uri(
-        Uri.parse(_reciter.audioUrl(surah, ayah)),
+        isLocal ? Uri.file(localFile.path) : Uri.parse(_reciter.audioUrl(surah, ayah)),
         tag: MediaItem(
           id:     '${surah}_$ayah',
           album:  _reciter.displayName,
@@ -233,6 +342,7 @@ class MurottalProvider extends ChangeNotifier {
   Future<void> setReciter(Reciter r) async {
     _reciter = r;
     await _box.put(_kReciter, r.index);
+    await _refreshDownloadedSurahs();
     notifyListeners();
 
     if (_surah != null && _ayah != null) {

@@ -1,7 +1,7 @@
 # 🕌 Waktu Shalat — Project Context & Evolution Master Doc
 > **Dokumen Master Progres Aplikasi & Konteks AI (Obsidian-Ready)**  
 > **Terakhir Diperbarui:** 25 September 2026  
-> **Versi Terkini:** `v1.7.2 (Build 41)`  
+> **Versi Terkini:** `v1.7.3 (Build 42)`  
 > **Package ID:** `studio.frosthoot.prayer_app`  
 > **Repository:** `frosthootstudio/prayer_app`
 
@@ -9,7 +9,7 @@
 
 ## 📌 Ringkasan Eksekutif & Tujuan Aplikasi
 **Waktu Shalat** adalah aplikasi ibadah harian Muslim yang dirancang dengan prinsip:
-1. **100% Offline-First Calculation**: Menggunakan library pure-Dart `adhan` sehingga perhitungan waktu shalat dan arah kiblat tetap akurat tanpa koneksi internet. Aset tulisan Arab dan font sepenuhnya dibundel lokal tanpa dependensi unduhan jaringan.
+1. **100% Offline-First Calculation & Storage**: Menggunakan library pure-Dart `adhan` sehingga perhitungan waktu shalat dan arah kiblat tetap akurat tanpa koneksi internet. Aset tulisan Arab dan font sepenuhnya dibundel lokal tanpa dependensi unduhan jaringan. Murottal audio dan Tafsir Kemenag dapat diunduh/disimpan lokal untuk pemakaian offline sepenuhnya.
 2. **Bersih & Nyaman (100% Bebas Iklan)**: Tidak ada iklan yang mengganggu kekhusyukan ibadah.
 3. **Design System Konsisten**: UI modern, flat (tidak ada nested-cards berlebihan), tema gelap/terang dinamis, serta navigasi 4 tab utama yang intuitif.
 
@@ -20,14 +20,32 @@
 - **State Management:** `Provider` (`MultiProvider`, `ChangeNotifier`, `Selector`)
 - **Penyimpanan Lokal (Database):** `Hive` & `hive_flutter` (box tersanitasi)
 - **Kalkulasi Waktu & Kiblat:** `adhan: ^2.0.0` & `flutter_compass: ^0.8.1`
-- **Audio & Murottal:** `just_audio` / native playback dengan auto-cache & isolasi posisi pemutaran
+- **Audio & Murottal:** `just_audio` / native playback dengan auto-cache & isolasi posisi pemutaran, plus offline storage cache di application documents directory
 - **Android Target:** AGP 9.2+, Gradle 9.4.1+, Java 17 bytecode, Android 15 ready
 
 ---
 
 ## 🗺️ Roadmap & Riwayat Progres Lengkap (Changelog Evolusi)
 
-### 🚀 v1.7.2 (Build 41) — *Current Release*
+### 🚀 v1.7.3 (Build 42) — *Current Release*
+- **Murottal Offline Storage & Cache:**
+  - Kemampuan mengunduh surah audio per qari langsung ke penyimpanan lokal perangkat (`path_provider` + `http`).
+  - Pemutaran audio otomatis mendeteksi file lokal sehingga dapat diputar 100% tanpa sambungan internet (`offline playback`).
+  - Indikator download real-time dengan progress spinner per surah di daftar surah Murottal.
+  - Dialog manajemen/penghapusan audio offline yang diunduh untuk menghemat kapasitas memori HP.
+  - Badge visual *"Offline · Tersimpan"* pada card Now Playing saat memutar surah lokal.
+- **Tafsir Ringkas Kemenag RI:**
+  - Integrasi Tafsir Ringkas resmi Kementerian Agama Republik Indonesia per ayat (diambil dari API Kemenag / equran.id).
+  - Caching lokal Hive (`quran_tafsir_cache` dengan TTL 365 hari) sehingga sekali dibuka langsung tersimpan dan dapat dibaca offline kapan saja.
+  - Bottom sheet modal Tafsir yang indah, tipografi nyaman dibaca, pratinjau ayat arab & terjemahan, serta tombol salin tafsir sekali sentuh.
+  - Tombol akses cepat Tafsir di setiap baris ayat (`_AyahTile`) dan menu aksi sentuh lama.
+
+### 📌 Roadmap Mendatang (Next Milestones)
+- **v1.7.4 (Keberlanjutan & Keamanan Data):**
+  - Fitur backup & restore data lokal (export/import catatan ibadah dan bookmark ke file JSON).
+  - Rebranding halaman Dukungan Developer murni sebagai Infaq/Wakaf operasional sukarela (tanpa paywall).
+
+### 🚀 v1.7.2 (Build 41)
 - **Pengingat Puasa Sunnah (Senin - Kamis & Ayyamul Bidh):**
   - Notifikasi otomatis H-1 malam hari (pukul 20:00) untuk puasa Senin, Kamis, dan tanggal 13, 14, 15 Hijriah.
   - Channel notifikasi khusus (`sunnah_fasting_v1`) dan toggle pengaturan di halaman Settings.
@@ -37,14 +55,6 @@
   - Header statistik 7 hari terakhir dengan persentase kepatuhan mingguan (*weekly completion rate*).
 - **Global CalendarProvider:**
   - Pengangkatan `CalendarProvider` ke root `MultiProvider` agar status kalender dan puasa sunnah sinkron di seluruh layar aplikasi.
-
-### 📌 Roadmap Mendatang (Next Milestones)
-- **v1.7.3 (Pure Offline Audio & Edukasi Al-Qur'an):**
-  - Download & cache audio murottal per surah ke storage lokal agar dapat didengarkan 100% tanpa internet.
-  - Integrasi Tafsir Ringkas Kemenag RI per ayat (dapat di-expand/collapse).
-- **v1.7.4 (Keberlanjutan & Keamanan Data):**
-  - Fitur backup & restore data lokal (export/import catatan ibadah dan bookmark ke file JSON).
-  - Rebranding halaman Dukungan Developer murni sebagai Infaq/Wakaf operasional sukarela (tanpa paywall).
 
 ### 🚀 v1.7.1 (Build 40)
 - **Rasionalisasi & Kurasi Font Arab:**

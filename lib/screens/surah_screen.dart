@@ -562,6 +562,19 @@ class _AyahTile extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
+                  // Tafsir
+                  GestureDetector(
+                    onTap: () => _showTafsirSheet(context, arabicText, translation),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.menu_book_rounded,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
                   // Bookmark
                   GestureDetector(
                     onTap: () => qp.toggleBookmark(surah, ayah),
@@ -748,6 +761,14 @@ class _AyahTile extends StatelessWidget {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.menu_book_rounded, color: gold),
+                title: Text(isEnLocal ? 'Read Tafsir Kemenag RI' : 'Baca Tafsir Kemenag RI'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showTafsirSheet(context, arabicText, translation);
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.play_circle_outline_rounded),
                 title: Text(isEnLocal ? 'Play Audio' : 'Putar Audio'),
                 onTap: () {
@@ -757,6 +778,292 @@ class _AyahTile extends StatelessWidget {
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showTafsirSheet(BuildContext context, String arabicText, String translation) {
+    const gold = Color(0xFFD4A057);
+    final sp = context.read<SettingsProvider>();
+    final isEnLocal = sp.isEnglish;
+    final surahName = QuranUtils.getSurahDisplayName(surah);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(ctx).height * 0.85,
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  12,
+                  20,
+                  MediaQuery.viewPaddingOf(ctx).bottom + 16,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Handle
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Header
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: gold.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.menu_book_rounded, color: gold, size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isEnLocal ? 'Tafsir Kemenag RI' : 'Tafsir Ringkas Kemenag RI',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '$surahName • ${isEnLocal ? 'Ayah' : 'Ayat'} $ayah',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: gold,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(height: 1, thickness: 0.5),
+
+                    // Scrollable content
+                    Expanded(
+                      child: FutureBuilder<Map<int, String>?>(
+                        future: ctx.read<QuranProvider>().fetchTafsir(surah),
+                        builder: (fCtx, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const CircularProgressIndicator(color: gold, strokeWidth: 2.5),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    isEnLocal
+                                        ? 'Loading Tafsir Kemenag RI...'
+                                        : 'Memuat Tafsir Kemenag RI...',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          final tafsirMap = snapshot.data;
+                          final tafsirText = tafsirMap?[ayah];
+
+                          if (tafsirText == null || tafsirText.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline_rounded,
+                                      size: 40,
+                                      color: Theme.of(ctx).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      isEnLocal
+                                          ? 'Tafsir is currently unavailable offline for this surah. Please connect to the internet to download.'
+                                          : 'Tafsir belum tersedia offline untuk surah ini. Hubungkan internet untuk mengunduh.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: gold,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      onPressed: () => setSheetState(() {}),
+                                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                                      label: Text(isEnLocal ? 'Retry' : 'Coba Lagi'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return SingleChildScrollView(
+                            padding: const EdgeInsets.only(top: 14, bottom: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Verse preview card
+                                Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(ctx).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Theme.of(ctx).colorScheme.outline.withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text(
+                                        arabicText,
+                                        textAlign: TextAlign.right,
+                                        textDirection: TextDirection.rtl,
+                                        style: ArabicFontHelper.getStyle(
+                                          sp.arabicFont,
+                                          fontSize: 20,
+                                          height: 1.8,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        translation,
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontStyle: FontStyle.italic,
+                                          color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Tafsir Title Header
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 3,
+                                      height: 16,
+                                      decoration: BoxDecoration(
+                                        color: gold,
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      isEnLocal ? 'Kemenag RI Interpretation' : 'Uraian Tafsir',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: gold,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    IconButton(
+                                      icon: const Icon(Icons.copy_rounded, size: 18),
+                                      tooltip: isEnLocal ? 'Copy Tafsir' : 'Salin Tafsir',
+                                      onPressed: () {
+                                        Clipboard.setData(ClipboardData(text: tafsirText));
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              isEnLocal ? 'Tafsir copied' : 'Tafsir berhasil disalin',
+                                            ),
+                                            duration: const Duration(seconds: 1),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+
+                                // Tafsir text body
+                                SelectableText(
+                                  tafsirText,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    height: 1.7,
+                                    color: Theme.of(ctx).colorScheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Footer note
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: gold.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.verified_rounded, size: 14, color: gold),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          isEnLocal
+                                              ? 'Source: Kementerian Agama Republik Indonesia (Lajnah Pentashihan Mushaf Al-Qur\'an)'
+                                              : 'Sumber: Kementerian Agama RI (Lajnah Pentashihan Mushaf Al-Qur\'an)',
+                                          style: const TextStyle(fontSize: 10, color: gold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );

@@ -36,6 +36,7 @@ class QuranProvider extends ChangeNotifier {
   late Box _bookmarksBox;
   late Box _translitCacheBox;
   late Box _uthmaniCacheBox;
+  late Box _tafsirCacheBox;
 
   bool   _showTranslation = true;
   bool   _showTranslit    = true;
@@ -58,6 +59,7 @@ class QuranProvider extends ChangeNotifier {
     _bookmarksBox      = await Hive.openBox('quran_bookmarks');
     _translitCacheBox  = await Hive.openBox('quran_translit_cache');
     _uthmaniCacheBox   = await Hive.openBox('quran_uthmani_cache');
+    _tafsirCacheBox    = await Hive.openBox('quran_tafsir_cache');
 
     _showTranslation = _prefsBox.get(_kShowTranslation, defaultValue: true) as bool;
     _showTranslit    = _prefsBox.get(_kShowTranslit,    defaultValue: true) as bool;
@@ -261,6 +263,72 @@ class QuranProvider extends ChangeNotifier {
     } catch (_) {}
 
     // 4. Failure — caller uses quran.getVerse() fallback
+    return null;
+  }
+
+  // ── Tafsir Ringkas Kemenag RI ──────────────────────────────────────────
+
+  static const _kTafsirTtlMs = 365 * 24 * 60 * 60 * 1000; // 1 year
+
+  final Map<int, Map<int, String>> _tafsirCache = {};
+
+  /// Returns verse-level Tafsir Ringkas Kemenag RI for [surahNumber].
+  /// Map key is 1-based ayah number, value is the tafsir explanation text.
+  ///
+  /// Load order:
+  ///   1. In-memory cache (instant)
+  ///   2. Hive disk cache (1-year TTL, works offline)
+  ///   3. Primary API — equran.id (/api/v2/tafsir/$surahNumber)
+  ///   4. null on error
+  Future<Map<int, String>?> fetchTafsir(int surahNumber) async {
+    // 1. In-memory cache
+    if (_tafsirCache.containsKey(surahNumber)) {
+      return _tafsirCache[surahNumber]!;
+    }
+
+    // 2. Disk cache
+    final cacheKey  = 'tafsir_$surahNumber';
+    final rawCached = _tafsirCacheBox.get(cacheKey) as String?;
+    if (rawCached != null) {
+      try {
+        final map   = json.decode(rawCached) as Map<String, dynamic>;
+        final ageMs = DateTime.now().millisecondsSinceEpoch - (map['ts'] as int);
+        if (ageMs < _kTafsirTtlMs) {
+          final rawTafsir = map['tafsir'] as Map<String, dynamic>;
+          final parsed = rawTafsir.map(
+            (k, v) => MapEntry(int.parse(k), v as String),
+          );
+          _tafsirCache[surahNumber] = parsed;
+          return parsed;
+        }
+      } catch (_) {}
+    }
+
+    // 3. Network — equran.id
+    try {
+      final response = await http
+          .get(Uri.parse('https://equran.id/api/v2/tafsir/$surahNumber'))
+          .timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final tafsirList = (data['data']['tafsir'] as List).cast<Map<String, dynamic>>();
+        final parsed = <int, String>{};
+        for (final item in tafsirList) {
+          final ayah = item['ayat'] as int;
+          final teks = item['teks'] as String;
+          parsed[ayah] = teks;
+        }
+        _tafsirCache[surahNumber] = parsed;
+        // Persist to Hive disk cache
+        final jsonMap = parsed.map((k, v) => MapEntry(k.toString(), v));
+        await _tafsirCacheBox.put(cacheKey, json.encode({
+          'ts': DateTime.now().millisecondsSinceEpoch,
+          'tafsir': jsonMap,
+        }));
+        return parsed;
+      }
+    } catch (_) {}
+
     return null;
   }
 
