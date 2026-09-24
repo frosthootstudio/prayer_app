@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/dzikir_data.dart';
@@ -388,7 +389,10 @@ class _CounterSection extends StatelessWidget {
             )
           else
             FilledButton(
-              onPressed: () => provider.increment(item.id),
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                provider.increment(item.id);
+              },
               style: FilledButton.styleFrom(
                 backgroundColor: accent,
                 visualDensity: VisualDensity.compact,
@@ -415,7 +419,12 @@ class _CounterSection extends StatelessWidget {
           height: 36,
           child: IconButton(
             icon: Icon(Icons.refresh_rounded, size: 18, color: context.appTextFaded),
-            onPressed: current > 0 ? () => provider.reset(item.id) : null,
+            onPressed: current > 0
+                ? () {
+                    HapticFeedback.selectionClick();
+                    provider.reset(item.id);
+                  }
+                : null,
             style: IconButton.styleFrom(
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
@@ -457,7 +466,16 @@ class _CounterSection extends StatelessWidget {
 
         // +/check button
         GestureDetector(
-          onTap: done ? null : () => provider.increment(item.id),
+          onTap: done
+              ? null
+              : () {
+                  if (current + 1 >= item.count) {
+                    HapticFeedback.mediumImpact();
+                  } else {
+                    HapticFeedback.lightImpact();
+                  }
+                  provider.increment(item.id);
+                },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: 44,

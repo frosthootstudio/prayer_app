@@ -2,7 +2,7 @@ name: prayer_app
 description: "Aplikasi waktu shalat dengan kalkulasi offline dan notifikasi adzan."
 publish_to: 'none'
 
-version: 1.7.0+39
+version: 1.7.1+40
 
 environment:
   sdk: ^3.11.0
@@ -114,18 +114,12 @@ flutter:
     - assets/audio/
 
   fonts:
-    - family: Amiri
-      fonts:
-        - asset: assets/fonts/arabic/Amiri-Regular.ttf
-    - family: AmiriQuran
-      fonts:
-        - asset: assets/fonts/arabic/AmiriQuran-Regular.ttf
     - family: ScheherazadeNew
       fonts:
         - asset: assets/fonts/arabic/ScheherazadeNew-Regular.ttf
+    - family: AmiriQuran
+      fonts:
+        - asset: assets/fonts/arabic/AmiriQuran-Regular.ttf
     - family: NotoNaskhArabic
       fonts:
         - asset: assets/fonts/arabic/NotoNaskhArabic-Regular.ttf
-    - family: Lateef
-      fonts:
-        - asset: assets/fonts/arabic/Lateef-Regular.ttf

@@ -337,9 +337,10 @@ class _PrayerCard extends StatelessWidget {
                           Text(
                             prayer.arabicTitle,
                             textDirection: TextDirection.rtl,
-                            style: GoogleFonts.amiri(
+                            style: ArabicFontHelper.getStyle(
+                              'amiri_quran',
                               color: context.appAccent,
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

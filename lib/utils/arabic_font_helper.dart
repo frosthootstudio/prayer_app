@@ -13,12 +13,12 @@ class ArabicFontHelper {
     final String family;
     final double size;
     switch (fontKey) {
-      case 'amiri':       family = 'Amiri';           size = fontSize;     break;
-      case 'amiri_quran': family = 'AmiriQuran';      size = fontSize;     break;
-      case 'noto_naskh':  family = 'NotoNaskhArabic'; size = fontSize;     break;
-      case 'lateef':      family = 'Lateef';          size = fontSize + 4; break;
+      case 'amiri_quran':
+      case 'amiri':       family = 'AmiriQuran';      size = fontSize; break;
+      case 'noto_naskh':  family = 'NotoNaskhArabic'; size = fontSize; break;
       case 'scheherazade':
-      default:            family = 'ScheherazadeNew'; size = fontSize;     break;
+      case 'lateef':
+      default:            family = 'ScheherazadeNew'; size = fontSize; break;
     }
     // inherit:false — prevents merge with GoogleFonts.poppinsTextTheme which
     // injects package:'google_fonts' into the DefaultTextStyle chain, causing
@@ -45,47 +45,35 @@ class ArabicFontHelper {
 
   static const List<Map<String, String>> availableFonts = [
     {
-      'key':    'amiri',
-      'name':   'Amiri',
-      'descId': 'Naskh klasik — standar mushaf',
-      'descEn': 'Classic Naskh — mushaf standard',
-      'style':  'Uthmani',
+      'key':    'scheherazade',
+      'name':   'Scheherazade',
+      'descId': 'Standar Kemenag RI / Indonesia',
+      'descEn': 'Standard Indonesian Ministry of Religious Affairs (Kemenag)',
+      'style':  'IndoPak',
     },
     {
       'key':    'amiri_quran',
       'name':   'Amiri Quran',
-      'descId': 'Naskh khusus mushaf — gaya Madinah',
-      'descEn': 'Mushaf-specialized Naskh — Madinah style',
+      'descId': 'Mushaf Madinah — Standar Global',
+      'descEn': 'Madinah Mushaf — Global standard',
       'style':  'Uthmani',
-    },
-    {
-      'key':    'scheherazade',
-      'name':   'Scheherazade',
-      'descId': 'Tradisional Indonesia/Pakistan',
-      'descEn': 'Traditional Indonesia/Pakistan',
-      'style':  'IndoPak',
     },
     {
       'key':    'noto_naskh',
       'name':   'Noto Naskh',
-      'descId': 'Bersih, mudah dibaca',
-      'descEn': 'Clean, easy to read',
+      'descId': 'Modern & minimalis, mudah dibaca',
+      'descEn': 'Modern & clean, easy to read',
       'style':  'Modern',
-    },
-    {
-      'key':    'lateef',
-      'name':   'Lateef',
-      'descId': 'Gaya kaligrafi tradisional',
-      'descEn': 'Traditional calligraphic style',
-      'style':  'Indo-Pak',
     },
   ];
 
-  static String displayName(String key) =>
-      availableFonts.firstWhere(
-        (f) => f['key'] == key,
-        orElse: () => availableFonts.first,
-      )['name']!;
+  static String displayName(String key) {
+    final effectiveKey = (key == 'amiri') ? 'amiri_quran' : (key == 'lateef' ? 'scheherazade' : key);
+    return availableFonts.firstWhere(
+      (f) => f['key'] == effectiveKey,
+      orElse: () => availableFonts.first,
+    )['name']!;
+  }
 
   /// Strips Uthmani-only Unicode marks. NOT called by default —
   /// fontFamilyFallback in getStyle handles missing glyphs. Kept as

@@ -6,6 +6,7 @@ import '../data/prophet_data.dart';
 import '../models/prophet_model.dart';
 import '../providers/settings_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/arabic_font_helper.dart';
 import 'prophet_detail_screen.dart';
 
 class ProphetListScreen extends StatefulWidget {
@@ -309,9 +310,10 @@ class _ProphetCard extends StatelessWidget {
                           Text(
                             prophet.arabicName,
                             textDirection: TextDirection.rtl,
-                            style: GoogleFonts.amiri(
+                            style: ArabicFontHelper.getStyle(
+                              'amiri_quran',
                               color: context.appAccent,
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

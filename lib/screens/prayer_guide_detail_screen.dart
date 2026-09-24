@@ -536,7 +536,8 @@ class _RecommendedSurahsCard extends StatelessWidget {
                       Text(
                         surahs[i].arabicSurahName!,
                         textDirection: TextDirection.rtl,
-                        style: GoogleFonts.amiri(
+                        style: ArabicFontHelper.getStyle(
+                          'amiri_quran',
                           color: context.appAccent,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

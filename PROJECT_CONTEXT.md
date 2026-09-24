@@ -1,0 +1,123 @@
+# 🕌 Waktu Shalat — Project Context & Evolution Master Doc
+> **Dokumen Master Progres Aplikasi & Konteks AI (Obsidian-Ready)**  
+> **Terakhir Diperbarui:** 25 September 2026  
+> **Versi Terkini:** `v1.7.1 (Build 40)`  
+> **Package ID:** `studio.frosthoot.prayer_app`  
+> **Repository:** `frosthootstudio/prayer_app`
+
+---
+
+## 📌 Ringkasan Eksekutif & Tujuan Aplikasi
+**Waktu Shalat** adalah aplikasi ibadah harian Muslim yang dirancang dengan prinsip:
+1. **100% Offline-First Calculation**: Menggunakan library pure-Dart `adhan` sehingga perhitungan waktu shalat dan arah kiblat tetap akurat tanpa koneksi internet. Aset tulisan Arab dan font sepenuhnya dibundel lokal tanpa dependensi unduhan jaringan.
+2. **Bersih & Nyaman (100% Bebas Iklan)**: Tidak ada iklan yang mengganggu kekhusyukan ibadah.
+3. **Design System Konsisten**: UI modern, flat (tidak ada nested-cards berlebihan), tema gelap/terang dinamis, serta navigasi 4 tab utama yang intuitif.
+
+---
+
+## 🏗️ Arsitektur & Tech Stack
+- **Framework:** Flutter (SDK `^3.11.0`) & Dart Null-Safety
+- **State Management:** `Provider` (`MultiProvider`, `ChangeNotifier`, `Selector`)
+- **Penyimpanan Lokal (Database):** `Hive` & `hive_flutter` (box tersanitasi)
+- **Kalkulasi Waktu & Kiblat:** `adhan: ^2.0.0` & `flutter_compass: ^0.8.1`
+- **Audio & Murottal:** `just_audio` / native playback dengan auto-cache & isolasi posisi pemutaran
+- **Android Target:** AGP 9.2+, Gradle 9.4.1+, Java 17 bytecode, Android 15 ready
+
+---
+
+## 🗺️ Roadmap & Riwayat Progres Lengkap (Changelog Evolusi)
+
+### 🚀 v1.7.1 (Build 40) — *Current Release*
+- **Rasionalisasi & Kurasi Font Arab:**
+  - Memangkas font redundant (`Amiri` biasa dan `Lateef`).
+  - Menyederhanakan pilihan font menjadi 3 opsi kurasi terbaik:
+    1. **Scheherazade New** (Standar Kemenag RI / Indonesia — IndoPak)
+    2. **Amiri Quran** (Mushaf Madinah — Standar Global Utsmani)
+    3. **Noto Naskh** (Modern & Minimalis)
+  - Migrasi seluruh rendering teks Arab (termasuk Nama Nabi & Panduan Shalat) ke `ArabicFontHelper` murni offline asset.
+  - Penanganan kompatibilitas mundur (fallback otomatis bagi pengguna yang menyimpan opsi font lama).
+- **Haptic Feedback Tasbih Digital (Dzikir):**
+  - Getaran halus (*light impact*) pada setiap ketukan hitungan dzikir.
+  - Getaran konfirmasi (*medium impact*) saat menyelesaikan target dzikir (misal 33x atau 100x).
+  - Getaran seleksi (*selection click*) saat mereset hitungan.
+
+### 📌 Roadmap Mendatang (Next Milestones)
+- **v1.7.2 (Rutinitas & Pengingat Ibadah):**
+  - Pengingat puasa sunnah (Notifikasi H-1 untuk Senin - Kamis dan Ayyamul Bidh tanggal 13, 14, 15 Hijriah).
+  - Visualisasi streak dan grafik statistik mingguan pada modul Tracking Ibadah.
+- **v1.7.3 (Pure Offline Audio & Edukasi Al-Qur'an):**
+  - Download & cache audio murottal per surah ke storage lokal agar dapat didengarkan 100% tanpa internet.
+  - Integrasi Tafsir Ringkas Kemenag RI per ayat (dapat di-expand/collapse).
+- **v1.7.4 (Keberlanjutan & Keamanan Data):**
+  - Fitur backup & restore data lokal (export/import catatan ibadah dan bookmark ke file JSON).
+  - Rebranding halaman Dukungan Developer murni sebagai Infaq/Wakaf operasional sukarela (tanpa paywall).
+
+### 🚀 v1.7.0 (Build 39)
+- **Hapus Iklan Total:** Semua dependensi dan alur penayangan `AdService` dinonaktifkan secara total. Aplikasi bersih 100%.
+- **Pilih Lokasi Manual (Offline Tanpa GPS):** Penambahan database koordinat kota/kabupaten se-Indonesia (`lib/data/indonesian_cities_data.dart`) dengan fitur search cepat.
+- **Full Page Scroll Home:** Halaman beranda dapat digulir penuh dari atas sampai bawah dengan mempertahankan swipe PageView jadwal shalat harian.
+- **Scroll Arabic Font Picker:** Modal dialog pemilihan font di Settings dan Surah Screen kini memiliki batas tinggi dan scroll view responsif.
+- **Fix Tombol Rating Play Store:** Penambahan query intent `<queries>` skema `market` & `https` di `AndroidManifest.xml` serta fallback berjenjang di `RatingService`.
+
+### 📖 v1.7.0 (Build 36 - 38)
+- **Rekomendasi Surah Pendek & Panduan Shalat:**
+  - Pemisahan bacaan shalat universal dari masing-masing jenis shalat agar tidak redundan.
+  - Penambahan rekomendasi surah pendek yang dianjurkan beserta keutamaannya di setiap shalat fardhu dan sunnah.
+  - Perapihan UI: Menghilangkan nested-card (kotak di dalam kotak) menjadi flat divider, dan posisi badge rakaat diletakkan di atas nama surah.
+
+### 🌟 v1.7.0 (Build 35)
+- **Kisah 25 Nabi & Rasul:** Fitur edukatif kisah 25 Nabi & Rasul dengan tampilan ringkas dan hikmah pembelajaran.
+- **Panduan Shalat Lengkap:** Modul tata cara shalat wajib, sunnah rawatib, dhuha, tahajud, witir, tarawih, istikharah, dan taubat.
+
+### ⚡ v1.6.0 (Build 33 - 34)
+- **Modernisasi Engine Android:** Upgrade Gradle 9.4.1 & Android Gradle Plugin 9.2.0.
+- **Qibla Decoupling:** Penggantian plugin pihak ketiga menjadi kalkulasi murni `adhan` + `flutter_compass`.
+- **Optimalisasi Performa:**
+  - Pemisahan pembaruan posisi murottal agar tidak men-trigger `notifyListeners()` global secara berlebihan.
+  - Rekalkulasi widget `NextPrayerCard` hanya saat transisi waktu shalat tiba.
+
+---
+
+## 🎨 Design Rules & Prinsip UI (PENTING UNTUK AI SELANJUTNYA)
+Jika melanjutkan pengembangan bersama AI lain, pegang teguh aturan ini:
+1. **Warna Aplikasi (Theme Preservation):** JANGAN PERNAH mengubah warna primer/aksen aplikasi tanpa izin pengguna. Gunakan token konteks: `context.appCardBg`, `context.appAccent`, `context.appTextPrimary`.
+2. **No Nested Cards:** Hindari membungkus `Card` di dalam `Card`. Gunakan `Container` dengan border lembut atau `Divider` datar.
+3. **Standar Kemenag:** Teks transliterasi Al-Qur'an dan latin tetap mempertahankan format standar Indonesia (Kemenag).
+
+---
+
+## 📁 Struktur File Kunci
+```text
+lib/
+├── data/
+│   ├── indonesian_cities_data.dart   # Database offline kota & koordinat Indonesia
+│   ├── prayer_guide_data.dart        # Data panduan shalat & rekomendasi surah
+│   └── prophets_data.dart            # Data kisah 25 Nabi & Rasul
+├── providers/
+│   ├── prayer_provider.dart          # Perhitungan shalat, auto/manual location
+│   ├── quran_provider.dart           # Cache ayat Al-Quran, latin Kemenag, bookmark
+│   └── settings_provider.dart        # Preferensi font Arab, tema, notifikasi
+├── screens/
+│   ├── home_screen.dart              # Beranda (Jadwal shalat, widget qibla, shalat berikutnya)
+│   ├── prayer_guide_screen.dart      # Panduan shalat & bacaan
+│   ├── settings_screen.dart          # Pengaturan notifikasi, lokasi manual, font Arab
+│   └── surah_screen.dart             # Baca Al-Qur'an & audio murottal
+└── services/
+    ├── ad_service.dart               # Service iklan (Dinonaktifkan total)
+    ├── notification_service.dart     # Pengingat adzan & notifikasi
+    └── rating_service.dart           # In-app review & redirect Play Store
+```
+
+---
+
+## 🤖 Panduan Prompt Siap Pakai untuk AI Baru
+Salin teks di bawah ini ke AI baru (ChatGPT, Claude, atau Gemini) jika ingin memulai sesi baru:
+
+```markdown
+Halo! Aku sedang mengembangkan aplikasi Flutter bernama "Waktu Shalat" (ID: studio.frosthoot.prayer_app) yang saat ini berada di versi 1.7.1+40.
+Berikut adalah file PROJECT_CONTEXT.md yang merangkum arsitektur, riwayat fitur, struktur kode, dan aturan desain aplikasi ini:
+
+[Tempelkan isi file PROJECT_CONTEXT.md di sini]
+
+Mohon pelajari konteks ini sebelum kita melanjutkan task berikutnya.
+```
